@@ -1,0 +1,67 @@
+---
+###########################
+###########################
+## Linter GitHub Actions ##
+###########################
+###########################
+name: Lint Code Base
+
+#
+# Documentation:
+# https://help.github.com/en/articles/workflow-syntax-for-github-actions
+#
+
+#############################
+# Start the job on all push #
+#############################
+on:
+  push:
+    branches-ignore:
+      - main
+
+###############
+# Set the Job #
+###############
+jobs:
+  build:
+    # Name the Job
+    name: Lint Code Base
+    # Set the agent to run on
+    runs-on: ubuntu-latest
+
+    ##################
+    # Load all steps #
+    ##################
+    steps:
+      ##########################
+      # Checkout the code base #
+      ##########################
+      - name: Checkout Code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Extract commands from markdown files
+        run: |
+          set -euxo pipefail
+          echo '#!/usr/bin/env bash' > README.sh
+          find . -name '*.md' -print0 | while IFS= read -r -d '' FILE ; do
+            sed -n "/^\`\`\`\(bash\|shell\).*/,/^\`\`\`$/p" "${FILE}" \
+            | \
+            sed \
+              -e 's/^```\(bash\|shell\).*/\n/' \
+              -e 's/^```$//' \
+            >> README.sh
+          done
+          chmod a+x README.sh
+
+      ################################
+      # Run Linter against code base #
+      ################################
+      - name: Lint Code Base
+        uses: github/super-linter/slim@v4
+        env:
+          ERROR_ON_MISSING_EXEC_BIT: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          USE_FIND_ALGORITHM: true
+          VALIDATE_CSS: false

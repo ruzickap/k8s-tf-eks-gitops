@@ -1,0 +1,11 @@
+[book]
+title = "Multitenant+Multicluster Amazon EKS installation using Terraform, GitHub Actions and ArgoCD"
+language = "en"
+description = "Few notes about Multitenant+Multicluster Amazon EKS installation using Terraform, GitHub Actions and ArgoCD"
+authors = ["Petr Ruzicka"]
+
+[output.html]
+additional-css = ["theme/css/custom.css"]
+edit-url-template = "https://github.com/ruzickap/k8s-tf-eks-argocd/edit/main/docs/{path}"
+git-repository-url = "https://github.com/ruzickap/k8s-tf-eks-argocd"
+site-url = "/k8s-tf-eks-argocd/"
