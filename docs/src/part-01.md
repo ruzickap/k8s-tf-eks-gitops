@@ -1,5 +1,7 @@
 # Create initial AWS structure
 
+<!-- toc -->
+
 ## Requirements
 
 If you would like to follow this documents you will need to do few configuration
