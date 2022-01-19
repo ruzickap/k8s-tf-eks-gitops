@@ -58,7 +58,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           use-linkcheck: true
-          use-mermaid: true
+          use-mermaid: false
           use-toc: true
           use-opengh: true
 
