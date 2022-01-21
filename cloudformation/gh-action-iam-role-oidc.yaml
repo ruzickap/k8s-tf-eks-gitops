@@ -1,0 +1,37 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Parameters:
+  GitHubFullRepositoryName:
+    Type: String
+    Default: ruzickap/k8s-tf-eks-argocd
+
+Resources:
+  Role:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: GitHubOidcFederatedRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringLike:
+                # Allows only actions in this repository to assume the role
+                token.actions.githubusercontent.com:sub: !Sub repo:${GitHubFullRepositoryName}:*
+            Effect: Allow
+            Principal:
+              Federated: !Ref GitHubOidc
+
+  GitHubOidc:
+    Type: AWS::IAM::OIDCProvider
+    Properties:
+      ClientIdList:
+        - sts.amazonaws.com
+      ThumbprintList:
+        - "6938fd4d98bab03faadb97b34396831e3780aea1"
+      Url: https://token.actions.githubusercontent.com
+
+Outputs:
+  RoleArn:
+    Value: !GetAtt Role.Arn
