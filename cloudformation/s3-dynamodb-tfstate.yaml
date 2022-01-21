@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+  ClusterFQDN:
+    Description: Name of the S3 bucket (Usually Cluster FQDN)
+    Type: String
+    Default: mycluster.mylabs.com
+
+Resources:
+  TerraformRemoteStateS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: Private
+      BucketName: !Sub "${ClusterFQDN}"
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+              KMSMasterKeyID: alias/aws/s3
+      Tags:
+        - Key: Name
+          Value: terrraform-remote-state-s3-bucket
+
+  TerraformRemoteStateLockDynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Retain
+    Properties:
+      TableName: !Sub "${ClusterFQDN}"
+      AttributeDefinitions:
+        - AttributeName: LockID
+          AttributeType: S
+      KeySchema:
+        - AttributeName: LockID
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      SSESpecification:
+        SSEEnabled: true
+      Tags:
+        - Key: Name
+          Value: terrraform-remote-state-lock-table
+
+Outputs:
+  TerraformRemoteStateS3Bucket:
+    Value: !Ref TerraformRemoteStateS3Bucket
+  TerraformRemoteStateLockDynamoDBTable:
+    Value: !Ref TerraformRemoteStateLockDynamoDBTable

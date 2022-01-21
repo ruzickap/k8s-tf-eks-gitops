@@ -1,0 +1,32 @@
+name: kics-security-scan
+
+on:
+  workflow_dispatch:
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+  kics-job:
+    runs-on: ubuntu-latest
+    name: kics-action
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Mkdir results-dir
+        run: mkdir -p results-dir
+
+      - name: Run KICS Scan with SARIF result
+        uses: checkmarx/kics-action@v1.4
+        with:
+          path: terraform
+          output_path: results-dir
+          output_formats: 'json,sarif'
+          fail_on: HIGH
+          ignore_on_exit: results
+
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: results-dir/results.sarif

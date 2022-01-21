@@ -1,0 +1,348 @@
+name: clusters-aws
+
+on:
+  workflow_dispatch:
+    inputs:
+      clusters:
+        description: Cluster list
+        # See details in `find` manual and look for `-regextype "posix-extended"` and `-regex`
+        default: .*(/ruzickap-eks.k8s.use1.dev.proj.aws.mylabs.dev$|/dev-sandbox/).*
+        required: true
+      action:
+        type: choice
+        description: Cluster Terraform action
+        default: plan
+        required: true
+        options:
+          - plan
+          - apply
+          - plan -destroy
+          - destroy
+      env-variables:
+        description: Environment variable(s)
+        # 'TF_CLI_ARGS_destroy=-auto-approve -lock=false'
+        default: "'TF_LOG=ERROR' 'TF_DATA_DIR=.terraform'"
+        required: false
+  push:
+    # Run pipeline in case there are any changes in these directories in `main` branch
+    paths:
+      # If you change this path change it also in the rest of the pipeline (variable can not be used)
+      - 'clusters/dev-sandbox/**'
+      - 'terraform/dev-clientech/**'
+    branches:
+      - main
+  # Run pipeline every midnight
+  schedule:
+    - cron: "0 0 * * *"
+
+env:
+  # Use cluster group for scheduled pipeline exection (daily - see above 'schedule:')
+  # Clusters in this group will be created + deleted
+  SCHEDULED_CLUSTERS: ".*(/sched-dev.test.k8s.mylabs.dev$).*"
+
+  # Terraform variables (https://www.terraform.io/docs/cli/config/environment-variables.html)
+  TERRAFORM_VERSION: "1.1.2"
+  TF_INPUT: "0"
+  TF_CLI_ARGS_apply: "-auto-approve"
+  TF_CLI_ARGS_destroy: "-auto-approve"
+  TF_IN_AUTOMATION: "true"
+
+  # https://github.com/helm/helm/releases
+  HELM_VERSION: "v3.6.0"
+  # https://github.com/kubernetes/kubectl/releases
+  KUBECTL_VERSION: "v1.21.1"
+  # https://github.com/kubernetes-sigs/kustomize/releases
+  KUSTOMIZE_VERSION: "4.4.1"
+  # https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html
+  AWS-IAM-AUTHENTICATOR_VERSION: "1.21.2/2021-07-05"
+
+jobs:
+  generate-cluster-aws-matrix:
+    name: "Generate AWS Cluster matrix"
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      action: ${{ steps.set-matrix.outputs.action }}
+      terraform_action: ${{ steps.set-matrix.outputs.terraform_action }}
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: 💡🔪 Get clusters
+        id: set-matrix
+        run: |
+          set -euxo pipefail
+          if [[ '${{ github.event.inputs.clusters }}' != '' ]]; then
+            echo "***🕹️ Run in case the pipeline was executed using 'workflow_dispatch' - TERRAFORM_ACTION=${{ github.event.inputs.action }}"
+            TERRAFORM_ACTION="${{ github.event.inputs.action }}"
+            # Find cluster names matching the given regexp
+            CLUSTERS=$(find clusters -maxdepth 2 -mindepth 2 -type d -regextype "posix-extended" -regex '${{ github.event.inputs.clusters }}' -printf "%f\n" | sort)
+            echo "::set-output name=action::${{ github.event.inputs.action }}"
+          else
+            if [[ "${{ github.event_name }}" = "schedule" ]]; then
+              echo "***⏰ Run in case of scheduled execution - TERRAFORM_ACTION=apply"
+              TERRAFORM_ACTION="apply"
+              CLUSTERS=$(find clusters -maxdepth 2 -mindepth 2 -type d -regextype "posix-extended" -regex '.*${{ env.SCHEDULED_CLUSTERS }}.*' -printf "%f\n" | sort)
+            else
+              echo "***💡 Run in case of 'path' trigger (only for 'dev-sandbox') - TERRAFORM_ACTION=apply"
+              TERRAFORM_ACTION="apply"
+              # In case the chnages in main branch were done in terraform/dev-sandbox or clusters/dev-sandbox then run terraform apply to all clusters in dev-sandbox
+              if [[ $(git diff --name-only HEAD HEAD~1) =~ (terraform/dev-sandbox|clusters/dev-sandbox) ]]; then
+                CLUSTERS=$(find clusters -maxdepth 2 -mindepth 2 -type d -regextype "posix-extended" -regex '.*dev-sandbox.*' -printf "%f\n" | sort )
+              else
+                CLUSTERS=""
+              fi
+            fi
+            echo "::set-output name=action::apply"
+          fi
+          echo "*** Export list of clusters and terraform action"
+          # shellcheck disable=SC2001
+          echo "${CLUSTERS}" | sed 's@\(.*\)@🔎 \1@'
+          echo "TERRAFORM_ACTION: ${TERRAFORM_ACTION}"
+          if [[ -z "${CLUSTERS}" ]] ; then
+            echo "🔥 No clusters found / selected / ... !!!"
+            exit 1
+          fi
+          echo "::set-output name=matrix::$( echo "${CLUSTERS}" | jq -c -R -s 'split("\n")[:-1]' )"
+          echo "::set-output name=terraform_action::${TERRAFORM_ACTION}"
+
+  cluster-aws-pipeline:
+    name: "${{ needs.generate-cluster-aws-matrix.outputs.terraform_action }} | ${{ matrix.stage }}"
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    # Cancel job after 100 minutes (just in case)
+    timeout-minutes: 100
+    if: ${{ needs.generate-cluster-aws-matrix.outputs.matrix != '[""]' }}
+    needs: generate-cluster-aws-matrix
+    # Allow only one execution of terraform per cluster (other executions will wait until first will complete)
+    concurrency:
+      group: cluster-aws-pipeline-${{ matrix.stage }}
+    strategy:
+      # Do not cancel matrix jobs if one of them fails
+      fail-fast: false
+      matrix:
+        stage: ${{ fromJSON(needs.generate-cluster-aws-matrix.outputs.matrix) }}
+
+    steps:
+      - name: 💡🔪 Check out repository code
+        uses: actions/checkout@v2
+
+      - name: 💡🔪 Install necessary tools/packages
+        # shell needs to be specified, because by default Ubuntu is using just `sh`
+        run: |
+          set -euxo pipefail
+          sudo apt update -qq
+          sudo apt-get install -y -qq curl gettext-base git jq unzip > /dev/null
+
+          if ! command -v helm &> /dev/null; then
+            curl -s https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash -s -- --version ${{ env.HELM_VERSION }}
+          fi
+
+          if ! command -v aws &> /dev/null; then
+            curl -sL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
+            unzip -q -o /tmp/awscliv2.zip -d /tmp/
+            sudo /tmp/aws/install
+          fi
+
+          if ! command -v kubectl &> /dev/null; then
+            sudo curl -s -Lo /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/${{ env.KUBECTL_VERSION }}/bin/$(uname | sed "s/./\L&/g" )/amd64/kubectl"
+            sudo chmod a+x /usr/local/bin/kubectl
+          fi
+
+          if ! command -v kustomize &> /dev/null; then
+            curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | sudo bash -s ${{ env.KUSTOMIZE_VERSION }} /usr/local/bin/
+          fi
+
+          if ! command -v aws-iam-authenticator &> /dev/null; then
+            sudo curl -s -Lo /usr/local/bin/aws-iam-authenticator "https://amazon-eks.s3.us-west-2.amazonaws.com/${{ env.AWS-IAM-AUTHENTICATOR_VERSION }}/bin/$(uname | sed "s/./\L&/g")/amd64/aws-iam-authenticator"
+            sudo chmod a+x /usr/local/bin/aws-iam-authenticator
+          fi
+
+      - name: 💡🔪 Get and display environment variables
+        id: get-environment-variables
+        run: |
+          set -euxo pipefail
+
+          # Funcion to extract variables from "${CLUSTER_PATH}/cluster-variables.tfvars" "${CLUSTER_PATH}/../group-variables.tfvars"
+          # Example: get_variable_from_group_cluster_tfvars /cluster/mycluster my_lowercase_variable_name
+          get_variable_from_group_cluster_tfvars () {
+            local CLUSTER_PATH="$1" TF_CODE_VARIABLE="$2" VARIABLE_HELPER
+            if grep -q "${TF_CODE_VARIABLE}" "${CLUSTER_PATH}/cluster-variables.tfvars" ; then
+              VARIABLE_HELPER=$(awk -F \" "/^${TF_CODE_VARIABLE}/ { print \$2 }" "${CLUSTER_PATH}/cluster-variables.tfvars")
+            else
+              VARIABLE_HELPER=$(awk -F \" "/^${TF_CODE_VARIABLE}/ { print \$2 }" "${CLUSTER_PATH}/../group-variables.tfvars")
+            fi
+            echo -e "\n💡 Variable: \"${TF_CODE_VARIABLE^^}\" = \"${VARIABLE_HELPER}\""
+            echo "${TF_CODE_VARIABLE^^}=${VARIABLE_HELPER}" >> "${GITHUB_ENV}"
+            echo "::set-output name=${TF_CODE_VARIABLE^^}::${VARIABLE_HELPER}"
+          }
+
+          echo -e "🎉 The job was automatically triggered by a \"${{ github.event_name }}\" event."
+          echo -e "💡 The name of your branch is ${{ github.ref }}"
+          echo -e "💊 Action: ${{needs.generate-cluster-aws-matrix.outputs.action }}"
+
+          # Put in place proper ACCOUNT_IDs
+          find clusters -type f -print0 | xargs -0 sed -i 's/123456789012/${{ secrets.AWS_ACCOUNT_ID_ORG1 }}/g'
+
+          # Find cluster path based on cluster FQDN (matrix.stage)
+          CLUSTER_PATH=$(find clusters -type d -regextype "posix-extended" -regex '.*${{ matrix.stage }}.*')
+          echo -e "\n🍏 Cluster path: ${CLUSTER_PATH}"
+          echo "CLUSTER_PATH=${CLUSTER_PATH}" >> "${GITHUB_ENV}"
+
+          get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "aws_default_region"
+          get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "aws_github_oidc_federated_role_to_assume"
+          get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "cluster_fqdn"
+          get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "cluster_name"
+          get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "terraform_code_dir"
+
+          echo -e "\n🍏 Set pre-defined environment variables (if any)"
+          # shellcheck disable=SC2043
+          for ENV_VARIBALE in ${{ github.event.inputs.env-variables }} ; do
+            echo "${ENV_VARIBALE}" | tee -a "${GITHUB_ENV}"
+          done
+
+      - name: 💡🔪 Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ env.AWS_GITHUB_OIDC_FEDERATED_ROLE_TO_ASSUME }}
+          role-session-name: GitHubOidcFederatedRole
+          aws-region: ${{ env.AWS_DEFAULT_REGION }}
+
+      - name: 💡 Create S3 bucket for terraform if needed
+        if: ${{ needs.generate-cluster-aws-matrix.outputs.terraform_action != 'destroy' }}
+        run: |
+          set -euxo pipefail
+          aws sts get-caller-identity
+          echo -e "\n***💡 Check if S3 bucket exists (may show 404 error - ignore)"
+          if ! aws s3api head-bucket --bucket "${CLUSTER_FQDN}" ; then
+            echo -e "\n***💡 Creating S3 bucket for Terraform using CloudFormation"
+            aws cloudformation deploy \
+              --parameter-overrides "ClusterFQDN=${CLUSTER_FQDN}" \
+              --stack-name "${CLUSTER_FQDN//./-}-s3-dynamodb-tfstate" --template-file "./cloudformation/s3-dynamodb-tfstate.yaml"
+          else
+            echo -e "\n***💡 S3 bucket for Terraform - \"${CLUSTER_FQDN}\" already exists...\n"
+          fi
+
+      - name: 💡🔪 Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      # Terraform needs node command: https://github.com/hashicorp/setup-terraform/issues/84
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
+      - name: 💡🔪 Terraform init
+        run: |
+          set -euxo pipefail
+          terraform -chdir="./terraform/${TERRAFORM_CODE_DIR}" init \
+            -backend-config="bucket=${CLUSTER_FQDN}" \
+            -backend-config="key=terraform-${CLUSTER_FQDN}.tfstate" \
+            -backend-config="region=${AWS_DEFAULT_REGION}" \
+            -backend-config="dynamodb_table=${CLUSTER_FQDN}"
+
+      # Some internal apps creating AWS objectls like (Loadbalancers, Route53)
+      # which then prevents terrafrom to "cleanly" remove all it's objects.
+      # Therefore I need to remove them in k8s which will cause deleting them
+      # from AWS
+      - name: 🔪 Delete k8s objects Loadbalancer, external-dns
+        if: ${{ needs.generate-cluster-aws-matrix.outputs.terraform_action == 'destroy' || github.event_name == 'schedule' }}
+        run: |
+          set -euxo pipefail
+
+          if [[ "$(aws eks list-clusters)" =~ \"${CLUSTER_NAME}\" ]] ; then
+            aws eks update-kubeconfig --name "${CLUSTER_NAME}" --kubeconfig "/tmp/kubeconfig-${CLUSTER_NAME}.conf"
+            export KUBECONFIG="/tmp/kubeconfig-${CLUSTER_NAME}.conf"
+
+            # !!! TODO - stop argo sync, delete all services which are type=Loadbalancers + uninstall external-dns
+            kubectl get nodes
+            kubectl delete deployments -A -l app.kubernetes.io/name=external-dns
+            rm "/tmp/kubeconfig-${CLUSTER_NAME}.conf"
+          fi
+
+          # Remove Network ELBs
+          for NETWORK_ELB_ARN in $(aws elbv2 describe-load-balancers --query "LoadBalancers[].LoadBalancerArn" --output=text) ; do
+            if [[ "$(aws elbv2 describe-tags --resource-arns "${NETWORK_ELB_ARN}" --query "TagDescriptions[].Tags[?Key == \`kubernetes.io/cluster/${CLUSTER_NAME}\`]" --output text)" =~ ${CLUSTER_NAME} ]]; then
+              echo "💊 Deleting Network ELB: ${NETWORK_ELB_ARN}"
+              aws elbv2 delete-load-balancer --load-balancer-arn "${NETWORK_ELB_ARN}"
+            fi
+          done
+
+          # Remove Classic ELBs
+          for CLASSIC_ELB_NAME in $(aws elb describe-load-balancers --query "LoadBalancerDescriptions[].LoadBalancerName" --output=text) ; do
+            if [[ "$(aws elb describe-tags --load-balancer-names "${CLASSIC_ELB_NAME}" --query "TagDescriptions[].Tags[?Key == \`kubernetes.io/cluster/${CLUSTER_NAME}\`]" --output text)" =~ ${CLUSTER_NAME} ]]; then
+              echo "💊 Deleting Classic ELB: ${CLASSIC_ELB_NAME}"
+              aws elb delete-load-balancer --load-balancer-name "${CLASSIC_ELB_NAME}"
+            fi
+          done
+
+          CLUSTER_FQDN_ZONE_ID=$(aws route53 list-hosted-zones --query "HostedZones[?Name==\`${CLUSTER_FQDN}.\`].Id" --output text)
+          if [[ -n "${CLUSTER_FQDN_ZONE_ID}" ]]; then
+            aws route53 list-resource-record-sets --hosted-zone-id "${CLUSTER_FQDN_ZONE_ID}" | jq -c '.ResourceRecordSets[] | select (.Type != "SOA" and .Type != "NS")' |
+            while read -r RESOURCERECORDSET; do
+              aws route53 change-resource-record-sets \
+                --hosted-zone-id "${CLUSTER_FQDN_ZONE_ID}" \
+                --change-batch '{"Changes":[{"Action":"DELETE","ResourceRecordSet": '"${RESOURCERECORDSET}"' }]}' \
+                --output text --query 'ChangeInfo.Id'
+            done
+          fi
+
+      - name: 💡🔪 Terraform action
+        run: |
+          set -euxo pipefail
+          terraform -chdir="./terraform/${TERRAFORM_CODE_DIR}" ${{ needs.generate-cluster-aws-matrix.outputs.terraform_action }} \
+            -var-file="../../${CLUSTER_PATH}/../../main-variables.tfvars" \
+            -var-file="../../${CLUSTER_PATH}/../group-variables.tfvars" \
+            -var-file="../../${CLUSTER_PATH}/cluster-variables.tfvars"
+
+      - name: 💡 Terraform apply+output action (contains "kubeconfig")
+        if: ${{ needs.generate-cluster-aws-matrix.outputs.terraform_action == 'apply' }}
+        run: |
+          set -euxo pipefail
+          terraform -chdir="./terraform/${TERRAFORM_CODE_DIR}" output configure_kubectl
+
+      - name: 🔪 Terraform destroy
+        if: ${{ github.event_name == 'schedule' }}
+        run: |
+          set -euxo pipefail
+          terraform -chdir="./terraform/${TERRAFORM_CODE_DIR}" destroy \
+            -var-file="../../${CLUSTER_PATH}/../../main-variables.tfvars" \
+            -var-file="../../${CLUSTER_PATH}/../group-variables.tfvars" \
+            -var-file="../../${CLUSTER_PATH}/cluster-variables.tfvars"
+
+      - name: 🔪 Delete Volumes / Snapshost created by k8s cluster
+        if: ${{ needs.generate-cluster-aws-matrix.outputs.terraform_action == 'destroy' || github.event_name == 'schedule' }}
+        run: |
+          set -euxo pipefail
+
+          VOLUMES=$(aws ec2 describe-volumes --filter "Name=tag:Cluster,Values=${CLUSTER_FQDN}" --query 'Volumes[].VolumeId' --output text) && \
+          for VOLUME in ${VOLUMES}; do
+            echo "Removing Volume: ${VOLUME}"
+            aws ec2 delete-volume --volume-id "${VOLUME}"
+          done
+
+          SNAPSHOTS=$(aws ec2 describe-snapshots --filter "Name=tag:Cluster,Values=${CLUSTER_FQDN}" --query 'Snapshots[].SnapshotId' --output text) && \
+          for SNAPSHOT in ${SNAPSHOTS}; do
+            echo "Removing Snapshot: ${SNAPSHOT}"
+            aws ec2 delete-snapshot --snapshot-id "${SNAPSHOT}"
+          done
+
+      - name: 🔪 Delete S3 bucket used by Terraform
+        if: ${{ needs.generate-cluster-aws-matrix.outputs.terraform_action == 'destroy' || github.event_name == 'schedule' }}
+        run: |
+          set -euxo pipefail
+
+          S3_OBJECTS=$(aws s3api list-object-versions --bucket "${CLUSTER_FQDN}" --query='{Objects: Versions[].{Key:Key,VersionId:VersionId}}')
+
+          if [[ ! "${S3_OBJECTS}" =~ "\"Objects\": null" ]]; then
+            aws s3api delete-objects --bucket "${CLUSTER_FQDN}" \
+              --delete "${S3_OBJECTS}" \
+              --output=json | jq
+          fi
+          aws cloudformation delete-stack --stack-name "${CLUSTER_FQDN//./-}-s3-dynamodb-tfstate"
+          aws cloudformation wait stack-delete-complete --stack-name "${CLUSTER_FQDN//./-}-s3-dynamodb-tfstate"

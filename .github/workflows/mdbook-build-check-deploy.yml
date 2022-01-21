@@ -65,6 +65,7 @@ jobs:
       - name: Build the document
         run: |
           mdbook build ./docs/
+          touch ./docs/.nojekyll
           cp LICENSE ./docs/book/
           cp docs/src/README.md docs/book/README.md
           ln -s docs/book ${{ github.event.repository.name }}
