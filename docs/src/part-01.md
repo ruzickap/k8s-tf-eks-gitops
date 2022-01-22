@@ -189,3 +189,29 @@ aws cloudformation deploy --region=eu-central-1 --capabilities CAPABILITY_NAMED_
   --template-file "./cloudformation/gh-action-iam-role-oidc.yaml" \
   --tags Owner=petr.ruzicka@gmail.com
 ```
+
+## Run GitHub Actions with Terraform
+
+Run GitHub Actions with Terraform to create Amazon EKS:
+
+```bash
+gh workflow run clusters-aws.yml -f clusters=".*(/ruzickap-eks.k8s.use1.dev.proj.aws.mylabs.dev$).*" -f action="apply"
+```
+
+or you can create multiple AWS clusters:
+
+```bash
+gh workflow run clusters-aws.yml -f clusters=".*(/ruzickap-eks.k8s.use1.dev.proj.aws.mylabs.dev$|/ruzickap-eks2.k8s.use1.dev.proj.aws.mylabs.dev$).*" -f action="apply"
+```
+
+You can run Terraform per "group of clusters":
+
+```bash
+gh workflow run clusters-aws.yml -f clusters=".*(/dev-sandbox/).*" -f action="apply"
+```
+
+Destroy Amazon EKS and related "objects":
+
+```bash
+gh workflow run clusters-aws.yml -f clusters=".*(/ruzickap-eks.k8s.use1.dev.proj.aws.mylabs.dev$).*" -f action="destroy"
+```
