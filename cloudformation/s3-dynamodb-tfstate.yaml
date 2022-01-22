@@ -12,6 +12,11 @@ Resources:
     Properties:
       AccessControl: Private
       BucketName: !Sub "${ClusterFQDN}"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
       VersioningConfiguration:
         Status: Enabled
       BucketEncryption:
@@ -29,6 +34,8 @@ Resources:
     UpdateReplacePolicy: Retain
     Properties:
       TableName: !Sub "${ClusterFQDN}"
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
       AttributeDefinitions:
         - AttributeName: LockID
           AttributeType: S
@@ -40,6 +47,8 @@ Resources:
         WriteCapacityUnits: 5
       SSESpecification:
         SSEEnabled: true
+        SSEType: KMS
+        KMSMasterKeyId: alias/aws/dynamodb
       Tags:
         - Key: Name
           Value: terrraform-remote-state-lock-table
