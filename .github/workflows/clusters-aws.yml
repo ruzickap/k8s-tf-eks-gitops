@@ -240,7 +240,7 @@ jobs:
       - name: 💡🔪 Terraform init
         run: |
           set -euxo pipefail
-          terraform -chdir="./terraform/${TERRAFORM_CODE_DIR}" init \
+          terraform -chdir="${TERRAFORM_CODE_DIR}" init \
             -backend-config="bucket=${CLUSTER_FQDN}" \
             -backend-config="key=terraform-${CLUSTER_FQDN}.tfstate" \
             -backend-config="region=${AWS_DEFAULT_REGION}" \
@@ -295,25 +295,25 @@ jobs:
       - name: 💡🔪 Terraform action
         run: |
           set -euxo pipefail
-          terraform -chdir="./terraform/${TERRAFORM_CODE_DIR}" ${{ needs.generate-cluster-aws-matrix.outputs.terraform_action }} \
-            -var-file="../../${CLUSTER_PATH}/../../main-variables.tfvars" \
-            -var-file="../../${CLUSTER_PATH}/../group-variables.tfvars" \
-            -var-file="../../${CLUSTER_PATH}/cluster-variables.tfvars"
+          terraform -chdir="${TERRAFORM_CODE_DIR}" ${{ needs.generate-cluster-aws-matrix.outputs.terraform_action }} \
+            -var-file="${PWD}/${CLUSTER_PATH}/../../main-variables.tfvars" \
+            -var-file="${PWD}/${CLUSTER_PATH}/../group-variables.tfvars" \
+            -var-file="${PWD}/${CLUSTER_PATH}/cluster-variables.tfvars"
 
       - name: 💡 Terraform apply+output action (contains "kubeconfig")
         if: ${{ needs.generate-cluster-aws-matrix.outputs.terraform_action == 'apply' }}
         run: |
           set -euxo pipefail
-          terraform -chdir="./terraform/${TERRAFORM_CODE_DIR}" output configure_kubectl
+          terraform -chdir="${TERRAFORM_CODE_DIR}" output configure_kubectl
 
       - name: 🔪 Terraform destroy
         if: ${{ github.event_name == 'schedule' }}
         run: |
           set -euxo pipefail
-          terraform -chdir="./terraform/${TERRAFORM_CODE_DIR}" destroy \
-            -var-file="../../${CLUSTER_PATH}/../../main-variables.tfvars" \
-            -var-file="../../${CLUSTER_PATH}/../group-variables.tfvars" \
-            -var-file="../../${CLUSTER_PATH}/cluster-variables.tfvars"
+          terraform -chdir="${TERRAFORM_CODE_DIR}" destroy \
+            -var-file="${PWD}/${CLUSTER_PATH}/../../main-variables.tfvars" \
+            -var-file="${PWD}/${CLUSTER_PATH}/../group-variables.tfvars" \
+            -var-file="${PWD}/${CLUSTER_PATH}/cluster-variables.tfvars"
 
       - name: 🔪 Delete Volumes / Snapshost created by k8s cluster
         if: ${{ needs.generate-cluster-aws-matrix.outputs.terraform_action == 'destroy' || github.event_name == 'schedule' }}
