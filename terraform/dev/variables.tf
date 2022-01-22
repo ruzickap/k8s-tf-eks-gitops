@@ -13,3 +13,7 @@ variable "cluster_fqdn" {
 variable "cluster_name" {
   default = "mycluster"
 }
+
+variable "terraform_code_dir" {
+  default = "terraform/dev"
+}

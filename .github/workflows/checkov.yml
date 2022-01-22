@@ -1,4 +1,4 @@
-name: tfsec
+name: checkov
 
 on:
   workflow_dispatch:
@@ -7,20 +7,22 @@ on:
       - main
 
 jobs:
-  tfsec:
-    name: Run tfsec sarif report
+  checkov:
+    name: Run checkov sarif report
     runs-on: ubuntu-latest
 
     steps:
       - name: Clone repo
         uses: actions/checkout@v2
 
-      - name: Run tfsec
-        uses: tfsec/tfsec-sarif-action@v0.0.6
+      - name: Run checkov
+        uses: bridgecrewio/checkov-action@v12.1178.0
         with:
-          sarif_file: tfsec.sarif
+          output_format: sarif
+          quiet: true
+          skip_check: CKV_GIT_1,CKV_AWS_18
 
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v1
         with:
-          sarif_file: tfsec.sarif
+          sarif_file: results.sarif
