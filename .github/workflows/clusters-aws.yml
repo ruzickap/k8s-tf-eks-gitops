@@ -23,17 +23,17 @@ on:
         # 'TF_CLI_ARGS_destroy=-auto-approve -lock=false'
         default: "'TF_LOG=ERROR' 'TF_DATA_DIR=.terraform'"
         required: false
-  push:
-    # Run pipeline in case there are any changes in these directories in `main` branch
-    paths:
-      # If you change this path change it also in the rest of the pipeline (variable can not be used)
-      - 'clusters/dev-sandbox/**'
-      - 'terraform/dev-clientech/**'
-    branches:
-      - main
-  # Run pipeline every midnight
-  schedule:
-    - cron: "0 0 * * *"
+  # push:
+  #   # Run pipeline in case there are any changes in these directories in `main` branch
+  #   paths:
+  #     # If you change this path change it also in the rest of the pipeline (variable can not be used)
+  #     - 'clusters/dev-sandbox/**'
+  #     - 'terraform/dev/**'
+  #   branches:
+  #     - main
+  # # Run pipeline every midnight
+  # schedule:
+  #   - cron: "0 0 * * *"
 
 env:
   # Use cluster group for scheduled pipeline exection (daily - see above 'schedule:')

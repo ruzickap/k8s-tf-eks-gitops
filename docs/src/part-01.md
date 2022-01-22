@@ -84,10 +84,14 @@ fi
 Create DNS zone (`BASE_DOMAIN`):
 
 ```shell
+export BASE_DOMAIN="k8s.use1.dev.proj.aws.mylabs.dev"
+export CLOUDFLARE_EMAIL="petr.ruzicka@gmail.com"
+export CLOUDFLARE_API_KEY="1234567890"
+
 aws route53 create-hosted-zone --output json \
   --name "${BASE_DOMAIN}" \
   --caller-reference "$(date)" \
-  --hosted-zone-config="{\"Comment\": \"Created by ${MY_EMAIL}\", \"PrivateZone\": false}" | jq
+  --hosted-zone-config="{\"Comment\": \"Created by petr.ruzicka@gmail.com\", \"PrivateZone\": false}" | jq
 ```
 
 Use your domain registrar to change the nameservers for your zone (for example
@@ -101,9 +105,9 @@ NEW_ZONE_NS1=$(echo "${NEW_ZONE_NS}" | jq -r ".[0]")
 NEW_ZONE_NS2=$(echo "${NEW_ZONE_NS}" | jq -r ".[1]")
 ```
 
-Create the NS record in `k8s.mylabs.dev` (`BASE_DOMAIN`) for proper zone
-delegation. This step depends on your domain registrar - I'm using CloudFlare
-and using Ansible to automate it:
+Create the NS record in `k8s.use1.dev.proj.aws.mylabs.dev` (`BASE_DOMAIN`) for
+proper zone delegation. This step depends on your domain registrar - I'm using
+CloudFlare and using Ansible to automate it:
 
 ```shell
 ansible -m cloudflare_dns -c local -i "localhost," localhost -a "zone=mylabs.dev record=${BASE_DOMAIN} type=NS value=${NEW_ZONE_NS1} solo=true proxied=no account_email=${CLOUDFLARE_EMAIL} account_api_token=${CLOUDFLARE_API_KEY}"
@@ -169,4 +173,19 @@ localhost | CHANGED => {
         }
     }
 }
+```
+
+## Allow GH Actions to connect to AWS accounts
+
+You also need to allow GitHub Action to connect to the AWS account(s) where you
+want to provision the clusters using [Configuring OpenID Connect in Amazon Web Services](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services).
+
+Example: [AWS federation comes to GitHub Actions](https://awsteele.com/blog/2021/09/15/aws-federation-comes-to-github-actions.html)
+
+```shell
+aws cloudformation deploy --region=eu-central-1 --capabilities CAPABILITY_NAMED_IAM \
+  --parameter-overrides "GitHubFullRepositoryName=ruzickap/k8s-tf-eks-argocd" \
+  --stack-name "ruzickap-k8s-tf-eks-argocd-gh-action-iam-role-oidc" \
+  --template-file "./cloudformation/gh-action-iam-role-oidc.yaml" \
+  --tags Owner=petr.ruzicka@gmail.com
 ```
