@@ -20,3 +20,8 @@ docs/.vuepress/.cache/
 
 # mdbook generated files
 docs/book
+
+# Terraform files
+.terraform*
+*.tfstate*
+crash.log

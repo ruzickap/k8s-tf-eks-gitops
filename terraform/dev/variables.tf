@@ -1,19 +1,53 @@
 variable "aws_default_region" {
-  default = "eu-central-1"
+  type    = string
+  default = null
 }
 
 variable "aws_github_oidc_federated_role_to_assume" {
-  default = "arn:aws:iam::1234567890:role/GitHubOidcFederatedRole"
+  type    = string
+  default = null
 }
 
 variable "cluster_fqdn" {
-  default = "mycluster.mylabs.com"
+  type    = string
+  default = null
 }
 
 variable "cluster_name" {
-  default = "mycluster"
+  description = "Name of the EKS cluster"
+  type        = string
+  default     = ""
+}
+
+variable "eks_cluster_version" {
+  description = "Desired kubernetes version. If you do not specify a value, the latest available version is used"
+  type        = string
+  default     = "1.21"
 }
 
 variable "terraform_code_dir" {
-  default = "terraform/dev"
+  type    = string
+  default = null
+}
+
+variable "aws_default_tags" {
+  description = "A map of tags to add to all resources"
+  type        = map(string)
+  default     = {}
+}
+
+variable "aws_vpc_cidr" {
+  type        = string
+  description = "VPC CIDR"
+}
+
+variable "aws_private_subnets" {
+  description = "List of private subnets for the worker nodes"
+  type        = list(string)
+}
+
+variable "aws_public_subnets" {
+  description = "List of public subnets for the worker nodes"
+  type        = list(string)
+  default     = []
 }
