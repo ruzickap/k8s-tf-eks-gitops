@@ -9,8 +9,9 @@ variable "aws_github_oidc_federated_role_to_assume" {
 }
 
 variable "cluster_fqdn" {
-  type    = string
-  default = null
+  description = "FQDN of the EKS cluster"
+  type        = string
+  default     = ""
 }
 
 variable "cluster_name" {
@@ -19,7 +20,7 @@ variable "cluster_name" {
   default     = ""
 }
 
-variable "eks_cluster_version" {
+variable "cluster_version" {
   description = "Desired kubernetes version. If you do not specify a value, the latest available version is used"
   type        = string
   default     = "1.21"
@@ -30,8 +31,14 @@ variable "terraform_code_dir" {
   default = null
 }
 
-variable "aws_default_tags" {
-  description = "A map of tags to add to all resources"
+variable "aws_group_tags" {
+  description = "A map group of tags to add to all resources"
+  type        = map(string)
+  default     = {}
+}
+
+variable "aws_cluster_tags" {
+  description = "A map of cluster tags to add to all resources"
   type        = map(string)
   default     = {}
 }
