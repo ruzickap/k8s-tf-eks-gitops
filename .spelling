@@ -2,6 +2,7 @@ Ansible
 ArgoCD
 CloudFlare
 CloudFormation
+ConfigMap
 K8s
 Kubernetes
 OpenID

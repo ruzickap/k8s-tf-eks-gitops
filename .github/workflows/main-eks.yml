@@ -17,6 +17,8 @@ env:
   MY_PASSWORD: ${{ secrets.MY_PASSWORD }}
   AWS_DEFAULT_REGION: eu-central-1
   AWS_GITHUB_OIDC_FEDERATED_ROLE_MAIN_EKS: ${{ secrets.AWS_GITHUB_OIDC_FEDERATED_ROLE_MAIN_EKS }}
+  AWS_CONSOLE_ADMIN_ROLE_ARN_MAIN_EKS: ${{ secrets.AWS_CONSOLE_ADMIN_ROLE_ARN_MAIN_EKS }}
+  AWS_USER_ROLE_ARN_MAIN_EKS: ${{ secrets.AWS_USER_ROLE_ARN_MAIN_EKS }}
 
 concurrency: main-eks
 
@@ -40,6 +42,15 @@ jobs:
         if: ${{ contains(github.event.inputs.action, 'create') }}
         run: |
           ./create-main-eks.sh
+
+      - name: 💡 Cluster access commands (kubeconfig)
+        if: ${{ contains(github.event.inputs.action, 'create') }}
+        run: |
+          cat << \EOF
+          aws eks --region ${{ env.AWS_DEFAULT_REGION }} update-kubeconfig --name main-eks --kubeconfig /tmp/kubeconfig-main-eks.conf
+          export KUBECONFIG="/tmp/kubeconfig-main-eks.conf"
+          kubectl get nodes -o wide
+          EOF
 
       - name: 🔪 Delete EKS cluster + environment
         if: ${{ contains(github.event.inputs.action, 'delete') }}
