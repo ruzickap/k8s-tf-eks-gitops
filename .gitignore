@@ -25,3 +25,6 @@ docs/book
 .terraform*
 *.tfstate*
 crash.log
+
+# tmp directory
+tmp/

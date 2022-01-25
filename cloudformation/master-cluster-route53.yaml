@@ -1,0 +1,28 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Route53 entries
+
+Parameters:
+
+  BaseDomain:
+    Description: "Base domain where cluster domains + their subdomains will live. Ex: k8s.mylabs.dev"
+    Type: String
+
+  ClusterFQDN:
+    Description: "Cluster FQDN. (domain for all applications) Ex: kube1.k8s.mylabs.dev"
+    Type: String
+
+Resources:
+
+  HostedZone:
+    Type: AWS::Route53::HostedZone
+    Properties:
+      Name: !Ref ClusterFQDN
+
+  RecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneName: !Sub "${BaseDomain}."
+      Name: !Ref ClusterFQDN
+      Type: NS
+      TTL: 60
+      ResourceRecords: !GetAtt HostedZone.NameServers

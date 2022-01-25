@@ -1,9 +1,15 @@
 Ansible
 ArgoCD
 CloudFlare
+CloudFormation
+K8s
 Kubernetes
 OpenID
+Route53
 awscli
+eksctl
+external-dns
+ingress-nginx
 kubectl
 kustomize
 nameservers
