@@ -24,8 +24,8 @@ Install necessary software:
 
 ```bash
 if command -v apt-get &> /dev/null; then
-  apt update -qq
-  DEBIAN_FRONTEND=noninteractive apt-get install -y -qq curl git jq sudo unzip > /dev/null
+  sudo apt update -qq
+  sudo apt-get install -y -qq curl git jq sudo unzip > /dev/null
 fi
 ```
 
@@ -46,6 +46,14 @@ if ! command -v aws-iam-authenticator &> /dev/null; then
   # https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html
   sudo curl -s -Lo /usr/local/bin/aws-iam-authenticator "https://amazon-eks.s3.us-west-2.amazonaws.com/1.21.2/2021-07-05/bin/$(uname | sed "s/./\L&/g")/amd64/aws-iam-authenticator"
   sudo chmod a+x /usr/local/bin/aws-iam-authenticator
+fi
+```
+
+Install [eksctl](https://eksctl.io/):
+
+```bash
+if ! command -v eksctl &> /dev/null; then
+  curl -s -L "https://github.com/weaveworks/eksctl/releases/download/v0.71.0/eksctl_$(uname)_amd64.tar.gz" | sudo tar xz -C /usr/local/bin/
 fi
 ```
 
