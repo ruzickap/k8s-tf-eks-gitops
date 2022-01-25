@@ -12,7 +12,7 @@ export CLUSTER_NAME="main-eks"
 export CLUSTER_FQDN="${CLUSTER_NAME}.${BASE_DOMAIN}"
 export ENVIRONMENT="dev"
 export MY_EMAIL="petr.ruzicka@gmail.com"
-export TAGS="Owner=${MY_EMAIL} Environment=${ENVIRONMENT} Group=Cloud_Native Squad=Cloud_Container_Platform"
+export TAGS="Owner=${MY_EMAIL} Environment=${ENVIRONMENT} Group=Cloud_Native Squad=Container_Platform"
 # * "production" - valid certificates signed by Lets Encrypt ""
 # * "staging" - not trusted certs signed by Lets Encrypt "Fake LE Intermediate X1"
 export LETSENCRYPT_ENVIRONMENT="staging"
@@ -154,7 +154,7 @@ Service account `external-dns` was created by `eksctl`.
 
 ```bash
 helm repo add --force-update jetstack https://charts.jetstack.io
-helm upgrade --install --version v1.6.1 --namespace cert-manager --wait --values - cert-manager jetstack/cert-manager << EOF
+helm upgrade --install --version v1.6.1 --namespace cert-manager --create-namespace --wait --values - cert-manager jetstack/cert-manager << EOF
 installCRDs: true
 extraArgs:
   - --enable-certificate-owner-ref=true
@@ -225,4 +225,11 @@ letsEncrypt:
 replicas: 2
 bootstrapPassword: "${MY_PASSWORD}"
 EOF
+```
+
+Check the Helm Charts and pods:
+
+```bash
+kubectl get pods -A
+helm ls -A
 ```

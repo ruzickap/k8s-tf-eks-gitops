@@ -7,8 +7,8 @@ Install necessary software:
 
 ```bash
 if command -v apt-get &> /dev/null; then
-  apt update -qq
-  DEBIAN_FRONTEND=noninteractive apt-get install -y -qq curl jq sudo unzip > /dev/null
+  sudo apt update -qq
+  sudo apt-get install -y -qq curl jq sudo unzip > /dev/null
 fi
 ```
 
