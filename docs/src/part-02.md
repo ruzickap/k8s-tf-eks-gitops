@@ -107,6 +107,20 @@ if [[ ! -s "${KUBECONFIG}" ]] ; then
 fi
 ```
 
+Add add the user or role to the `aws-auth` ConfigMap. This is handy if you are
+using different user for CLI operations and different user/role for accessing
+the AWS Console to see EKS Workloads in Cluster's tab.
+
+```bash
+if [[ -n ${AWS_CONSOLE_ADMIN_ROLE_ARN_MAIN_EKS+x} ]] && ! eksctl get iamidentitymapping --cluster="${CLUSTER_NAME}" --arn="${AWS_CONSOLE_ADMIN_ROLE_ARN_MAIN_EKS}" &> /dev/null ; then
+  eksctl create iamidentitymapping --cluster="${CLUSTER_NAME}" --arn="${AWS_CONSOLE_ADMIN_ROLE_ARN_MAIN_EKS}" --group system:masters --username admin
+fi
+
+if [[ -n ${AWS_USER_ROLE_ARN_MAIN_EKS+x} ]] && ! eksctl get iamidentitymapping --cluster="${CLUSTER_NAME}" --arn="${AWS_USER_ROLE_ARN_MAIN_EKS}" &> /dev/null ; then
+  eksctl create iamidentitymapping --cluster="${CLUSTER_NAME}" --arn="${AWS_USER_ROLE_ARN_MAIN_EKS}" --group system:masters --username admin
+fi
+```
+
 ## Post installation tasks
 
 Change TTL=60 of SOA + NS records for new domain
