@@ -81,7 +81,7 @@ fi
 
 > This should be done only once.
 
-Create DNS zone (`BASE_DOMAIN`):
+Create DNS zone for EKS clusters:
 
 ```shell
 export BASE_DOMAIN="k8s.use1.dev.proj.aws.mylabs.dev"
@@ -175,43 +175,92 @@ localhost | CHANGED => {
 }
 ```
 
-## Allow GH Actions to connect to AWS accounts
-
-You also need to allow GitHub Action to connect to the AWS account(s) where you
-want to provision the clusters using [Configuring OpenID Connect in Amazon Web Services](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services).
-
-Example: [AWS federation comes to GitHub Actions](https://awsteele.com/blog/2021/09/15/aws-federation-comes-to-github-actions.html)
+Create DNS zone for main EKS cluster:
 
 ```shell
-aws cloudformation deploy --region=eu-central-1 --capabilities CAPABILITY_NAMED_IAM \
-  --parameter-overrides "GitHubFullRepositoryName=ruzickap/k8s-tf-eks-argocd" \
-  --stack-name "ruzickap-k8s-tf-eks-argocd-gh-action-iam-role-oidc" \
-  --template-file "./cloudformation/gh-action-iam-role-oidc.yaml" \
-  --tags Owner=petr.ruzicka@gmail.com
+aws route53 create-hosted-zone --output json \
+  --name "${BASE_DOMAIN}" \
+  --caller-reference "$(date)" \
+  --hosted-zone-config="{\"Comment\": \"Created by ${MY_EMAIL}\", \"PrivateZone\": false}" | jq
 ```
 
-## Run GitHub Actions with Terraform
+Use your domain registrar to change the nameservers for your zone (for example
+`mylabs.dev`) to use the Amazon Route 53 nameservers. Here is the way how you
+can find out the the Route 53 nameservers:
 
-Run GitHub Actions with Terraform to create Amazon EKS:
-
-```bash
-gh workflow run clusters-aws.yml -f clusters=".*(/ruzickap-eks.k8s.use1.dev.proj.aws.mylabs.dev$).*" -f action="apply"
+```shell
+NEW_ZONE_ID=$(aws route53 list-hosted-zones --query "HostedZones[?Name==\`${BASE_DOMAIN}.\`].Id" --output text)
+NEW_ZONE_NS=$(aws route53 get-hosted-zone --output json --id "${NEW_ZONE_ID}" --query "DelegationSet.NameServers")
+NEW_ZONE_NS1=$(echo "${NEW_ZONE_NS}" | jq -r ".[0]")
+NEW_ZONE_NS2=$(echo "${NEW_ZONE_NS}" | jq -r ".[1]")
 ```
 
-or you can create multiple AWS clusters:
+Create the NS record in `k8s.mylabs.dev` (`BASE_DOMAIN`) for proper zone
+delegation. This step depends on your domain registrar - I'm using CloudFlare
+and using Ansible to automate it:
 
-```bash
-gh workflow run clusters-aws.yml -f clusters=".*(/ruzickap-eks.k8s.use1.dev.proj.aws.mylabs.dev$|/ruzickap-eks2.k8s.use1.dev.proj.aws.mylabs.dev$).*" -f action="apply"
+```shell
+ansible -m cloudflare_dns -c local -i "localhost," localhost -a "zone=mylabs.dev record=${BASE_DOMAIN} type=NS value=${NEW_ZONE_NS1} solo=true proxied=no account_email=${CLOUDFLARE_EMAIL} account_api_token=${CLOUDFLARE_API_KEY}"
+ansible -m cloudflare_dns -c local -i "localhost," localhost -a "zone=mylabs.dev record=${BASE_DOMAIN} type=NS value=${NEW_ZONE_NS2} solo=false proxied=no account_email=${CLOUDFLARE_EMAIL} account_api_token=${CLOUDFLARE_API_KEY}"
 ```
 
-You can run Terraform per "group of clusters":
+Output:
 
-```bash
-gh workflow run clusters-aws.yml -f clusters=".*(/dev-sandbox/).*" -f action="apply"
-```
-
-Destroy Amazon EKS and related "objects":
-
-```bash
-gh workflow run clusters-aws.yml -f clusters=".*(/ruzickap-eks.k8s.use1.dev.proj.aws.mylabs.dev$).*" -f action="destroy"
+```text
+localhost | CHANGED => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python"
+    },
+    "changed": true,
+    "result": {
+        "record": {
+            "content": "ns-885.awsdns-46.net",
+            "created_on": "2020-11-13T06:25:32.18642Z",
+            "id": "dxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxb",
+            "locked": false,
+            "meta": {
+                "auto_added": false,
+                "managed_by_apps": false,
+                "managed_by_argo_tunnel": false,
+                "source": "primary"
+            },
+            "modified_on": "2020-11-13T06:25:32.18642Z",
+            "name": "k8s.mylabs.dev",
+            "proxiable": false,
+            "proxied": false,
+            "ttl": 1,
+            "type": "NS",
+            "zone_id": "2xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxe",
+            "zone_name": "mylabs.dev"
+        }
+    }
+}
+localhost | CHANGED => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python"
+    },
+    "changed": true,
+    "result": {
+        "record": {
+            "content": "ns-1692.awsdns-19.co.uk",
+            "created_on": "2020-11-13T06:25:37.605605Z",
+            "id": "9xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxb",
+            "locked": false,
+            "meta": {
+                "auto_added": false,
+                "managed_by_apps": false,
+                "managed_by_argo_tunnel": false,
+                "source": "primary"
+            },
+            "modified_on": "2020-11-13T06:25:37.605605Z",
+            "name": "k8s.mylabs.dev",
+            "proxiable": false,
+            "proxied": false,
+            "ttl": 1,
+            "type": "NS",
+            "zone_id": "2xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxe",
+            "zone_name": "mylabs.dev"
+        }
+    }
+}
 ```
