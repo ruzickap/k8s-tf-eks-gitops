@@ -14,6 +14,10 @@ terraform {
       source  = "hashicorp/helm"
       version = ">= 2.4.1"
     }
+    rancher2 = {
+      source  = "rancher/rancher2"
+      version = "1.22.2"
+    }
   }
   required_version = ">= 1.0.0"
 }
@@ -36,4 +40,8 @@ provider "aws" {
   }
 
   region = var.aws_default_region
+}
+
+provider "rancher2" {
+  # Configuration options
 }

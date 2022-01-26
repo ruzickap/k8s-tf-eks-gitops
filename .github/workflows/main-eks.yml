@@ -19,6 +19,9 @@ env:
   AWS_GITHUB_OIDC_FEDERATED_ROLE_MAIN_EKS: ${{ secrets.AWS_GITHUB_OIDC_FEDERATED_ROLE_MAIN_EKS }}
   AWS_CONSOLE_ADMIN_ROLE_ARN_MAIN_EKS: ${{ secrets.AWS_CONSOLE_ADMIN_ROLE_ARN_MAIN_EKS }}
   AWS_USER_ROLE_ARN_MAIN_EKS: ${{ secrets.AWS_USER_ROLE_ARN_MAIN_EKS }}
+  AWS_ACCOUNT_ID_ORG1: ${{ secrets.AWS_ACCOUNT_ID_ORG1 }}
+  AWS_ACCESS_KEY_ID_ORG1: ${{ secrets.AWS_ACCESS_KEY_ID_ORG1 }}
+  AWS_SECRET_ACCESS_KEY_ORG1: ${{ secrets.AWS_SECRET_ACCESS_KEY_ORG1 }}
 
 concurrency: main-eks
 
@@ -47,6 +50,7 @@ jobs:
         if: ${{ contains(github.event.inputs.action, 'create') }}
         run: |
           cat << \EOF
+          https://rancher.main-eks.k8s.mylabs.dev/
           aws eks --region ${{ env.AWS_DEFAULT_REGION }} update-kubeconfig --name main-eks --kubeconfig /tmp/kubeconfig-main-eks.conf
           export KUBECONFIG="/tmp/kubeconfig-main-eks.conf"
           kubectl get nodes -o wide

@@ -2,6 +2,7 @@ Ansible
 ArgoCD
 CloudFlare
 CloudFormation
+ClusterIssuers
 ConfigMap
 K8s
 Kubernetes

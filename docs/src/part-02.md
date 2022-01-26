@@ -77,6 +77,11 @@ iam:
   withOIDC: true
   serviceAccounts:
     - metadata:
+        name: cert-manager
+        namespace: cert-manager
+      wellKnownPolicies:
+        certManager: true
+    - metadata:
         name: external-dns
         namespace: external-dns
       wellKnownPolicies:
@@ -168,10 +173,84 @@ Service account `external-dns` was created by `eksctl`.
 
 ```bash
 helm repo add --force-update jetstack https://charts.jetstack.io
-helm upgrade --install --version v1.6.1 --namespace cert-manager --create-namespace --wait --values - cert-manager jetstack/cert-manager << EOF
+helm upgrade --install --version v1.7.0 --namespace cert-manager --create-namespace --wait --values - cert-manager jetstack/cert-manager << EOF
 installCRDs: true
+serviceAccount:
+  create: false
+  name: cert-manager
 extraArgs:
   - --enable-certificate-owner-ref=true
+EOF
+```
+
+Add ClusterIssuers for Let's Encrypt staging and production:
+
+```bash
+kubectl apply -f - << EOF
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging-dns
+  namespace: cert-manager
+spec:
+  acme:
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    email: ${MY_EMAIL}
+    privateKeySecretRef:
+      name: letsencrypt-staging-dns
+    solvers:
+      - selector:
+          dnsZones:
+            - ${CLUSTER_FQDN}
+        dns01:
+          route53:
+            region: ${AWS_DEFAULT_REGION}
+---
+# Create ClusterIssuer for production to get real signed certificates
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-production-dns
+  namespace: cert-manager
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: ${MY_EMAIL}
+    privateKeySecretRef:
+      name: letsencrypt-production-dns
+    solvers:
+      - selector:
+          dnsZones:
+            - ${CLUSTER_FQDN}
+        dns01:
+          route53:
+            region: ${AWS_DEFAULT_REGION}
+EOF
+
+kubectl wait --namespace cert-manager --timeout=10m --for=condition=Ready clusterissuer --all
+```
+
+### external-dns
+
+Install `external-dns`
+[helm chart](https://artifacthub.io/packages/helm/bitnami/external-dns)
+and modify the
+[default values](https://github.com/bitnami/charts/blob/master/bitnami/external-dns/values.yaml).
+`external-dns` will take care about DNS records.
+Service account `external-dns` was created by `eksctl`.
+
+```bash
+helm repo add --force-update bitnami https://charts.bitnami.com/bitnami
+helm upgrade --install --version 6.1.1 --namespace external-dns --wait --values - external-dns bitnami/external-dns << EOF
+aws:
+  region: ${AWS_DEFAULT_REGION}
+domainFilters:
+  - ${CLUSTER_FQDN}
+interval: 20s
+policy: sync
+serviceAccount:
+  create: false
+  name: external-dns
 EOF
 ```
 
@@ -196,31 +275,31 @@ controller:
 EOF
 ```
 
-### external-dns
+### Rancher
 
-Install `external-dns`
-[helm chart](https://artifacthub.io/packages/helm/bitnami/external-dns)
-and modify the
-[default values](https://github.com/bitnami/charts/blob/master/bitnami/external-dns/values.yaml).
-`external-dns` will take care about DNS records.
-Service account `external-dns` was created by `eksctl`.
+Create Let's Encrypt certificate (using Route53):
 
 ```bash
-helm repo add --force-update bitnami https://charts.bitnami.com/bitnami
-helm upgrade --install --version 6.1.1 --namespace external-dns --values - external-dns bitnami/external-dns << EOF
-aws:
-  region: ${AWS_DEFAULT_REGION}
-domainFilters:
-  - ${CLUSTER_FQDN}
-interval: 20s
-policy: sync
-serviceAccount:
-  create: false
-  name: external-dns
-EOF
-```
+kubectl get namespace cattle-system &> /dev/null || kubectl create namespace cattle-system
 
-### Rancher
+kubectl apply -f - << EOF
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: ingress-cert-${LETSENCRYPT_ENVIRONMENT}
+  namespace: cattle-system
+spec:
+  secretName: ingress-cert-${LETSENCRYPT_ENVIRONMENT}
+  issuerRef:
+    name: letsencrypt-${LETSENCRYPT_ENVIRONMENT}-dns
+    kind: ClusterIssuer
+  commonName: "rancher.${CLUSTER_FQDN}"
+  dnsNames:
+    - "rancher.${CLUSTER_FQDN}"
+EOF
+
+kubectl wait --namespace cattle-system --for=condition=Ready --timeout=20m certificate "ingress-cert-${LETSENCRYPT_ENVIRONMENT}"
+```
 
 Install `rancher-server`
 [helm chart](https://github.com/rancher/rancher/tree/master/chart)
@@ -229,21 +308,25 @@ and modify the
 
 ```bash
 helm repo add --force-update rancher-latest https://releases.rancher.com/server-charts/latest
-helm upgrade --install --version 2.6.3 --namespace cattle-system --create-namespace --values - rancher rancher-latest/rancher << EOF
+helm upgrade --install --version 2.6.3 --namespace cattle-system --wait --values - rancher rancher-latest/rancher << EOF
 hostname: rancher.${CLUSTER_FQDN}
 ingress:
   tls:
-    source: letsEncrypt
-letsEncrypt:
-  environment: staging
+    source: secret
+    secretName: ingress-cert-${LETSENCRYPT_ENVIRONMENT}
 replicas: 2
 bootstrapPassword: "${MY_PASSWORD}"
 EOF
+
+kubectl wait --namespace cattle-system --for condition=available deployment rancher
 ```
 
-Check the Helm Charts and pods:
+Notes: [Unable to create API keys for an user using curl](https://forums.rancher.com/t/unable-to-create-api-keys-for-an-user-using-curl/12899/3)
+
+Create the API token:
 
 ```bash
-kubectl get pods -A
-helm ls -A
+set +x
+LOGIN_TOKEN=$( curl -k -s "https://rancher.${CLUSTER_FQDN}/v3-public/localProviders/local?action=login" -H 'content-type: application/json' --data-binary "{\"username\":\"admin\",\"password\":\"${MY_PASSWORD}\"}" | jq -r .token )
+curl -k -s "https://rancher.${CLUSTER_FQDN}/v3/cloudcredentials" -H 'Content-Type: application/json' -H "Authorization: Bearer ${LOGIN_TOKEN}" --data-binary "{\"type\":\"provisioning.cattle.io/cloud-credential\",\"metadata\":{\"generateName\":\"cc-\",\"namespace\":\"fleet-default\"},\"_name\":\"aws-credentials-${AWS_ACCOUNT_ID_ORG1}\",\"annotations\":{\"provisioning.cattle.io/driver\":\"aws\",\"field.cattle.io/description\":\"aws-credentials-${AWS_ACCOUNT_ID_ORG1}\"},\"amazonec2credentialConfig\":{\"defaultRegion\":\"${AWS_DEFAULT_REGION}\",\"accessKey\":\"${AWS_ACCESS_KEY_ID_ORG1}\",\"secretKey\":\"${AWS_SECRET_ACCESS_KEY_ORG1}\"},\"_type\":\"provisioning.cattle.io/cloud-credential\",\"name\":\"aws-credentials-${AWS_ACCOUNT_ID_ORG1}\"}" > /dev/null
 ```
