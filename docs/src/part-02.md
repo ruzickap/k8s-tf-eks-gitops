@@ -323,10 +323,18 @@ kubectl wait --namespace cattle-system --for condition=available deployment ranc
 
 Notes: [Unable to create API keys for an user using curl](https://forums.rancher.com/t/unable-to-create-api-keys-for-an-user-using-curl/12899/3)
 
-Create the API token:
+Create Rancher Token Key and upload it to GitHub Repository Secrets:
 
 ```bash
 set +x
 LOGIN_TOKEN=$( curl -k -s "https://rancher.${CLUSTER_FQDN}/v3-public/localProviders/local?action=login" -H 'content-type: application/json' --data-binary "{\"username\":\"admin\",\"password\":\"${MY_PASSWORD}\"}" | jq -r .token )
+
+# Store AWS credentials in Rancher
 curl -k -s "https://rancher.${CLUSTER_FQDN}/v3/cloudcredentials" -H 'Content-Type: application/json' -H "Authorization: Bearer ${LOGIN_TOKEN}" --data-binary "{\"type\":\"provisioning.cattle.io/cloud-credential\",\"metadata\":{\"generateName\":\"cc-\",\"namespace\":\"fleet-default\"},\"_name\":\"aws-credentials-${AWS_ACCOUNT_ID_ORG1}\",\"annotations\":{\"provisioning.cattle.io/driver\":\"aws\",\"field.cattle.io/description\":\"aws-credentials-${AWS_ACCOUNT_ID_ORG1}\"},\"amazonec2credentialConfig\":{\"defaultRegion\":\"${AWS_DEFAULT_REGION}\",\"accessKey\":\"${AWS_ACCESS_KEY_ID_ORG1}\",\"secretKey\":\"${AWS_SECRET_ACCESS_KEY_ORG1}\"},\"_type\":\"provisioning.cattle.io/cloud-credential\",\"name\":\"aws-credentials-${AWS_ACCOUNT_ID_ORG1}\"}" > /dev/null
+
+# Get new Rancher API Token
+RANCHER_TOKEN_KEY=$( curl -k -s "https://rancher.${CLUSTER_FQDN}/v3/token" -H 'Content-Type: application/json' -H "Authorization: Bearer ${LOGIN_TOKEN}" --data-binary '{"type":"token","description":"Rancher Token used By Terraform"}' | jq '.token' )
+
+export GITHUB_TOKEN="${GH_TOKEN_FOR_UPDATING_THE_RANCHER_TOKEN_KEY}"
+gh secret set rancher_token_key --body "${RANCHER_TOKEN_KEY}"
 ```

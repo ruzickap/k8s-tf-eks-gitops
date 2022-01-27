@@ -43,5 +43,6 @@ provider "aws" {
 }
 
 provider "rancher2" {
-  # Configuration options
+  api_url   = var.rancher_api_url
+  token_key = var.rancher_token_key
 }

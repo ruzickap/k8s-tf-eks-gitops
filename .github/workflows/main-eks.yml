@@ -22,11 +22,13 @@ env:
   AWS_ACCOUNT_ID_ORG1: ${{ secrets.AWS_ACCOUNT_ID_ORG1 }}
   AWS_ACCESS_KEY_ID_ORG1: ${{ secrets.AWS_ACCESS_KEY_ID_ORG1 }}
   AWS_SECRET_ACCESS_KEY_ORG1: ${{ secrets.AWS_SECRET_ACCESS_KEY_ORG1 }}
+  GH_TOKEN_FOR_UPDATING_THE_RANCHER_TOKEN_KEY: ${{ secrets.GH_TOKEN_FOR_UPDATING_THE_RANCHER_TOKEN_KEY }}
 
 concurrency: main-eks
 
 jobs:
   create-main-eks:
+    name: "${{ github.event.inputs.action }} | main-eks"
     runs-on: ubuntu-latest
     permissions:
       id-token: write
