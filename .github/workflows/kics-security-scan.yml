@@ -5,6 +5,9 @@ on:
   push:
     branches-ignore:
       - main
+    paths:
+      - cloudformation/**
+      - terraform/**
 
 jobs:
   kics-job:

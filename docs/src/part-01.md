@@ -53,7 +53,7 @@ Install [eksctl](https://eksctl.io/):
 
 ```bash
 if ! command -v eksctl &> /dev/null; then
-  curl -s -L "https://github.com/weaveworks/eksctl/releases/download/v0.71.0/eksctl_$(uname)_amd64.tar.gz" | sudo tar xz -C /usr/local/bin/
+  curl -s -L "https://github.com/weaveworks/eksctl/releases/download/v0.80.0/eksctl_$(uname)_amd64.tar.gz" | sudo tar xz -C /usr/local/bin/
 fi
 ```
 

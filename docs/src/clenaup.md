@@ -16,7 +16,7 @@ Install [eksctl](https://eksctl.io/):
 
 ```bash
 if ! command -v eksctl &> /dev/null; then
-  curl -s -L "https://github.com/weaveworks/eksctl/releases/download/v0.71.0/eksctl_$(uname)_amd64.tar.gz" | sudo tar xz -C /usr/local/bin/
+  curl -s -L "https://github.com/weaveworks/eksctl/releases/download/v0.80.0/eksctl_$(uname)_amd64.tar.gz" | sudo tar xz -C /usr/local/bin/
 fi
 ```
 
@@ -54,7 +54,7 @@ Remove EKS cluster and created components:
 ```bash
 if eksctl get cluster --name="${CLUSTER_NAME}" 2>/dev/null ; then
   eksctl utils write-kubeconfig --cluster="${CLUSTER_NAME}" --kubeconfig "${KUBECONFIG}"
-  eksctl delete cluster --name="${CLUSTER_NAME}" --force
+  eksctl delete cluster --name="${CLUSTER_NAME}" --wait --force
 fi
 ```
 
@@ -77,6 +77,13 @@ Remove CloudFormation stacks:
 
 ```bash
 aws cloudformation delete-stack --stack-name "${CLUSTER_NAME}-route53"
+```
+
+Delete CloudFormation stack which created VPC, Subnets, Route53, EKS, ...:
+
+```bash
+aws cloudformation wait stack-delete-complete --stack-name "${CLUSTER_NAME}-route53"
+aws cloudformation wait stack-delete-complete --stack-name "eksctl-${CLUSTER_NAME}-cluster"
 ```
 
 Remove `tmp` directory:
