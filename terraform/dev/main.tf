@@ -28,8 +28,8 @@ locals {
   # Merging tfvars file when running terraform is not possible therefore I'm doing it here
   # (https://stackoverflow.com/questions/64615552/merge-more-than-2-tfvars-file-contents)
   aws_default_tags = merge(
-    var.aws_group_tags,
-    var.aws_cluster_tags,
+    var.aws_tags_group_level,
+    var.aws_tags_cluster_level,
   )
 }
 
@@ -38,7 +38,6 @@ provider "aws" {
   default_tags {
     tags = local.aws_default_tags
   }
-
   region = var.aws_default_region
 }
 
