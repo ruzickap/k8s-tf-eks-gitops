@@ -301,6 +301,12 @@ EOF
 kubectl wait --namespace cattle-system --for=condition=Ready --timeout=20m certificate "ingress-cert-${LETSENCRYPT_ENVIRONMENT}"
 ```
 
+Prepare `tls-ca-additional` secret with Let's Encrypt staging certificate:
+
+```bash
+kubectl -n cattle-system create secret generic tls-ca --from-literal=cacerts.pem="$(curl -sL https://letsencrypt.org/certs/staging/letsencrypt-stg-root-x1.pem)"
+```
+
 Install `rancher-server`
 [helm chart](https://github.com/rancher/rancher/tree/master/chart)
 and modify the
@@ -314,23 +320,22 @@ ingress:
   tls:
     source: secret
     secretName: ingress-cert-${LETSENCRYPT_ENVIRONMENT}
-replicas: 2
+privateCA: true
+replicas: 1
 bootstrapPassword: "${MY_PASSWORD}"
 EOF
 
-kubectl wait --namespace cattle-system --for condition=available deployment rancher
+kubectl wait --namespace cattle-system --for condition=available deployment --all
 ```
 
 Notes: [Unable to create API keys for an user using curl](https://forums.rancher.com/t/unable-to-create-api-keys-for-an-user-using-curl/12899/3)
 
-Create Rancher Token Key and upload it to GitHub Repository Secrets:
+Create Rancher Token Key and upload it to GitHub Repository Secrets and add AWS
+credentials to Rancher:
 
 ```bash
 set +x
 LOGIN_TOKEN=$( curl -k -s "https://rancher.${CLUSTER_FQDN}/v3-public/localProviders/local?action=login" -H 'content-type: application/json' --data-binary "{\"username\":\"admin\",\"password\":\"${MY_PASSWORD}\"}" | jq -r .token )
-
-# Store AWS credentials in Rancher
-curl -k -s "https://rancher.${CLUSTER_FQDN}/v3/cloudcredentials" -H 'Content-Type: application/json' -H "Authorization: Bearer ${LOGIN_TOKEN}" --data-binary "{\"type\":\"provisioning.cattle.io/cloud-credential\",\"metadata\":{\"generateName\":\"cc-\",\"namespace\":\"fleet-default\"},\"_name\":\"aws-credentials-${AWS_ACCOUNT_ID_ORG1}\",\"annotations\":{\"provisioning.cattle.io/driver\":\"aws\",\"field.cattle.io/description\":\"aws-credentials-${AWS_ACCOUNT_ID_ORG1}\"},\"amazonec2credentialConfig\":{\"defaultRegion\":\"${AWS_DEFAULT_REGION}\",\"accessKey\":\"${AWS_ACCESS_KEY_ID_ORG1}\",\"secretKey\":\"${AWS_SECRET_ACCESS_KEY_ORG1}\"},\"_type\":\"provisioning.cattle.io/cloud-credential\",\"name\":\"aws-credentials-${AWS_ACCOUNT_ID_ORG1}\"}" > /dev/null
 
 # Get new Rancher API Token
 RANCHER_TOKEN_KEY=$( curl -k -s "https://rancher.${CLUSTER_FQDN}/v3/token" -H 'Content-Type: application/json' -H "Authorization: Bearer ${LOGIN_TOKEN}" --data-binary '{"type":"token","description":"Rancher Token used By Terraform"}' | jq '.token' )

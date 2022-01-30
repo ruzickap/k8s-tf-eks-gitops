@@ -33,6 +33,7 @@ echo -e "\n# ------------- Secrets - must be ADDED !!! -------------\n"
 
 echo "### export AWS_ACCESS_KEY_ID='<secrets belongs to AWS_ACCESS_KEY_ID>"
 echo "### export AWS_SECRET_ACCESS_KEY='<secrets belongs to AWS_SECRET_ACCESS_KEY>'"
+echo "### export TF_VAR_rancher_token_key='<Rancher API token>'"
 
 echo -e "\n# ------------------------ Code -------------------------"
 

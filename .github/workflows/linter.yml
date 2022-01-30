@@ -69,3 +69,4 @@ jobs:
           VALIDATE_JSCPD: false
           YAML_CONFIG_FILE: .yamllint.yml
           LINTER_RULES_PATH: /
+          VALIDATE_TERRAFORM_TERRASCAN: false

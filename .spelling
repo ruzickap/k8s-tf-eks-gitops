@@ -8,6 +8,7 @@ K8s
 Kubernetes
 OpenID
 Route53
+VPCs
 awscli
 eksctl
 external-dns
