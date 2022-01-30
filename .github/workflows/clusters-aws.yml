@@ -56,6 +56,8 @@ env:
   # https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html
   AWS-IAM-AUTHENTICATOR_VERSION: "1.21.2/2021-07-05"
 
+  TF_VAR_rancher_token_key: ${{ secrets.rancher_token_key }}
+
 jobs:
   generate-cluster-aws-matrix:
     name: "Generate AWS Cluster matrix"

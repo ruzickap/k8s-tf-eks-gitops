@@ -1,11 +1,13 @@
 variable "aws_default_region" {
-  type    = string
-  default = null
+  description = "AWS region"
+  type        = string
+  default     = null
 }
 
 variable "aws_github_oidc_federated_role_to_assume" {
-  type    = string
-  default = null
+  description = "OIDC Federation role (not used in the code)"
+  type        = string
+  default     = null
 }
 
 variable "cluster_fqdn" {
@@ -27,8 +29,9 @@ variable "cluster_version" {
 }
 
 variable "terraform_code_dir" {
-  type    = string
-  default = null
+  description = "Path to terraform code (not used in the code)"
+  type        = string
+  default     = null
 }
 
 variable "aws_group_tags" {
@@ -44,8 +47,8 @@ variable "aws_cluster_tags" {
 }
 
 variable "aws_vpc_cidr" {
-  type        = string
   description = "VPC CIDR"
+  type        = string
 }
 
 variable "aws_private_subnets" {
@@ -57,4 +60,15 @@ variable "aws_public_subnets" {
   description = "List of public subnets for the worker nodes"
   type        = list(string)
   default     = []
+}
+
+
+variable "rancher_api_url" {
+  description = "Rancher API endpoint FQDN"
+  type        = string
+}
+
+variable "rancher_token_key" {
+  description = "Rancher API token key to connect to rancher"
+  type        = string
 }
