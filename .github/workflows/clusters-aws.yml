@@ -164,6 +164,9 @@ jobs:
             sudo chmod a+x /usr/local/bin/aws-iam-authenticator
           fi
 
+          sudo curl -sL https://letsencrypt.org/certs/staging/letsencrypt-stg-root-x1.pem -o /usr/local/share/ca-certificates/letsencrypt-stg-root-x1.crt
+          sudo update-ca-certificates
+
       - name: 💡🔪 Get and display environment variables
         id: get-environment-variables
         run: |

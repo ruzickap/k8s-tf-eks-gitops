@@ -338,7 +338,7 @@ set +x
 LOGIN_TOKEN=$( curl -k -s "https://rancher.${CLUSTER_FQDN}/v3-public/localProviders/local?action=login" -H 'content-type: application/json' --data-binary "{\"username\":\"admin\",\"password\":\"${MY_PASSWORD}\"}" | jq -r .token )
 
 # Get new Rancher API Token
-RANCHER_TOKEN_KEY=$( curl -k -s "https://rancher.${CLUSTER_FQDN}/v3/token" -H 'Content-Type: application/json' -H "Authorization: Bearer ${LOGIN_TOKEN}" --data-binary '{"type":"token","description":"Rancher Token used By Terraform"}' | jq '.token' )
+RANCHER_TOKEN_KEY=$( curl -k -s "https://rancher.${CLUSTER_FQDN}/v3/token" -H 'Content-Type: application/json' -H "Authorization: Bearer ${LOGIN_TOKEN}" --data-binary '{"type":"token","description":"Rancher Token used By Terraform"}' | jq -r '.token' )
 
 export GITHUB_TOKEN="${GH_TOKEN_FOR_UPDATING_THE_RANCHER_TOKEN_KEY}"
 gh secret set rancher_token_key --body "${RANCHER_TOKEN_KEY}"
