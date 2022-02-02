@@ -1,23 +1,26 @@
 variable "aws_default_region" {
-  type    = string
-  default = null
+  description = "AWS region"
+  type        = string
 }
 
 variable "aws_github_oidc_federated_role_to_assume" {
-  type    = string
-  default = null
+  description = "OIDC Federation role (not used in the code)"
+  type        = string
+  default     = null
 }
 
 variable "cluster_fqdn" {
   description = "FQDN of the EKS cluster"
   type        = string
-  default     = ""
 }
 
 variable "cluster_name" {
   description = "Name of the EKS cluster"
   type        = string
-  default     = ""
+  validation {
+    condition     = can(regex("[a-z0-9]([-a-z0-9]*[a-z0-9])?", var.cluster_name))
+    error_message = "The cluster_name value must contain alphanumeric character + '-' only."
+  }
 }
 
 variable "cluster_version" {
@@ -27,25 +30,25 @@ variable "cluster_version" {
 }
 
 variable "terraform_code_dir" {
-  type    = string
-  default = null
+  description = "Path to terraform code (not used in the code)"
+  type        = string
 }
 
-variable "aws_group_tags" {
+variable "aws_tags_group_level" {
   description = "A map group of tags to add to all resources"
   type        = map(string)
   default     = {}
 }
 
-variable "aws_cluster_tags" {
+variable "aws_tags_cluster_level" {
   description = "A map of cluster tags to add to all resources"
   type        = map(string)
   default     = {}
 }
 
 variable "aws_vpc_cidr" {
-  type        = string
   description = "VPC CIDR"
+  type        = string
 }
 
 variable "aws_private_subnets" {
@@ -56,5 +59,4 @@ variable "aws_private_subnets" {
 variable "aws_public_subnets" {
   description = "List of public subnets for the worker nodes"
   type        = list(string)
-  default     = []
 }
