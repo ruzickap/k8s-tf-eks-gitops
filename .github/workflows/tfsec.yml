@@ -29,6 +29,7 @@ jobs:
           sarif_file: tfsec.sarif
 
       - name: Upload SARIF file
+        if: ${{ github.actor!= 'dependabot[bot]' }}
         uses: github/codeql-action/upload-sarif@v1
         with:
           sarif_file: tfsec.sarif
