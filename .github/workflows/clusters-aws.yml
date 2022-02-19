@@ -196,13 +196,12 @@ jobs:
           get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "aws_default_region"
           get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "aws_github_oidc_federated_role_to_assume"
           get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "cluster_fqdn"
-          get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "cluster_name"
           get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "terraform_code_dir"
 
           echo -e "\n🍏 Set pre-defined environment variables (if any)"
           # shellcheck disable=SC2043
-          for ENV_VARIBALE in ${{ github.event.inputs.env-variables }} ; do
-            echo "${ENV_VARIBALE}" | tee -a "${GITHUB_ENV}"
+          for ENV_VARIABLE in ${{ github.event.inputs.env-variables }} ; do
+            echo "${ENV_VARIABLE}" | tee -a "${GITHUB_ENV}"
           done
 
       - name: 💡🔪 Configure AWS credentials
@@ -255,9 +254,10 @@ jobs:
         run: |
           set -euxo pipefail
 
+          export CLUSTER_NAME=${CLUSTER_FQDN##*.}
           if [[ "$(aws eks list-clusters)" =~ \"${CLUSTER_NAME}\" ]] ; then
-            aws eks update-kubeconfig --name "${CLUSTER_NAME}" --kubeconfig "/tmp/kubeconfig-${CLUSTER_NAME}.conf"
             export KUBECONFIG="/tmp/kubeconfig-${CLUSTER_NAME}.conf"
+            aws eks update-kubeconfig --name "${CLUSTER_NAME}" --kubeconfig "${KUBECONFIG}"
 
             # !!! TODO - stop argo sync, delete all services which are type=Loadbalancers + uninstall external-dns
             kubectl get nodes

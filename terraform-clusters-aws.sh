@@ -26,7 +26,6 @@ echo "# ---------------------------------------------------"
 echo "export CLUSTER_PATH=\"${CLUSTER_PATH}\""
 get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "aws_default_region"
 get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "cluster_fqdn"
-get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "cluster_name"
 get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "terraform_code_dir"
 
 echo -e "\n# ------------- Secrets - must be ADDED !!! -------------\n"

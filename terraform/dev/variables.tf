@@ -14,15 +14,6 @@ variable "cluster_fqdn" {
   type        = string
 }
 
-variable "cluster_name" {
-  description = "Name of the EKS cluster"
-  type        = string
-  validation {
-    condition     = can(regex("[a-z0-9]([-a-z0-9]*[a-z0-9])?", var.cluster_name))
-    error_message = "The cluster_name value must contain alphanumeric character + '-' only."
-  }
-}
-
 variable "cluster_version" {
   description = "Desired kubernetes version. If you do not specify a value, the latest available version is used"
   type        = string
@@ -59,4 +50,20 @@ variable "aws_private_subnets" {
 variable "aws_public_subnets" {
   description = "List of public subnets for the worker nodes"
   type        = list(string)
+}
+
+variable "cloudwatch_log_group_retention_in_days" {
+  description = "Number of days to retain log events"
+  type        = number
+}
+
+variable "cluster_enabled_log_types" {
+  description = "A list of the desired control plane logging to enable. For more information, see https://docs.aws.amazon.com/en_us/eks/latest/userguide/control-plane-logs.html. Possible values [`api`, `audit`, `authenticator`, `controllerManager`, `scheduler`]"
+  type        = list(string)
+  default     = []
+}
+
+variable "eks_managed_node_groups" {
+  description = "Map of maps of eks_node_groups to create"
+  type        = any
 }
