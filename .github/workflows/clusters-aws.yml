@@ -232,7 +232,7 @@ jobs:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
 
       # Terraform needs node command: https://github.com/hashicorp/setup-terraform/issues/84
-      - uses: actions/setup-node@v2
+      - uses: actions/setup-node@v3
         with:
           node-version: '16'
 
