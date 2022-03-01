@@ -73,3 +73,8 @@ variable "eks_managed_node_groups" {
   description = "Map of maps of eks_node_groups to create"
   type        = any
 }
+
+variable "eks_aws_auth_configmap_admins" {
+  description = "A list of the Admins which can access the EKS cluster added to aws-config"
+  type        = list(string)
+}

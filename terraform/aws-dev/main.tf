@@ -54,6 +54,16 @@ locals {
       }
     }]
   })
+
+  aws_auth_configmap_yaml = <<-EOT
+${chomp(module.eks.aws_auth_configmap_yaml)}
+%{for admin in var.eks_aws_auth_configmap_admins~}
+    - rolearn: arn:aws:iam::${data.aws_caller_identity.current.account_id}:${admin}
+      username: system:aws:root
+      groups:
+        - system:masters
+%{endfor~}
+  EOT
 }
 
 provider "aws" {

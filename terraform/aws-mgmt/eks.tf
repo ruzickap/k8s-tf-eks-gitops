@@ -114,6 +114,21 @@ module "eks" {
   tags = merge(local.aws_default_tags, { Name = local.cluster_name })
 }
 
+resource "null_resource" "patch" {
+  triggers = {
+    kubeconfig = base64encode(local.kubeconfig)
+    cmd_patch  = "kubectl patch configmap/aws-auth --patch \"${local.aws_auth_configmap_yaml}\" -n kube-system --kubeconfig <(echo $KUBECONFIG | base64 --decode)"
+  }
+
+  provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
+    environment = {
+      KUBECONFIG = self.triggers.kubeconfig
+    }
+    command = self.triggers.cmd_patch
+  }
+}
+
 # ---------------------------------------------------------------------------------------------------------------------
 # IRSA
 # ---------------------------------------------------------------------------------------------------------------------
