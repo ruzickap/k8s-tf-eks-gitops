@@ -195,23 +195,26 @@ aws cloudformation deploy --region=eu-central-1 --capabilities CAPABILITY_NAMED_
 Run GitHub Actions with Terraform to create Amazon EKS:
 
 ```bash
-gh workflow run clusters-aws.yml -f clusters=".*(/ruzickap-eks.k8s.use1.dev.proj.aws.mylabs.dev$).*" -f action="apply"
+gh workflow run clusters-aws.yml -f clusters=".*(/ruzickap01.k8s.use1.dev.proj.aws.mylabs.dev$).*" -f action="apply"
+gh workflow run clusters-aws.yml -f clusters=".*(/mgmt01.k8s.use1.dev.proj.aws.mylabs.dev$).*" -f action="apply"
 ```
 
 or you can create multiple AWS clusters:
 
 ```bash
-gh workflow run clusters-aws.yml -f clusters=".*(/ruzickap-eks.k8s.use1.dev.proj.aws.mylabs.dev$|/ruzickap-eks2.k8s.use1.dev.proj.aws.mylabs.dev$).*" -f action="apply"
+gh workflow run clusters-aws.yml -f clusters=".*(/ruzickap.*.k8s.use1.dev.proj.aws.mylabs.dev$|/mgmt01.k8s.use1.dev.proj.aws.mylabs.dev$).*" -f action="apply"
 ```
 
 You can run Terraform per "group of clusters":
 
 ```bash
-gh workflow run clusters-aws.yml -f clusters=".*(/dev-sandbox/).*" -f action="apply"
+gh workflow run clusters-aws.yml -f clusters=".*(/aws-dev-sandbox/).*" -f action="apply"
+gh workflow run clusters-aws.yml -f clusters=".*" -f action="apply"
 ```
 
 Destroy Amazon EKS and related "objects":
 
 ```bash
 gh workflow run clusters-aws.yml -f clusters=".*(/ruzickap-eks.k8s.use1.dev.proj.aws.mylabs.dev$).*" -f action="destroy"
+gh workflow run clusters-aws.yml -f clusters=".*" -f action="destroy"
 ```
