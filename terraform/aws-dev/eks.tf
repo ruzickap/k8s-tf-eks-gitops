@@ -44,6 +44,23 @@ resource "aws_kms_alias" "eks" {
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
+# Route 53
+# ---------------------------------------------------------------------------------------------------------------------
+
+resource "aws_route53_zone" "cluster_fqdn" {
+  name    = var.cluster_fqdn
+  comment = "Managed by ${local.aws_default_tags.owner}"
+}
+
+resource "aws_route53_record" "base_domain" {
+  zone_id = data.aws_route53_zone.base_domain.zone_id
+  name    = aws_route53_zone.cluster_fqdn.name
+  type    = "NS"
+  ttl     = "30"
+  records = aws_route53_zone.cluster_fqdn.name_servers
+}
+
+# ---------------------------------------------------------------------------------------------------------------------
 # Create the EKS cluster
 # ---------------------------------------------------------------------------------------------------------------------
 
@@ -96,13 +113,3 @@ module "eks" {
 
   tags = merge(local.aws_default_tags, { Name = local.cluster_name })
 }
-
-data "aws_eks_cluster" "eks-cluster" {
-  name = module.eks.cluster_id
-}
-
-data "aws_eks_cluster_auth" "eks-cluster" {
-  name = module.eks.cluster_id
-}
-
-data "aws_caller_identity" "current" {}
