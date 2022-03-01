@@ -1,3 +1,5 @@
+# Variables used in the cluster-aws pipeline
+
 variable "aws_default_region" {
   description = "AWS region"
   type        = string
@@ -14,10 +16,14 @@ variable "cluster_fqdn" {
   type        = string
 }
 
+variable "base_domain" {
+  type        = string
+  description = "Domain name used for delegation"
+}
+
 variable "cluster_version" {
   description = "Desired kubernetes version. If you do not specify a value, the latest available version is used"
   type        = string
-  default     = "1.21"
 }
 
 variable "terraform_code_dir" {

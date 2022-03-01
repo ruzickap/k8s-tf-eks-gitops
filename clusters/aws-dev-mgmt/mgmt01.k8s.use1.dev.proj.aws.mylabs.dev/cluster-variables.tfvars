@@ -1,16 +1,20 @@
-cluster_fqdn = "ruzickap-eks.k8s.use1.dev.proj.aws.mylabs.dev"
+cluster_fqdn = "mgmt01.k8s.use1.dev.proj.aws.mylabs.dev"
+# Domain where TF will create NS record to point to the new "zone" `cluster_fqdn`
+base_domain = "k8s.use1.dev.proj.aws.mylabs.dev"
 
-aws_vpc_cidr        = "10.0.8.0/21"
-aws_private_subnets = ["10.0.8.0/24", "10.0.9.0/24", "10.0.10.0/24"]
-aws_public_subnets  = ["10.0.11.0/24", "10.0.12.0/24", "10.0.13.0/24"]
+cluster_version = "1.21"
+
+aws_vpc_cidr        = "10.0.0.0/21"
+aws_private_subnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
+aws_public_subnets  = ["10.0.4.0/24", "10.0.5.0/24", "10.0.6.0/24"]
 
 aws_tags_cluster_level = {
   owner = "petr.ruzicka@gmail.com"
 }
 
 eks_managed_node_groups = {
-  ruzickap-eks-ng-01 = {
-    description = "EKS managed node group example launch template"
+  mgmt01-ng-01 = {
+    description = "Amazon EKS managed node group for ruzickap-eks.k8s.use1.dev.proj.aws.mylabs.dev"
     name        = "ruzickap-eks-ng01"
 
     ami_type       = "BOTTLEROCKET_x86_64"

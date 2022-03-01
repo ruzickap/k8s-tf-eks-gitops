@@ -5,6 +5,6 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "terraform"
-    directory: "/terraform/dev/"
+    directory: "/terraform/aws-dev/"
     schedule:
       interval: "daily"
