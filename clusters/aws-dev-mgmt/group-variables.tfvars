@@ -5,6 +5,12 @@ terraform_code_dir                       = "terraform/aws-mgmt"
 cloudwatch_log_group_retention_in_days = "1"
 cluster_enabled_log_types              = [] # "audit", "authenticator"
 
+# arn:aws:iam::123456789012:role/Admins
+eks_aws_auth_configmap_admins = [
+  "role/Admins",
+  "user/ruzickap",
+]
+
 aws_tags_group_level = {
   cluster_group       = "dev-mgmt"
   entity              = "org1"
