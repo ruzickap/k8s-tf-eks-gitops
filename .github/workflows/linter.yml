@@ -66,3 +66,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USE_FIND_ALGORITHM: true
           VALIDATE_CSS: false
+          VALIDATE_TERRAFORM_TERRASCAN: false
