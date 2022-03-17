@@ -4,11 +4,15 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "4.5.0"
+      version = "4.4.0"
     }
     helm = {
       source  = "hashicorp/helm"
       version = "2.4.1"
+    }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = ">= 2.8.0"
     }
   }
   required_version = ">= 1.0.1"
@@ -24,49 +28,14 @@ locals {
     var.aws_tags_group_level,
     var.aws_tags_cluster_level,
   )
-
-  kubeconfig = yamlencode({
-    apiVersion      = "v1"
-    kind            = "Config"
-    current-context = "terraform"
-    clusters = [{
-      name = module.eks.cluster_id
-      cluster = {
-        certificate-authority-data = module.eks.cluster_certificate_authority_data
-        server                     = module.eks.cluster_endpoint
-      }
-    }]
-    contexts = [{
-      name = "terraform"
-      context = {
-        cluster = module.eks.cluster_id
-        user    = "terraform"
-      }
-    }]
-    users = [{
-      name = "terraform"
-      user = {
-        token = data.aws_eks_cluster_auth.eks-cluster.token
-      }
-    }]
-  })
-
-  aws_auth_configmap_yaml = <<-EOT
-${chomp(module.eks.aws_auth_configmap_yaml)}
-%{for admin in var.eks_aws_auth_configmap_admins~}
-    - rolearn: arn:aws:iam::${data.aws_caller_identity.current.account_id}:${admin}
-      username: system:aws:root
-      groups:
-        - system:masters
-%{endfor~}
-  EOT
 }
 
 provider "aws" {
   # Default tags that will be applied to ALL resources: https://www.hashicorp.com/blog/default-tags-in-the-terraform-aws-provider
-  default_tags {
-    tags = local.aws_default_tags
-  }
+  # Not working: Provider produced inconsistent final plan
+  # default_tags {
+  #   tags = local.aws_default_tags
+  # }
   region = var.aws_default_region
 }
 
@@ -76,4 +45,10 @@ provider "helm" {
     token                  = data.aws_eks_cluster_auth.eks-cluster.token
     cluster_ca_certificate = base64decode(data.aws_eks_cluster.eks-cluster.certificate_authority.0.data)
   }
+}
+
+provider "kubernetes" {
+  host                   = data.aws_eks_cluster.eks-cluster.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.eks-cluster.certificate_authority.0.data)
+  token                  = data.aws_eks_cluster_auth.eks-cluster.token
 }

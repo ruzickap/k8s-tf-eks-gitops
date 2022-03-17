@@ -2,9 +2,9 @@ cluster_fqdn = "ruzickap01.k8s.use1.dev.proj.aws.mylabs.dev"
 # Domain where TF will create NS record to point to the new "zone" `cluster_fqdn`
 base_domain = "k8s.use1.dev.proj.aws.mylabs.dev"
 
-aws_vpc_cidr        = "10.0.8.0/21"
-aws_private_subnets = ["10.0.8.0/24", "10.0.9.0/24", "10.0.10.0/24"]
-aws_public_subnets  = ["10.0.11.0/24", "10.0.12.0/24", "10.0.13.0/24"]
+aws_vpc_cidr        = "10.0.16.0/21"
+aws_private_subnets = ["10.0.16.0/24", "10.0.17.0/24", "10.0.18.0/24"]
+aws_public_subnets  = ["10.0.19.0/24", "10.0.20.0/24", "10.0.21.0/24"]
 
 cluster_version = "1.21"
 
