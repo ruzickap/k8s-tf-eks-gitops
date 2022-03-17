@@ -19,7 +19,7 @@ get_variable_from_group_cluster_tfvars () {
 set -euo pipefail
 
 CLUSTER_PATH=$(find ./clusters -type d -regextype "posix-extended" -regex ".*/${1}\$.*")
-echo -e "\n🍏 Cluster path: ${CLUSTER_PATH}\n"
+echo -e "\n#🍏 Cluster path: ${CLUSTER_PATH}\n"
 
 echo "# ---------------------------------------------------"
 

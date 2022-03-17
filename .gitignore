@@ -2,7 +2,7 @@
 .pre-commit-config.yaml
 
 # Kubernetes kubeconfig file
-kubeconfig*.conf*
+kubeconfig*
 
 # tmp directory
 tmp/

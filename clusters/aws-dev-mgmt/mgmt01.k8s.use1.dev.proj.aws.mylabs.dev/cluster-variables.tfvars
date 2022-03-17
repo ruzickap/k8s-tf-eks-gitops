@@ -14,8 +14,8 @@ aws_tags_cluster_level = {
 
 eks_managed_node_groups = {
   mgmt01-ng-01 = {
-    description = "Amazon EKS managed node group for ruzickap-eks.k8s.use1.dev.proj.aws.mylabs.dev"
-    name        = "ruzickap-eks-ng01"
+    description = "Amazon EKS managed node group for mgmt01.k8s.use1.dev.proj.aws.mylabs.dev"
+    name        = "mgmt01-ng01"
 
     ami_type       = "BOTTLEROCKET_x86_64"
     platform       = "bottlerocket"

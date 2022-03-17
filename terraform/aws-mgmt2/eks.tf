@@ -26,6 +26,8 @@ module "vpc" {
     "kubernetes.io/cluster/${local.cluster_name}" = "shared"
     "kubernetes.io/role/internal-elb"             = 1
   }
+
+  tags = local.aws_default_tags
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -36,6 +38,7 @@ resource "aws_kms_key" "eks-kms_key" {
   description             = "${var.cluster_fqdn} Amazon EKS Secret Encryption Key"
   deletion_window_in_days = 7
   enable_key_rotation     = true
+  tags                    = local.aws_default_tags
 }
 
 resource "aws_kms_alias" "eks" {
@@ -64,69 +67,32 @@ resource "aws_route53_record" "base_domain" {
 # Create the EKS cluster
 # ---------------------------------------------------------------------------------------------------------------------
 
-module "eks" {
-  source  = "terraform-aws-modules/eks/aws"
-  version = "18.9.0"
+module "aws-eks-accelerator-for-terraform" {
+  source = "github.com/aws-samples/aws-eks-accelerator-for-terraform?ref=v3.5.0"
 
-  cluster_name                    = local.cluster_name
-  cluster_version                 = var.cluster_version
-  cluster_endpoint_private_access = true
-  cluster_endpoint_public_access  = true
+  tenant      = var.tenant
+  environment = var.environment
+  zone        = var.zone
 
-  cluster_encryption_config = [{
-    provider_key_arn = aws_kms_key.eks-kms_key.arn
-    resources        = ["secrets"]
-  }]
+  # EKS Cluster VPC and Subnet mandatory config
+  vpc_id             = module.vpc.vpc_id
+  private_subnet_ids = module.vpc.private_subnets
 
-  cluster_addons = {
-    coredns = {
-      addon_version     = "v1.8.4-eksbuild.1"
-      resolve_conflicts = "OVERWRITE"
-    }
-    kube-proxy = {
-      addon_version     = "v1.21.2-eksbuild.2"
-      resolve_conflicts = "OVERWRITE"
-    }
-    vpc-cni = {
-      addon_version     = "v1.10.2-eksbuild.1"
-      resolve_conflicts = "OVERWRITE"
-    }
-    aws-ebs-csi-driver = {
-      addon_version     = "v1.4.0-eksbuild.preview"
-      resolve_conflicts = "OVERWRITE"
-    }
-  }
+  # EKS CONTROL PLANE VARIABLES
+  kubernetes_version = var.kubernetes_version
+  cluster_name       = local.cluster_name
 
-  vpc_id     = module.vpc.vpc_id
-  subnet_ids = module.vpc.private_subnets
+  cluster_endpoint_private_access = var.cluster_endpoint_private_access
+  cluster_endpoint_public_access  = var.cluster_endpoint_public_access
+  cluster_enabled_log_types       = var.cluster_enabled_log_types
+  cluster_log_retention_in_days   = var.cluster_log_retention_in_days
 
-  enable_irsa = true
+  map_roles = var.map_roles
 
-  cloudwatch_log_group_retention_in_days = var.cloudwatch_log_group_retention_in_days
-  cluster_enabled_log_types              = var.cluster_enabled_log_types
+  tags = local.aws_default_tags
 
-  eks_managed_node_group_defaults = {
-    iam_role_additional_policies = ["arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"]
-  }
-
-  eks_managed_node_groups = var.eks_managed_node_groups
-
-  tags = merge(local.aws_default_tags, { Name = local.cluster_name })
-}
-
-resource "null_resource" "patch" {
-  triggers = {
-    kubeconfig = base64encode(local.kubeconfig)
-    cmd_patch  = "kubectl patch configmap/aws-auth --patch \"${local.aws_auth_configmap_yaml}\" -n kube-system --kubeconfig <(echo $KUBECONFIG | base64 --decode)"
-  }
-
-  provisioner "local-exec" {
-    interpreter = ["/bin/bash", "-c"]
-    environment = {
-      KUBECONFIG = self.triggers.kubeconfig
-    }
-    command = self.triggers.cmd_patch
-  }
+  # EKS MANAGED NODE GROUPS
+  managed_node_groups = var.managed_node_groups
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -134,8 +100,9 @@ resource "null_resource" "patch" {
 # ---------------------------------------------------------------------------------------------------------------------
 
 resource "aws_iam_policy" "external-dns" {
-  name        = "${module.eks.cluster_id}-external-dns"
+  name        = "${module.aws-eks-accelerator-for-terraform.eks_cluster_id}-external-dns"
   description = "Policy allowing external-dns to change Route53 entries"
+  tags        = local.aws_default_tags
   policy      = <<EOF
 {
   "Version": "2012-10-17",
@@ -166,17 +133,19 @@ EOF
 
 module "irsa_external-dns" {
   source                            = "github.com/aws-samples/aws-eks-accelerator-for-terraform//modules/irsa?ref=v3.2.2"
-  eks_cluster_id                    = module.eks.cluster_id
+  eks_cluster_id                    = module.aws-eks-accelerator-for-terraform.eks_cluster_id
   kubernetes_namespace              = "external-dns"
   create_kubernetes_namespace       = false
   create_kubernetes_service_account = false
   kubernetes_service_account        = "external-dns"
   irsa_iam_policies                 = [aws_iam_policy.external-dns.arn]
+  tags                              = local.aws_default_tags
 }
 
 resource "aws_iam_policy" "cert-manager" {
-  name        = "${module.eks.cluster_id}-cert-manager"
+  name        = "${module.aws-eks-accelerator-for-terraform.eks_cluster_id}-cert-manager"
   description = "Policy allowing external-dns to change Route53 entries"
+  tags        = local.aws_default_tags
   policy      = <<EOF
 {
   "Version": "2012-10-17",
@@ -206,10 +175,24 @@ EOF
 
 module "irsa_cert-manager" {
   source                            = "github.com/aws-samples/aws-eks-accelerator-for-terraform//modules/irsa?ref=v3.2.2"
-  eks_cluster_id                    = module.eks.cluster_id
+  eks_cluster_id                    = module.aws-eks-accelerator-for-terraform.eks_cluster_id
   kubernetes_namespace              = "cert-manager"
   create_kubernetes_namespace       = false
   create_kubernetes_service_account = false
   kubernetes_service_account        = "cert-manager"
   irsa_iam_policies                 = [aws_iam_policy.cert-manager.arn]
+  tags                              = local.aws_default_tags
+}
+
+# ---------------------------------------------------------------------------------------------------------------------
+# Argo CD
+# ---------------------------------------------------------------------------------------------------------------------
+
+resource "helm_release" "argocd" {
+  name             = "argo-cd"
+  repository       = "https://argoproj.github.io/argo-helm"
+  chart            = "argo-cd"
+  version          = "3.33.5"
+  namespace        = "argocd"
+  create_namespace = true
 }
