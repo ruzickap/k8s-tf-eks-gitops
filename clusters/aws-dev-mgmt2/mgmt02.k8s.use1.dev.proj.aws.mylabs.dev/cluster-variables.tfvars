@@ -23,7 +23,15 @@ aws_tags_cluster_level = {
 
 map_roles = [
   {
-    rolearn  = "arn:aws:iam::123456:role/Admins"
+    rolearn  = "arn:aws:iam::123456789012:role/Admins"
+    username = "system:aws:root"
+    groups   = ["system:masters"]
+  },
+]
+
+map_users = [
+  {
+    userarn  = "arn:aws:iam::123456789012:user/ruzickap"
     username = "system:aws:root"
     groups   = ["system:masters"]
   },

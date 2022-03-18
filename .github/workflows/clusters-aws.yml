@@ -300,11 +300,10 @@ jobs:
             -var-file="${PWD}/${CLUSTER_PATH}/../group-variables.tfvars" \
             -var-file="${PWD}/${CLUSTER_PATH}/cluster-variables.tfvars"
 
-      - name: 💡 Terraform apply+output action (contains "kubeconfig")
+      - name: 💡 Terraform output action (contains "kubeconfig")
         if: ${{ needs.generate-cluster-aws-matrix.outputs.terraform_action == 'apply' }}
         run: |
-          set -euxo pipefail
-          terraform -chdir="${TERRAFORM_CODE_DIR}" output amazon_eks_kubectl_commands
+          terraform -chdir="${TERRAFORM_CODE_DIR}" output -raw amazon_eks_kubectl_commands
 
       - name: 🔪 Terraform destroy
         if: ${{ github.event_name == 'schedule' }}
