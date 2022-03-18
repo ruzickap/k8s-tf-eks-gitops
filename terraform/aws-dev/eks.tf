@@ -205,7 +205,7 @@ EOF
 }
 
 module "irsa_cert-manager" {
-  source                            = "github.com/aws-samples/aws-eks-accelerator-for-terraform//modules/irsa?ref=v3.2.2"
+  source                            = "github.com/aws-samples/aws-eks-accelerator-for-terraform//modules/irsa?ref=v3.5.0"
   eks_cluster_id                    = module.eks.cluster_id
   kubernetes_namespace              = "cert-manager"
   create_kubernetes_namespace       = false
