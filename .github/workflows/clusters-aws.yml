@@ -178,6 +178,7 @@ jobs:
             fi
             echo -e "\n💡 Variable: \"${TF_CODE_VARIABLE^^}\" = \"${VARIABLE_HELPER}\""
             echo "${TF_CODE_VARIABLE^^}=${VARIABLE_HELPER}" >> "${GITHUB_ENV}"
+            export "${TF_CODE_VARIABLE^^}=${VARIABLE_HELPER}"
             echo "::set-output name=${TF_CODE_VARIABLE^^}::${VARIABLE_HELPER}"
           }
 
@@ -196,6 +197,7 @@ jobs:
           get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "aws_default_region"
           get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "aws_github_oidc_federated_role_to_assume"
           get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "cluster_fqdn"
+          echo "CLUSTER_NAME=${CLUSTER_FQDN%%.*}" | tee -a "${GITHUB_ENV}"
           get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "terraform_code_dir"
 
           echo -e "\n🍏 Set pre-defined environment variables (if any)"
@@ -254,7 +256,6 @@ jobs:
         run: |
           set -euxo pipefail
 
-          export CLUSTER_NAME=${CLUSTER_FQDN##*.}
           if [[ "$(aws eks list-clusters)" =~ \"${CLUSTER_NAME}\" ]] ; then
             export KUBECONFIG="/tmp/kubeconfig-${CLUSTER_NAME}.conf"
             aws eks update-kubeconfig --name "${CLUSTER_NAME}" --kubeconfig "${KUBECONFIG}"
@@ -303,6 +304,9 @@ jobs:
       - name: 💡 Terraform output action (contains "kubeconfig")
         if: ${{ needs.generate-cluster-aws-matrix.outputs.terraform_action == 'apply' }}
         run: |
+          export KUBECONFIG="/tmp/kubeconfig-${CLUSTER_NAME}.conf"
+          aws eks update-kubeconfig --region "${AWS_DEFAULT_REGION}" --name "${CLUSTER_NAME}" --kubeconfig "${KUBECONFIG}"
+          kubectl get nodes
           terraform -chdir="${TERRAFORM_CODE_DIR}" output -raw amazon_eks_kubectl_commands
 
       - name: 🔪 Terraform destroy
