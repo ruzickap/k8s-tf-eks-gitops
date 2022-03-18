@@ -88,6 +88,7 @@ module "aws-eks-accelerator-for-terraform" {
   cluster_log_retention_in_days   = var.cluster_log_retention_in_days
 
   map_roles = var.map_roles
+  map_users = var.map_users
 
   tags = local.aws_default_tags
 

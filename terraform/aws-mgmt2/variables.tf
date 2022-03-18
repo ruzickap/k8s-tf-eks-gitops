@@ -91,6 +91,16 @@ variable "map_roles" {
   default = []
 }
 
+variable "map_users" {
+  description = "Additional IAM users to add to the aws-auth ConfigMap"
+  type = list(object({
+    userarn  = string
+    username = string
+    groups   = list(string)
+  }))
+  default = []
+}
+
 variable "managed_node_groups" {
   description = "Map of maps of eks_node_groups to create"
   type        = any
