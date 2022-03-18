@@ -165,7 +165,7 @@ EOF
 }
 
 module "irsa_external-dns" {
-  source                            = "github.com/aws-samples/aws-eks-accelerator-for-terraform//modules/irsa?ref=v3.2.2"
+  source                            = "github.com/aws-samples/aws-eks-accelerator-for-terraform//modules/irsa?ref=v3.5.0"
   eks_cluster_id                    = module.eks.cluster_id
   kubernetes_namespace              = "external-dns"
   create_kubernetes_namespace       = false
