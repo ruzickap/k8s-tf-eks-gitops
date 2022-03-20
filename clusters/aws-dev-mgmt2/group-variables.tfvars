@@ -1,5 +1,5 @@
 aws_default_region                       = "eu-central-1"
-aws_github_oidc_federated_role_to_assume = "arn:aws:iam::123456789012:role/GitHubOidcFederatedRole"
+aws_github_oidc_federated_role_to_assume = "arn:aws:iam::729560437327:role/GitHubOidcFederatedRole"
 terraform_code_dir                       = "terraform/aws-mgmt2"
 
 cluster_enabled_log_types = [] # "audit", "authenticator"

@@ -4,7 +4,7 @@
 
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "3.12.0"
+  version = "3.13.0"
 
   name = local.vpc_name
   cidr = var.aws_vpc_cidr
@@ -66,7 +66,7 @@ resource "aws_route53_record" "base_domain" {
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "18.9.0"
+  version = "18.10.2"
 
   cluster_name                    = local.cluster_name
   cluster_version                 = var.cluster_version
@@ -164,14 +164,15 @@ resource "aws_iam_policy" "external-dns" {
 EOF
 }
 
-module "irsa_external-dns" {
-  source                            = "github.com/aws-samples/aws-eks-accelerator-for-terraform//modules/irsa?ref=v3.2.2"
-  eks_cluster_id                    = module.eks.cluster_id
-  kubernetes_namespace              = "external-dns"
-  create_kubernetes_namespace       = false
-  create_kubernetes_service_account = false
-  kubernetes_service_account        = "external-dns"
-  irsa_iam_policies                 = [aws_iam_policy.external-dns.arn]
+module "iam_assumable_role_external-dns" {
+  source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
+  version                       = "4.14.0"
+  create_role                   = true
+  provider_url                  = "module.eks.oidc_provider"
+  role_name                     = "${module.eks.cluster_id}-iamserviceaccount-external-dns"
+  role_description              = "Allow external-dns to change Route53 entries"
+  role_policy_arns              = [aws_iam_policy.external-dns.arn]
+  oidc_fully_qualified_subjects = ["system:serviceaccount:external-dns:external-dns"]
 }
 
 resource "aws_iam_policy" "cert-manager" {
@@ -204,14 +205,15 @@ resource "aws_iam_policy" "cert-manager" {
 EOF
 }
 
-module "irsa_cert-manager" {
-  source                            = "github.com/aws-samples/aws-eks-accelerator-for-terraform//modules/irsa?ref=v3.2.2"
-  eks_cluster_id                    = module.eks.cluster_id
-  kubernetes_namespace              = "cert-manager"
-  create_kubernetes_namespace       = false
-  create_kubernetes_service_account = false
-  kubernetes_service_account        = "cert-manager"
-  irsa_iam_policies                 = [aws_iam_policy.cert-manager.arn]
+module "iam_assumable_role_cert-manager" {
+  source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
+  version                       = "4.14.0"
+  create_role                   = true
+  provider_url                  = "module.eks.oidc_provider"
+  role_name                     = "${module.eks.cluster_id}-iamserviceaccount-cert-manager"
+  role_description              = "Allow cert-manager to change Route53 entries"
+  role_policy_arns              = [aws_iam_policy.cert-manager.arn]
+  oidc_fully_qualified_subjects = ["system:serviceaccount:cert-manager:cert-manager"]
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -222,7 +224,7 @@ resource "helm_release" "argocd" {
   name             = "argo-cd"
   repository       = "https://argoproj.github.io/argo-helm"
   chart            = "argo-cd"
-  version          = "3.33.5"
+  version          = var.argo-cd_version
   namespace        = "argocd"
   create_namespace = true
 }

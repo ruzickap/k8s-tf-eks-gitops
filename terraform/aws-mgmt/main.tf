@@ -4,7 +4,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "4.4.0"
+      version = "4.5.0"
     }
     helm = {
       source  = "hashicorp/helm"
@@ -53,12 +53,7 @@ locals {
 
   aws_auth_configmap_yaml = <<-EOT
 ${chomp(module.eks.aws_auth_configmap_yaml)}
-%{for admin in var.eks_aws_auth_configmap_admins~}
-    - rolearn: arn:aws:iam::${data.aws_caller_identity.current.account_id}:${admin}
-      username: system:aws:root
-      groups:
-        - system:masters
-%{endfor~}
+${var.eks_aws_auth_configmap}
   EOT
 }
 

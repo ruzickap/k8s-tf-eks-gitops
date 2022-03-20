@@ -86,7 +86,7 @@ Create DNS zone for EKS clusters:
 ```shell
 export BASE_DOMAIN="k8s.use1.dev.proj.aws.mylabs.dev"
 export CLOUDFLARE_EMAIL="petr.ruzicka@gmail.com"
-export CLOUDFLARE_API_KEY="1234567890"
+export CLOUDFLARE_API_KEY="11234567890"
 
 aws route53 create-hosted-zone --output json \
   --name "${BASE_DOMAIN}" \
@@ -185,9 +185,9 @@ Example: [AWS federation comes to GitHub Actions](https://awsteele.com/blog/2021
 ```shell
 aws cloudformation deploy --region=eu-central-1 --capabilities CAPABILITY_NAMED_IAM \
   --parameter-overrides "GitHubFullRepositoryName=ruzickap/k8s-tf-eks-argocd" \
-  --stack-name "ruzickap-k8s-tf-eks-argocd-gh-action-iam-role-oidc" \
+  --stack-name "${USER}-k8s-tf-eks-argocd-gh-action-iam-role-oidc" \
   --template-file "./cloudformation/gh-action-iam-role-oidc.yaml" \
-  --tags Owner=petr.ruzicka@gmail.com
+  --tags "Owner=petr.ruzicka@gmail.com"
 ```
 
 ## Run GitHub Actions with Terraform

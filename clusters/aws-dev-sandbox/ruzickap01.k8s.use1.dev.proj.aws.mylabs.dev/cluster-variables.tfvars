@@ -2,15 +2,26 @@ cluster_fqdn = "ruzickap01.k8s.use1.dev.proj.aws.mylabs.dev"
 # Domain where TF will create NS record to point to the new "zone" `cluster_fqdn`
 base_domain = "k8s.use1.dev.proj.aws.mylabs.dev"
 
+cluster_version = "1.21"
+
 aws_vpc_cidr        = "10.0.16.0/21"
 aws_private_subnets = ["10.0.16.0/24", "10.0.17.0/24", "10.0.18.0/24"]
 aws_public_subnets  = ["10.0.19.0/24", "10.0.20.0/24", "10.0.21.0/24"]
 
-cluster_version = "1.21"
-
 aws_tags_cluster_level = {
   owner = "petr.ruzicka@gmail.com"
 }
+
+eks_aws_auth_configmap = <<EOT
+    - rolearn: arn:aws:iam::729560437327:role/Admins
+      username: system:aws:root
+      groups:
+        - system:masters
+    - rolearn: arn:aws:iam::729560437327:user/ruzickap
+      username: system:aws:root
+      groups:
+        - system:masters
+EOT
 
 eks_managed_node_groups = {
   ruzickap01-ng-01 = {

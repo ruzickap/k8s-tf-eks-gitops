@@ -186,9 +186,6 @@ jobs:
           echo -e "💡 The name of your branch is ${{ github.ref }}"
           echo -e "💊 Action: ${{needs.generate-cluster-aws-matrix.outputs.action }}"
 
-          # Put in place proper ACCOUNT_IDs
-          find clusters -type f -print0 | xargs -0 sed -i 's/123456789012/${{ secrets.AWS_ACCOUNT_ID_ORG1 }}/g'
-
           # Find cluster path based on cluster FQDN (matrix.stage)
           CLUSTER_PATH=$(find clusters -type d -regextype "posix-extended" -regex '.*${{ matrix.stage }}.*')
           echo -e "\n🍏 Cluster path: ${CLUSTER_PATH}"
