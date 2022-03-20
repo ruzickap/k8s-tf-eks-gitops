@@ -62,9 +62,10 @@ variable "cluster_version" {
   type        = string
 }
 
-variable "eks_aws_auth_configmap_admins" {
-  description = "A list of the Admins which can access the EKS cluster added to aws-config"
-  type        = list(string)
+variable "eks_aws_auth_configmap" {
+  description = "Additional IAM roles to add to the aws-auth ConfigMap"
+  type        = string
+  default     = null
 }
 
 variable "eks_managed_node_groups" {

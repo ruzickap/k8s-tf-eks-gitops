@@ -6,10 +6,18 @@ Parameters:
     Default: ruzickap/k8s-tf-eks-argocd
 
 Resources:
+  User:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: aws-cli
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess
   Role:
     Type: AWS::IAM::Role
     Properties:
+      Description: "Role for running Terrafrom code for GH Actions and local user"
       RoleName: GitHubOidcFederatedRole
+      MaxSessionDuration: 36000
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AdministratorAccess
       AssumeRolePolicyDocument:
@@ -18,11 +26,16 @@ Resources:
             Condition:
               StringLike:
                 # Allows only actions in this repository to assume the role
-                token.actions.githubusercontent.com:sub: !Sub repo:${GitHubFullRepositoryName}:*
+                token.actions.githubusercontent.com:sub:
+                  - !Sub "repo:${GitHubFullRepositoryName}:*"
             Effect: Allow
             Principal:
               Federated: !Ref GitHubOidc
-
+          - Action: sts:AssumeRole
+            Effect: Allow
+            Principal:
+              AWS:
+                - !GetAtt User.Arn
   GitHubOidc:
     Type: AWS::IAM::OIDCProvider
     Properties:
@@ -35,3 +48,7 @@ Resources:
 Outputs:
   RoleArn:
     Value: !GetAtt Role.Arn
+  UserArn:
+    Value: !GetAtt User.Arn
+  GitHubOidcArn:
+    Value: !GetAtt GitHubOidc.Arn

@@ -1,3 +1,8 @@
+variable "argo-cd_version" {
+  type        = string
+  description = "ArgoCD Helm Chart version"
+}
+
 # Variable used only in the cluster-aws pipeline
 variable "aws_default_region" {
   description = "AWS region"

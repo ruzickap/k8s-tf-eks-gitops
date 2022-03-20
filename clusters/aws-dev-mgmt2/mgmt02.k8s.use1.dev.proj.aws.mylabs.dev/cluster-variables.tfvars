@@ -2,6 +2,7 @@ cluster_fqdn = "mgmt02.k8s.use1.dev.proj.aws.mylabs.dev"
 # Domain where TF will create NS record to point to the new "zone" `cluster_fqdn`
 base_domain = "k8s.use1.dev.proj.aws.mylabs.dev"
 
+argo-cd_version    = "4.2.1"
 kubernetes_version = "1.21"
 
 cluster_endpoint_private_access = false
@@ -23,7 +24,7 @@ aws_tags_cluster_level = {
 
 map_roles = [
   {
-    rolearn  = "arn:aws:iam::123456789012:role/Admins"
+    rolearn  = "arn:aws:iam::729560437327:role/Admins"
     username = "system:aws:root"
     groups   = ["system:masters"]
   },
@@ -31,20 +32,11 @@ map_roles = [
 
 map_users = [
   {
-    userarn  = "arn:aws:iam::123456789012:user/ruzickap"
+    userarn  = "arn:aws:iam::729560437327:user/ruzickap"
     username = "system:aws:root"
     groups   = ["system:masters"]
   },
 ]
-
-# # arn:aws:iam::123456789012:role/Admins
-# eks_aws_auth_configmap_admins = [
-#   "role/Admins",
-#   "user/ruzickap",
-# ]
-
-# map_users = [
-# ]
 
 managed_node_groups = {
   mgmt02-ng-01 = {
