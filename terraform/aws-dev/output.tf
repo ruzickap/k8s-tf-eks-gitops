@@ -1,5 +1,6 @@
 output "amazon_eks_kubectl_commands" {
-  value = <<EOF
+  description = "kubectl commands"
+  value       = <<EOF
   export KUBECONFIG="/tmp/kubeconfig-${local.cluster_name}.conf"
   aws eks update-kubeconfig --region ${var.aws_default_region} --name "${local.cluster_name}" --kubeconfig "$KUBECONFIG"
   kubectl get nodes

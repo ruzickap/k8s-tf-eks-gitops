@@ -2,7 +2,6 @@ cluster_fqdn = "mgmt02.k8s.use1.dev.proj.aws.mylabs.dev"
 # Domain where TF will create NS record to point to the new "zone" `cluster_fqdn`
 base_domain = "k8s.use1.dev.proj.aws.mylabs.dev"
 
-argo-cd_version    = "4.2.1"
 kubernetes_version = "1.21"
 
 cluster_endpoint_private_access = false

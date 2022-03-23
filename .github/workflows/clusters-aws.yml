@@ -18,6 +18,7 @@ on:
           - apply
           - plan -destroy
           - destroy
+          - destroy -lock=false
       env-variables:
         description: Environment variable(s)
         # 'TF_CLI_ARGS_destroy=-auto-approve -lock=false'
@@ -192,7 +193,7 @@ jobs:
           echo "CLUSTER_PATH=${CLUSTER_PATH}" >> "${GITHUB_ENV}"
 
           get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "aws_default_region"
-          get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "aws_github_oidc_federated_role_to_assume"
+          get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "aws_assume_role"
           get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "cluster_fqdn"
           echo "CLUSTER_NAME=${CLUSTER_FQDN%%.*}" | tee -a "${GITHUB_ENV}"
           get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "terraform_code_dir"
@@ -206,12 +207,12 @@ jobs:
       - name: 💡🔪 Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: ${{ env.AWS_GITHUB_OIDC_FEDERATED_ROLE_TO_ASSUME }}
+          role-to-assume: ${{ env.AWS_ASSUME_ROLE }}
           role-session-name: GitHubOidcFederatedRole
           aws-region: ${{ env.AWS_DEFAULT_REGION }}
 
-      - name: 💡 Create S3 bucket for terraform if needed
-        if: ${{ needs.generate-cluster-aws-matrix.outputs.terraform_action != 'destroy' }}
+      - name: 💡 Create S3 bucket + DynamoDB for terraform if needed
+        if: ${{ ! startsWith(needs.generate-cluster-aws-matrix.outputs.terraform_action, 'destroy') }}
         run: |
           set -euxo pipefail
           aws sts get-caller-identity
@@ -249,7 +250,7 @@ jobs:
       # Therefore I need to remove them in k8s which will cause deleting them
       # from AWS
       - name: 🔪 Delete k8s objects Loadbalancer, external-dns
-        if: ${{ needs.generate-cluster-aws-matrix.outputs.terraform_action == 'destroy' || github.event_name == 'schedule' }}
+        if: ${{ startsWith(needs.generate-cluster-aws-matrix.outputs.terraform_action, 'destroy') || github.event_name == 'schedule' }}
         run: |
           set -euxo pipefail
 
@@ -316,7 +317,7 @@ jobs:
             -var-file="${PWD}/${CLUSTER_PATH}/cluster-variables.tfvars"
 
       - name: 🔪 Delete Volumes / Snapshost created by k8s cluster
-        if: ${{ needs.generate-cluster-aws-matrix.outputs.terraform_action == 'destroy' || github.event_name == 'schedule' }}
+        if: ${{ startsWith(needs.generate-cluster-aws-matrix.outputs.terraform_action, 'destroy') || github.event_name == 'schedule' }}
         run: |
           set -euxo pipefail
 
@@ -332,8 +333,8 @@ jobs:
             aws ec2 delete-snapshot --snapshot-id "${SNAPSHOT}"
           done
 
-      - name: 🔪 Delete S3 bucket used by Terraform
-        if: ${{ needs.generate-cluster-aws-matrix.outputs.terraform_action == 'destroy' || github.event_name == 'schedule' }}
+      - name: 🔪 Delete S3 bucket + DynamoDB used by Terraform
+        if: ${{ startsWith(needs.generate-cluster-aws-matrix.outputs.terraform_action, 'destroy') || github.event_name == 'schedule' }}
         run: |
           set -euxo pipefail
 

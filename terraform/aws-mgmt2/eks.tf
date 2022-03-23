@@ -34,7 +34,7 @@ module "vpc" {
 # Create the cluster's KMS key
 # ---------------------------------------------------------------------------------------------------------------------
 
-resource "aws_kms_key" "eks-kms_key" {
+resource "aws_kms_key" "eks_kms_key" {
   description             = "${var.cluster_fqdn} Amazon EKS Secret Encryption Key"
   deletion_window_in_days = 7
   enable_key_rotation     = true
@@ -43,7 +43,7 @@ resource "aws_kms_key" "eks-kms_key" {
 
 resource "aws_kms_alias" "eks" {
   name          = "alias/${local.cluster_name}"
-  target_key_id = aws_kms_key.eks-kms_key.key_id
+  target_key_id = aws_kms_key.eks_kms_key.key_id
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -67,7 +67,7 @@ resource "aws_route53_record" "base_domain" {
 # Create the EKS cluster
 # ---------------------------------------------------------------------------------------------------------------------
 
-module "aws-eks-accelerator-for-terraform" {
+module "aws_eks_accelerator_for_terraform" {
   source = "github.com/aws-samples/aws-eks-accelerator-for-terraform?ref=v3.5.0"
 
   tenant      = var.tenant
@@ -100,8 +100,8 @@ module "aws-eks-accelerator-for-terraform" {
 # IRSA
 # ---------------------------------------------------------------------------------------------------------------------
 
-resource "aws_iam_policy" "external-dns" {
-  name        = "${module.aws-eks-accelerator-for-terraform.eks_cluster_id}-external-dns"
+resource "aws_iam_policy" "external_dns" {
+  name        = "${module.aws_eks_accelerator_for_terraform.eks_cluster_id}-external-dns"
   description = "Policy allowing external-dns to change Route53 entries"
   tags        = local.aws_default_tags
   policy      = <<EOF
@@ -132,19 +132,19 @@ resource "aws_iam_policy" "external-dns" {
 EOF
 }
 
-module "iam_assumable_role_external-dns" {
+module "iam_assumable_role_external_dns" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
   version                       = "4.14.0"
   create_role                   = true
-  provider_url                  = module.aws-eks-accelerator-for-terraform.eks_oidc_issuer_url
-  role_name                     = "${module.aws-eks-accelerator-for-terraform.eks_cluster_id}-iamserviceaccount-external-dns"
+  provider_url                  = module.aws_eks_accelerator_for_terraform.eks_oidc_issuer_url
+  role_name                     = "${module.aws_eks_accelerator_for_terraform.eks_cluster_id}-iamserviceaccount-external-dns"
   role_description              = "Allow external-dns to change Route53 entries"
-  role_policy_arns              = [aws_iam_policy.external-dns.arn]
+  role_policy_arns              = [aws_iam_policy.external_dns.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:external-dns:external-dns"]
 }
 
-resource "aws_iam_policy" "cert-manager" {
-  name        = "${module.aws-eks-accelerator-for-terraform.eks_cluster_id}-cert-manager"
+resource "aws_iam_policy" "cert_manager" {
+  name        = "${module.aws_eks_accelerator_for_terraform.eks_cluster_id}-cert-manager"
   description = "Policy allowing external-dns to change Route53 entries"
   tags        = local.aws_default_tags
   policy      = <<EOF
@@ -174,26 +174,17 @@ resource "aws_iam_policy" "cert-manager" {
 EOF
 }
 
-module "iam_assumable_role_cert-manager" {
+module "iam_assumable_role_cert_manager" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
   version                       = "4.14.0"
   create_role                   = true
-  provider_url                  = module.aws-eks-accelerator-for-terraform.eks_oidc_issuer_url
-  role_name                     = "${module.aws-eks-accelerator-for-terraform.eks_cluster_id}-iamserviceaccount-cert-manager"
+  provider_url                  = module.aws_eks_accelerator_for_terraform.eks_oidc_issuer_url
+  role_name                     = "${module.aws_eks_accelerator_for_terraform.eks_cluster_id}-iamserviceaccount-cert-manager"
   role_description              = "Allow cert-manager to change Route53 entries"
-  role_policy_arns              = [aws_iam_policy.cert-manager.arn]
+  role_policy_arns              = [aws_iam_policy.cert_manager.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:cert-manager:cert-manager"]
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
 # Argo CD
 # ---------------------------------------------------------------------------------------------------------------------
-
-resource "helm_release" "argocd" {
-  name             = "argo-cd"
-  repository       = "https://argoproj.github.io/argo-helm"
-  chart            = "argo-cd"
-  version          = var.argo-cd_version
-  namespace        = "argocd"
-  create_namespace = true
-}
