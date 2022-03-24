@@ -1,17 +1,15 @@
 cluster_fqdn = "mgmt02.k8s.use1.dev.proj.aws.mylabs.dev"
 # Domain where TF will create NS record to point to the new "zone" `cluster_fqdn`
-base_domain = "k8s.use1.dev.proj.aws.mylabs.dev"
+base_domain     = "k8s.use1.dev.proj.aws.mylabs.dev"
+aws_assume_role = "arn:aws:iam::729560437327:role/GitHubOidcFederatedRole"
 
-kubernetes_version = "1.21"
+environment = "dev"
+tenant      = "test123"
+zone        = "dev1"
 
+cluster_version                 = "1.21"
 cluster_endpoint_private_access = false
 cluster_endpoint_public_access  = true
-
-cluster_kms_key_deletion_window_in_days = 7
-cluster_log_retention_in_days           = 1
-environment                             = "dev"
-tenant                                  = "test123"
-zone                                    = "dev1"
 
 aws_vpc_cidr        = "10.0.0.0/21"
 aws_private_subnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]

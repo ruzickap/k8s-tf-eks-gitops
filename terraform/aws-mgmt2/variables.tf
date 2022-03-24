@@ -60,12 +60,7 @@ variable "cluster_fqdn" {
   type        = string
 }
 
-variable "cluster_kms_key_deletion_window_in_days" {
-  type        = number
-  description = "The waiting period, specified in number of days (7 - 30). After the waiting period ends, AWS KMS deletes the KMS key"
-}
-
-variable "cluster_log_retention_in_days" {
+variable "cloudwatch_log_group_retention_in_days" {
   description = "Number of days to retain log events. Default retention - 90 days."
   type        = number
 }
@@ -75,7 +70,7 @@ variable "environment" {
   description = "Environment area, e.g. prod or preprod "
 }
 
-variable "kubernetes_version" {
+variable "cluster_version" {
   type        = string
   description = "Desired kubernetes version. If you do not specify a value, the latest available version is used"
 }

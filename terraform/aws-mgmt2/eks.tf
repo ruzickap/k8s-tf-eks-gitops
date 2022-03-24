@@ -68,7 +68,7 @@ resource "aws_route53_record" "base_domain" {
 # ---------------------------------------------------------------------------------------------------------------------
 
 module "aws_eks_accelerator_for_terraform" {
-  source = "github.com/aws-samples/aws-eks-accelerator-for-terraform?ref=v3.5.0"
+  source = "github.com/aws-samples/aws-eks-accelerator-for-terraform?ref=v4.0.0"
 
   tenant      = var.tenant
   environment = var.environment
@@ -79,13 +79,13 @@ module "aws_eks_accelerator_for_terraform" {
   private_subnet_ids = module.vpc.private_subnets
 
   # EKS CONTROL PLANE VARIABLES
-  kubernetes_version = var.kubernetes_version
-  cluster_name       = local.cluster_name
+  cluster_version = var.cluster_version
+  cluster_name    = local.cluster_name
 
-  cluster_endpoint_private_access = var.cluster_endpoint_private_access
-  cluster_endpoint_public_access  = var.cluster_endpoint_public_access
-  cluster_enabled_log_types       = var.cluster_enabled_log_types
-  cluster_log_retention_in_days   = var.cluster_log_retention_in_days
+  cluster_endpoint_private_access        = var.cluster_endpoint_private_access
+  cluster_endpoint_public_access         = var.cluster_endpoint_public_access
+  cluster_enabled_log_types              = var.cluster_enabled_log_types
+  cloudwatch_log_group_retention_in_days = var.cloudwatch_log_group_retention_in_days
 
   map_roles = var.map_roles
   map_users = var.map_users
