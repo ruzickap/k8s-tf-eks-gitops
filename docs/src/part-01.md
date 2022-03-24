@@ -218,3 +218,7 @@ Destroy Amazon EKS and related "objects":
 gh workflow run clusters-aws.yml -f clusters=".*(/ruzickap-eks.k8s.use1.dev.proj.aws.mylabs.dev$).*" -f action="destroy"
 gh workflow run clusters-aws.yml -f clusters=".*" -f action="destroy"
 ```
+
+## ArgoCD
+
+* [App of Apps Best Practices](https://medium.com/dzerolabs/turbocharge-argocd-with-app-of-apps-pattern-and-kustomized-helm-ea4993190e7c)

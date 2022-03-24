@@ -1,6 +1,6 @@
-variable "argo-cd_version" {
+variable "aws_assume_role" {
+  description = "IAM Role to assume when working with AWS"
   type        = string
-  description = "ArgoCD Helm Chart version"
 }
 
 # Variable used only in the cluster-aws pipeline
@@ -9,12 +9,6 @@ variable "aws_default_region" {
   type        = string
 }
 
-# Variable used only in the cluster-aws pipeline
-variable "aws_github_oidc_federated_role_to_assume" {
-  description = "OIDC Federation role (not used in the code)"
-  type        = string
-  default     = null
-}
 
 variable "aws_private_subnets" {
   description = "List of private subnets for the worker nodes"

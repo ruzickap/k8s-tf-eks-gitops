@@ -25,6 +25,7 @@ echo "# ---------------------------------------------------"
 
 echo "export CLUSTER_PATH=\"${CLUSTER_PATH}\""
 get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "aws_default_region"
+get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "aws_assume_role"
 get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "cluster_fqdn"
 get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "terraform_code_dir"
 
@@ -32,13 +33,17 @@ echo -e "\n# ------------- Secrets - must be ADDED !!! -------------\n"
 
 echo "### export AWS_ACCESS_KEY_ID='<secrets belongs to AWS_ACCESS_KEY_ID>"
 echo "### export AWS_SECRET_ACCESS_KEY='<secrets belongs to AWS_SECRET_ACCESS_KEY>'"
-echo "### export AWS_ROLE_ARN='arn:aws:iam::7xxxxxxxxxx7:role/GitHubOidcFederatedRole'"
 
 echo -e "\n# ------------------------ Code -------------------------"
 
-aws sts assume-role --role-arn "${AWS_ROLE_ARN}" --role-session-name "${USER}@$(hostname -f)-terraform-clusters-aws" --duration-seconds 3600 | jq -r '.Credentials | "export AWS_ACCESS_KEY_ID=\(.AccessKeyId)\nexport AWS_SECRET_ACCESS_KEY=\(.SecretAccessKey)\nexport AWS_SESSION_TOKEN=\(.SessionToken)\n"'
-
+# Prevent role chaining in case of you already assumed proper role
+# This will happen if you run these commands multiple times
 cat << \EOF
+CURRENT_ASSUME_ROLE_ARN=$( aws sts get-caller-identity --query Arn --output text | sed 's/sts/iam/;s/assumed-role/role/' )
+if [[ ! "${CURRENT_ASSUME_ROLE_ARN}" =~ "${AWS_ASSUME_ROLE}" ]]; then
+  eval $(aws sts assume-role --role-arn "${AWS_ASSUME_ROLE}" --role-session-name "${USER}@$(hostname -f)-k8s-tf-eks-argocd-$(date +%s)" --duration-seconds 36000 | jq -r '.Credentials | "export AWS_ACCESS_KEY_ID=\(.AccessKeyId)\nexport AWS_SECRET_ACCESS_KEY=\(.SecretAccessKey)\nexport AWS_SESSION_TOKEN=\(.SessionToken)\n"')
+fi
+
 aws sts get-caller-identity
 aws cloudformation deploy \
   --parameter-overrides "ClusterFQDN=${CLUSTER_FQDN}" \

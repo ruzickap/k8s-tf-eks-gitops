@@ -1,14 +1,12 @@
-# Variable used only in the cluster-aws pipeline
-variable "aws_default_region" {
-  description = "AWS region"
+variable "aws_assume_role" {
+  description = "IAM Role to assume when working with AWS"
   type        = string
 }
 
 # Variable used only in the cluster-aws pipeline
-variable "aws_github_oidc_federated_role_to_assume" {
-  description = "OIDC Federation role (not used in the code)"
+variable "aws_default_region" {
+  description = "AWS region"
   type        = string
-  default     = null
 }
 
 variable "aws_private_subnets" {
