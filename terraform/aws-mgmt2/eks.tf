@@ -31,22 +31,6 @@ module "vpc" {
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
-# Create the cluster's KMS key
-# ---------------------------------------------------------------------------------------------------------------------
-
-resource "aws_kms_key" "eks_kms_key" {
-  description             = "${var.cluster_fqdn} Amazon EKS Secret Encryption Key"
-  deletion_window_in_days = 7
-  enable_key_rotation     = true
-  tags                    = local.aws_default_tags
-}
-
-resource "aws_kms_alias" "eks" {
-  name          = "alias/${local.cluster_name}"
-  target_key_id = aws_kms_key.eks_kms_key.key_id
-}
-
-# ---------------------------------------------------------------------------------------------------------------------
 # Route 53
 # ---------------------------------------------------------------------------------------------------------------------
 
@@ -82,10 +66,11 @@ module "aws_eks_accelerator_for_terraform" {
   cluster_version = var.cluster_version
   cluster_name    = local.cluster_name
 
-  cluster_endpoint_private_access        = var.cluster_endpoint_private_access
-  cluster_endpoint_public_access         = var.cluster_endpoint_public_access
-  cluster_enabled_log_types              = var.cluster_enabled_log_types
-  cloudwatch_log_group_retention_in_days = var.cloudwatch_log_group_retention_in_days
+  cloudwatch_log_group_retention_in_days  = var.cloudwatch_log_group_retention_in_days
+  cluster_enabled_log_types               = var.cluster_enabled_log_types
+  cluster_endpoint_private_access         = var.cluster_endpoint_private_access
+  cluster_endpoint_public_access          = var.cluster_endpoint_public_access
+  cluster_kms_key_deletion_window_in_days = var.cluster_kms_key_deletion_window_in_days
 
   map_roles = var.map_roles
   map_users = var.map_users

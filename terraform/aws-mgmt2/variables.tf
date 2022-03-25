@@ -70,6 +70,12 @@ variable "environment" {
   description = "Environment area, e.g. prod or preprod "
 }
 
+variable "cluster_kms_key_deletion_window_in_days" {
+  type        = number
+  default     = 30
+  description = "The waiting period, specified in number of days (7 - 30). After the waiting period ends, AWS KMS deletes the KMS key"
+}
+
 variable "cluster_version" {
   type        = string
   description = "Desired kubernetes version. If you do not specify a value, the latest available version is used"
