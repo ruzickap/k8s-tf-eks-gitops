@@ -1,0 +1,48 @@
+name: clusters-aws-schedule
+
+on:
+  workflow_dispatch:
+  # Run pipeline every midnight
+  # schedule:
+  #   - cron: "0 0 * * *"
+
+env:
+  # Use cluster group for scheduled pipeline exection (daily - see above 'schedule:')
+  # Clusters in this group will be created + deleted
+  SCHEDULED_CLUSTERS: ".*(/ruzickap01.k8s.use1.dev.proj.aws.mylabs.dev$).*"
+
+jobs:
+  scheduled-run-time-check:
+    name: "Scheduled run time check"
+    runs-on: ubuntu-latest
+    outputs:
+      scheduled_run: ${{ steps.scheduled_run.outputs.scheduled_run }}
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: 💡 Scheduled run time check
+        id: scheduled_run
+        run: |
+          set -euxo pipefail
+
+          # For scheduled run - check if there was a change in repo in passed 24 hours
+          # https://github.community/t/trigger-action-on-schedule-only-if-there-are-changes-to-the-branch/17887/4
+          if [[ -z "$(git rev-list --after='24 hours' ${{ github.sha }})" ]]; then
+            echo "*** Git repository hasn't been changed in passed 24 hours - skipping next tasks..."
+            echo "::set-output name=scheduled_run::false"
+          fi
+
+  scheduled-run:
+    name: "Scheduled run"
+    needs: scheduled-run-time-check
+    if: ${{ needs.scheduled-run-time-check.outputs.scheduled_run != 'false' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run Create pipeline
+        uses: ./.github/workflows/clusters-aws.yml
+        with:
+          clusters: ${{ env.SCHEDULED_CLUSTERS }}
+          action: apply
