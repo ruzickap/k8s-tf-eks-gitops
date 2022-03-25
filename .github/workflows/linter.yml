@@ -62,8 +62,13 @@ jobs:
       - name: Lint Code Base
         uses: github/super-linter/slim@v4
         env:
+          DEFAULT_BRANCH: main
           ERROR_ON_MISSING_EXEC_BIT: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           USE_FIND_ALGORITHM: true
+          VALIDATE_ALL_CODEBASE: false
           VALIDATE_CSS: false
+          # Disable GitHub Actions linter because it is reporting false positive: when a reusable workflow is called with "uses", "concurrency" is not available.
+          # "concurrencry" parameter is working fine
+          VALIDATE_GITHUB_ACTIONS: false
           VALIDATE_TERRAFORM_TERRASCAN: false
