@@ -2,14 +2,13 @@ name: clusters-aws-schedule
 
 on:
   workflow_dispatch:
-  # Run pipeline every midnight
-  # schedule:
-  #   - cron: "0 0 * * *"
-
-env:
-  # Use cluster group for scheduled pipeline exection (daily - see above 'schedule:')
-  # Clusters in this group will be created + deleted
-  SCHEDULED_CLUSTERS: ".*(/ruzickap01.k8s.use1.dev.proj.aws.mylabs.dev$).*"
+    inputs:
+      clusters:
+        description: Cluster list
+        default: .*(/ruzickap01.k8s.use1.dev.proj.aws.mylabs.dev$).*
+        required: true
+  schedule:
+    - cron: "0 0 * * *"
 
 jobs:
   scheduled-run-time-check:
@@ -28,21 +27,29 @@ jobs:
         run: |
           set -euxo pipefail
 
-          # For scheduled run - check if there was a change in repo in passed 24 hours
+          # Check if there was a change in git repo in passed 24 hours
           # https://github.community/t/trigger-action-on-schedule-only-if-there-are-changes-to-the-branch/17887/4
           if [[ -z "$(git rev-list --after='24 hours' ${{ github.sha }})" ]]; then
             echo "*** Git repository hasn't been changed in passed 24 hours - skipping next tasks..."
             echo "::set-output name=scheduled_run::false"
           fi
 
-  scheduled-run:
-    name: "Scheduled run"
+  scheduled-create:
+    name: "sched"
     needs: scheduled-run-time-check
     if: ${{ needs.scheduled-run-time-check.outputs.scheduled_run != 'false' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Run Create pipeline
-        uses: ./.github/workflows/clusters-aws.yml
-        with:
-          clusters: ${{ env.SCHEDULED_CLUSTERS }}
-          action: apply
+    uses: ./.github/workflows/clusters-aws-reusable-workflow.yml
+    with:
+      clusters: ${{ github.event.inputs.clusters }}
+      terraform_action: apply
+      env-variables: "'TF_LOG=ERROR' 'TF_DATA_DIR=.terraform'"
+
+  scheduled-delete:
+    name: "sched"
+    needs: scheduled-create
+    if: ${{ needs.scheduled-run-time-check.outputs.scheduled_run != 'false' }}
+    uses: ./.github/workflows/clusters-aws-reusable-workflow.yml
+    with:
+      clusters: ${{ github.event.inputs.clusters }}
+      terraform_action: destroy
+      env-variables: "'TF_LOG=ERROR' 'TF_DATA_DIR=.terraform'"
