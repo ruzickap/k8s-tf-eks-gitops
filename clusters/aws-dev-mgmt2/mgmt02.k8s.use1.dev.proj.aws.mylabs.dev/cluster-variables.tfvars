@@ -4,8 +4,8 @@ base_domain     = "k8s.use1.dev.proj.aws.mylabs.dev"
 aws_assume_role = "arn:aws:iam::729560437327:role/GitHubOidcFederatedRole"
 
 environment = "dev"
-tenant      = "test123"
-zone        = "dev1"
+tenant      = "mgmt02"
+zone        = "mylabs"
 
 cluster_version                 = "1.21"
 cluster_endpoint_private_access = false
