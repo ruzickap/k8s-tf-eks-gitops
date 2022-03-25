@@ -33,13 +33,13 @@ on:
   #   branches:
   #     - main
   # # Run pipeline every midnight
-  # schedule:
-  #   - cron: "0 0 * * *"
+  schedule:
+    - cron: "0 0 * * *"
 
 env:
   # Use cluster group for scheduled pipeline exection (daily - see above 'schedule:')
   # Clusters in this group will be created + deleted
-  SCHEDULED_CLUSTERS: ".*(/sched-dev.test.k8s.mylabs.dev$).*"
+  SCHEDULED_CLUSTERS: ".*(/ruzickap01.k8s.use1.dev.proj.aws.mylabs.dev$).*"
 
   # Terraform variables (https://www.terraform.io/docs/cli/config/environment-variables.html)
   TERRAFORM_VERSION: "1.1.2"
@@ -85,7 +85,10 @@ jobs:
             if [[ "${{ github.event_name }}" = "schedule" ]]; then
               echo "***⏰ Run in case of scheduled execution - TERRAFORM_ACTION=apply"
               TERRAFORM_ACTION="apply"
-              CLUSTERS=$(find clusters -maxdepth 2 -mindepth 2 -type d -regextype "posix-extended" -regex '.*${{ env.SCHEDULED_CLUSTERS }}.*' -printf "%f\n" | sort)
+              # For scheduled run - check if there was a change in repo in passed 24 hours - https://github.community/t/trigger-action-on-schedule-only-if-there-are-changes-to-the-branch/17887/4
+              if [[ -n "$(git rev-list --after='24 hours' ${{ github.sha }})" ]]; then
+                CLUSTERS=$(find clusters -maxdepth 2 -mindepth 2 -type d -regextype "posix-extended" -regex '.*${{ env.SCHEDULED_CLUSTERS }}.*' -printf "%f\n" | sort)
+              fi
             else
               echo "***💡 Run in case of 'path' trigger (only for 'dev-sandbox') - TERRAFORM_ACTION=apply"
               TERRAFORM_ACTION="apply"
