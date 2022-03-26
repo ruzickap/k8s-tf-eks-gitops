@@ -68,7 +68,4 @@ jobs:
           USE_FIND_ALGORITHM: true
           VALIDATE_ALL_CODEBASE: false
           VALIDATE_CSS: false
-          # Disable GitHub Actions linter because it is reporting false positive: when a reusable workflow is called with "uses", "concurrency" is not available.
-          # "concurrencry" parameter is working fine
-          VALIDATE_GITHUB_ACTIONS: false
           VALIDATE_TERRAFORM_TERRASCAN: false

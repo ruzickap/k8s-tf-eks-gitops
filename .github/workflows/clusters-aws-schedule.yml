@@ -2,13 +2,11 @@ name: clusters-aws-schedule
 
 on:
   workflow_dispatch:
-    inputs:
-      clusters:
-        description: Cluster list
-        default: .*(/ruzickap01.k8s.use1.dev.proj.aws.mylabs.dev$).*
-        required: true
   schedule:
     - cron: "0 0 * * *"
+
+env:
+  SCHEDULED_CLUSTERS: ".*(/ruzickap01.k8s.use1.dev.proj.aws.mylabs.dev$).*"
 
 jobs:
   scheduled-run-time-check:
@@ -16,6 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       scheduled_run: ${{ steps.scheduled_run.outputs.scheduled_run }}
+      scheduled_clusters: ${{ steps.scheduled_run.outputs.scheduled_clusters }}
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
@@ -33,6 +32,8 @@ jobs:
             echo "*** Git repository hasn't been changed in passed 24 hours - skipping next tasks..."
             echo "::set-output name=scheduled_run::false"
           fi
+          # This is workaround for: https://github.community/t/reusable-workflow-env-context-not-available-in-jobs-job-id-with/206111/3
+          echo "::set-output name=scheduled_clusters::${SCHEDULED_CLUSTERS}"
 
   scheduled-create:
     name: "sched"
@@ -40,16 +41,17 @@ jobs:
     if: ${{ needs.scheduled-run-time-check.outputs.scheduled_run != 'false' }}
     uses: ./.github/workflows/clusters-aws-reusable-workflow.yml
     with:
-      clusters: ${{ github.event.inputs.clusters }}
+      clusters: ${{ needs.scheduled-run-time-check.outputs.scheduled_clusters }}
       terraform_action: apply
       env-variables: "'TF_LOG=ERROR' 'TF_DATA_DIR=.terraform'"
 
   scheduled-delete:
     name: "sched"
-    needs: scheduled-create
+    needs: [ scheduled-run-time-check, scheduled-create ]
     if: ${{ needs.scheduled-run-time-check.outputs.scheduled_run != 'false' }}
     uses: ./.github/workflows/clusters-aws-reusable-workflow.yml
     with:
-      clusters: ${{ github.event.inputs.clusters }}
+      # https://github.community/t/reusable-workflow-env-context-not-available-in-jobs-job-id-with/206111
+      clusters: ${{ needs.scheduled-run-time-check.outputs.scheduled_clusters }}
       terraform_action: destroy
       env-variables: "'TF_LOG=ERROR' 'TF_DATA_DIR=.terraform'"
