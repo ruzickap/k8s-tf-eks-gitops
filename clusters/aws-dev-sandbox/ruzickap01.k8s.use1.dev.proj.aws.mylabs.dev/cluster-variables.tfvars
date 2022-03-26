@@ -25,9 +25,9 @@ eks_aws_auth_configmap = <<EOT
 EOT
 
 eks_managed_node_groups = {
-  ruzickap01-ng-01 = {
-    description = "Amazon EKS managed node group for ruzickap-eks.k8s.use1.dev.proj.aws.mylabs.dev"
-    name        = "ruzickap-eks-ng01"
+  ruzickap01-ng01 = {
+    description = "Amazon EKS managed node group for ruzickap01.k8s.use1.dev.proj.aws.mylabs.dev"
+    name        = "ruzickap01-ng01"
 
     ami_type       = "BOTTLEROCKET_x86_64"
     platform       = "bottlerocket"
