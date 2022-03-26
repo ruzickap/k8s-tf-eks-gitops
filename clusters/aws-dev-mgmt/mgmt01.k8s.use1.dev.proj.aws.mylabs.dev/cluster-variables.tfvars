@@ -25,7 +25,7 @@ eks_aws_auth_configmap = <<EOT
 EOT
 
 eks_managed_node_groups = {
-  mgmt01-ng-01 = {
+  mgmt01-ng01 = {
     description = "Amazon EKS managed node group for mgmt01.k8s.use1.dev.proj.aws.mylabs.dev"
     name        = "mgmt01-ng01"
 

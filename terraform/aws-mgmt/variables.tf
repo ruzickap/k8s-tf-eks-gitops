@@ -64,7 +64,7 @@ variable "cluster_version" {
 variable "eks_aws_auth_configmap" {
   description = "Additional IAM roles to add to the aws-auth ConfigMap"
   type        = string
-  default     = null
+  default     = ""
 }
 
 variable "eks_managed_node_groups" {

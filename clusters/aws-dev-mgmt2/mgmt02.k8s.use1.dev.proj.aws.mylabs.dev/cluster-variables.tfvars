@@ -36,7 +36,7 @@ map_users = [
 ]
 
 managed_node_groups = {
-  mgmt02-ng-01 = {
+  mgmt02-ng01 = {
     node_group_name = "mgmt02-ng01"
 
     desired_size    = 2

@@ -21,11 +21,13 @@ jobs:
       - name: tfsec
         uses: aquasecurity/tfsec-pr-commenter-action@v1.2.0
         with:
+          tfsec_args: --exclude-downloaded-modules
           github_token: ${{ github.token }}
 
       - name: Run tfsec
         uses: tfsec/tfsec-sarif-action@v0.1.0
         with:
+          tfsec_args: --exclude-downloaded-modules
           sarif_file: tfsec.sarif
 
       - name: Upload SARIF file
