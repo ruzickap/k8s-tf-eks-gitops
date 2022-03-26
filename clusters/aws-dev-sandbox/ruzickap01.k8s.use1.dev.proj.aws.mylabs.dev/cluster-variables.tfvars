@@ -1,6 +1,7 @@
 cluster_fqdn = "ruzickap01.k8s.use1.dev.proj.aws.mylabs.dev"
 # Domain where TF will create NS record to point to the new "zone" `cluster_fqdn`
-base_domain = "k8s.use1.dev.proj.aws.mylabs.dev"
+base_domain     = "k8s.use1.dev.proj.aws.mylabs.dev"
+aws_assume_role = "arn:aws:iam::729560437327:role/GitHubOidcFederatedRole"
 
 cluster_version = "1.21"
 
