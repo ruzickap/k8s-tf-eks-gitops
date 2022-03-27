@@ -174,24 +174,172 @@ module "iam_assumable_role_cert_manager" {
 # Argo CD
 # ---------------------------------------------------------------------------------------------------------------------
 
-resource "helm_release" "argocd" {
-  name             = "argo-cd"
-  repository       = "https://argoproj.github.io/argo-helm"
-  chart            = "argo-cd"
-  version          = var.argo-cd_version
-  namespace        = "argocd"
-  create_namespace = true
+# resource "helm_release" "argocd" {
+#   name             = "argo-cd"
+#   repository       = "https://argoproj.github.io/argo-helm"
+#   chart            = "argo-cd"
+#   version          = var.argo-cd_version
+#   namespace        = "argocd"
+#   create_namespace = true
 
-  values = [
-    templatefile("templates/argocd-values.yaml", {
-      test = "test"
-    })
-  ]
+#   values = [
+#     templatefile("templates/argocd-values.yaml", {
+#       cluster_path = var.cluster_path
+#     })
+#   ]
 
-  # Install argo-cd and ignore any future changes - no further changes are made to the release
-  # It is only used for the initial ArgoCD deployment...
-  # ArgoCD application is deployed and you're able to manage ArgoCD from ArgoCD.
-  # https://registry.terraform.io/modules/lablabs/argocd/helm/latest
+#   # Install argo-cd and ignore any future changes - no further changes are made to the release
+#   # It is only used for the initial ArgoCD deployment...
+#   # ArgoCD application is deployed and you're able to manage ArgoCD from ArgoCD.
+#   # https://registry.terraform.io/modules/lablabs/argocd/helm/latest
+#   lifecycle {
+#     ignore_changes = all
+#   }
+# }
+
+resource "kubectl_manifest" "argo-cd_namespace" {
+  wait       = true
+  apply_only = true
+  yaml_body  = <<YAML
+    apiVersion: v1
+    kind: Namespace
+    metadata:
+      name: argocd
+  YAML
+}
+
+resource "kubectl_manifest" "argo-cd_core-install" {
+  depends_on         = [kubectl_manifest.argo-cd_namespace]
+  for_each           = data.kubectl_file_documents.argo-cd_core-install.manifests
+  apply_only         = true
+  wait               = true
+  override_namespace = "argocd"
+  yaml_body          = each.value
+
+  lifecycle {
+    ignore_changes = all
+  }
+}
+
+# resource "kubectl_manifest" "argo-cd_project" {
+#   depends_on = [kubectl_manifest.argo-cd_core-install]
+#   wait       = true
+#   apply_only = true
+#   yaml_body  = <<YAML
+#     apiVersion: argoproj.io/v1alpha1
+#     kind: AppProject
+#     metadata:
+#       name: argocd-init-project
+#       namespace: argocd
+#     spec:
+#       description: Temporary ArgoCD Project for argocd-core
+#       sourceRepos:
+#       - '*'
+#       destinations:
+#       - namespace: '*'
+#         server: https://kubernetes.default.svc
+#       clusterResourceWhitelist:
+#       - group: '*'
+#         kind: '*'
+#   YAML
+
+#   lifecycle {
+#     ignore_changes = all
+#   }
+# }
+
+# resource "kubectl_manifest" "argo-cd_application" {
+#   depends_on = [kubectl_manifest.argo-cd_project]
+#   wait       = true
+#   apply_only = true
+#   yaml_body  = <<YAML
+#     apiVersion: argoproj.io/v1alpha1
+#     kind: Application
+#     metadata:
+#       name: argocd-init
+#       namespace: argocd
+#     spec:
+#       project: argocd-init-project
+#       source:
+#         repoURL: https://github.com/ruzickap/k8s-tf-eks-argocd
+#         # targetRevision: HEAD
+#         targetRevision: argocd-init
+#         path: ${var.cluster_path}
+#       destination:
+#         server: https://kubernetes.default.svc
+#         namespace: argocd
+#       syncPolicy:
+#         automated:
+#           prune: true
+#           selfHeal: true
+#   YAML
+
+#   lifecycle {
+#     ignore_changes = all
+#   }
+# }
+
+
+
+resource "kubectl_manifest" "argo-cd_project" {
+  depends_on = [kubectl_manifest.argo-cd_core-install]
+  wait       = true
+  apply_only = true
+  yaml_body  = <<YAML
+    apiVersion: argoproj.io/v1alpha1
+    kind: AppProject
+    metadata:
+      name: argocd-app-of-apps
+      namespace: argocd
+    spec:
+      description: ArgoCD Project for argocd-app-of-apps
+      sourceRepos:
+      - '*'
+      destinations:
+      - namespace: '*'
+        server: '*'
+      clusterResourceWhitelist:
+      - group: '*'
+        kind: '*'
+  YAML
+
+  lifecycle {
+    ignore_changes = all
+  }
+}
+
+resource "kubectl_manifest" "argo-cd_application" {
+  depends_on = [kubectl_manifest.argo-cd_project]
+  wait       = true
+  apply_only = true
+  yaml_body  = <<YAML
+    apiVersion: argoproj.io/v1alpha1
+    kind: ApplicationSet
+    metadata:
+      name: argocd-app-of-apps
+      namespace: argocd
+    spec:
+      generators:
+      - git:
+          repoURL: https://github.com/ruzickap/k8s-tf-eks-argocd.git
+          revision: HEAD
+          directories:
+          - path: examples/git-generator-directory/cluster-addons/*
+          - path: clusters/aws-dev-sandbox/*
+      template:
+        metadata:
+          name: {{path.basename}}
+        spec:
+          project: argocd-app-of-apps
+          source:
+            repoURL: https://github.com/ruzickap/k8s-tf-eks-argocd.git
+            targetRevision: HEAD
+            path: {{path}}
+          destination:
+            server: https://{{path.basename}}
+            namespace: argocd
+ YAML
+
   lifecycle {
     ignore_changes = all
   }

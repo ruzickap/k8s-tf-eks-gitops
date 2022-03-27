@@ -247,6 +247,7 @@ jobs:
           export KUBECONFIG="/tmp/kubeconfig-${CLUSTER_NAME}.conf"
           aws eks update-kubeconfig --region "${AWS_DEFAULT_REGION}" --name "${CLUSTER_NAME}" --kubeconfig "${KUBECONFIG}"
           kubectl get nodes
+          echo -e "\n\n\n*** Amazon EKS access commands ***\n"
           terraform -chdir="${TERRAFORM_CODE_DIR}" output -raw amazon_eks_kubectl_commands
 
       - name: 🔪 Delete Volumes / Snapshost created by k8s cluster

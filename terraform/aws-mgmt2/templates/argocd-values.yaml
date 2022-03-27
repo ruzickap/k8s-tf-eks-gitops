@@ -1,12 +1,13 @@
 server:
   additionalApplications:
-  - name: app-of-apps-initial-argocd
+  - name: argocd-init
     namespace: argocd
-    project: app-of-apps-initial-argocd
+    project: default
     source:
-      repoURL: https://github.com/argoproj/argocd-example-apps.git
-      targetRevision: HEAD
-      path: apps
+      repoURL: https://github.com/ruzickap/k8s-tf-eks-argocd
+      # targetRevision: HEAD
+      targetRevision: argocd-init
+      path: ${cluster_path}
     destination:
       server: https://kubernetes.default.svc
       namespace: argocd
@@ -14,14 +15,3 @@ server:
       automated:
         prune: true
         selfHeal: true
-  additionalProjects:
-  - name: app-of-apps-initial-argocd
-    namespace: argocd
-    sourceRepos:
-    - '*'
-    destinations:
-    - namespace: '*'
-      server: '*'
-    clusterResourceWhitelist:
-    - group: '*'
-      kind: '*'

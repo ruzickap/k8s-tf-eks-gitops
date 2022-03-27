@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: argocd-app-of-apps-test
+  namespace: argocd
+spec:
+  description: App-of-Apps ArgoCD Project
+  sourceRepos:
+  - '*'
+  destinations:
+  - namespace: '*'
+    server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+# ---
+# apiVersion: argoproj.io/v1alpha1
+# kind: Application
+# metadata:
+#   name: argocd-app-of-apps
+#   namespace: argocd
+# spec:
+#   project: argocd-app-of-apps
+#   source:
+#     repoURL: https://github.com/ruzickap/k8s-tf-eks-argocd
+#     targetRevision: HEAD
+#     path: argocd
+#     helm:
+#       valueFiles:
+#       - ../clusters/aws-dev-mgmt2/argocd-app-of-apps-group-values.yaml
+#       - ../clusters/aws-dev-mgmt2/mgmt02.k8s.use1.dev.proj.aws.mylabs.dev/argocd-app-of-apps-cluster-values.yaml
+#   destination:
+#     server: https://kubernetes.default.svc
+#     namespace: argocd
+#   syncPolicy:
+#     automated:
+#       prune: true
+#       selfHeal: true
