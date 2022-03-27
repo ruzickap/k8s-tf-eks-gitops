@@ -1,3 +1,8 @@
+variable "argo-cd_version" {
+  type        = string
+  description = "ArgoCD Helm Chart version"
+}
+
 variable "aws_assume_role" {
   description = "IAM Role to assume when working with AWS"
   type        = string
@@ -8,7 +13,6 @@ variable "aws_default_region" {
   description = "AWS region"
   type        = string
 }
-
 
 variable "aws_private_subnets" {
   description = "List of private subnets for the worker nodes"
