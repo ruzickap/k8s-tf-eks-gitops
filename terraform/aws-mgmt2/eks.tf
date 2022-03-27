@@ -173,3 +173,26 @@ module "iam_assumable_role_cert_manager" {
 # ---------------------------------------------------------------------------------------------------------------------
 # Argo CD
 # ---------------------------------------------------------------------------------------------------------------------
+
+resource "helm_release" "argocd" {
+  name             = "argo-cd"
+  repository       = "https://argoproj.github.io/argo-helm"
+  chart            = "argo-cd"
+  version          = var.argo-cd_version
+  namespace        = "argocd"
+  create_namespace = true
+
+  values = [
+    templatefile("templates/argocd-values.yaml", {
+      test = "test"
+    })
+  ]
+
+  # Install argo-cd and ignore any future changes - no further changes are made to the release
+  # It is only used for the initial ArgoCD deployment...
+  # ArgoCD application is deployed and you're able to manage ArgoCD from ArgoCD.
+  # https://registry.terraform.io/modules/lablabs/argocd/helm/latest
+  lifecycle {
+    ignore_changes = all
+  }
+}

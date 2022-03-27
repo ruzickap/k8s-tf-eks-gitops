@@ -7,6 +7,7 @@ environment = "dev"
 tenant      = "mgmt02"
 zone        = "mylabs"
 
+argo-cd_version                 = "4.2.2"
 cluster_version                 = "1.21"
 cluster_endpoint_private_access = false
 cluster_endpoint_public_access  = true
