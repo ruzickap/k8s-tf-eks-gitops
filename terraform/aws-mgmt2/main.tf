@@ -6,6 +6,14 @@ terraform {
       source  = "hashicorp/aws"
       version = "4.4.0"
     }
+    git = {
+      source  = "paultyng/git"
+      version = "0.1.0"
+    }
+    kubectl = {
+      source  = "gavinbunney/kubectl"
+      version = "1.14.0"
+    }
     kubernetes = {
       source  = "hashicorp/kubernetes"
       version = ">= 2.8.0"
@@ -13,10 +21,6 @@ terraform {
     helm = {
       source  = "hashicorp/helm"
       version = "2.4.1"
-    }
-    kubectl = {
-      source  = "gavinbunney/kubectl"
-      version = "1.14.0"
     }
     http = {
       source  = "hashicorp/http"

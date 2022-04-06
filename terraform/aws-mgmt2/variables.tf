@@ -1,4 +1,4 @@
-variable "argo-cd_version" {
+variable "argocd_version" {
   type        = string
   description = "ArgoCD Helm Chart version"
 }

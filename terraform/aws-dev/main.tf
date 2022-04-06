@@ -4,7 +4,15 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "4.9.0"
+      version = "~> 4.9.0"
+    }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.10.0"
+    }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 3.3.0"
     }
   }
   required_version = ">= 1.0.1"
@@ -20,37 +28,6 @@ locals {
     var.aws_tags_group_level,
     var.aws_tags_cluster_level,
   )
-
-  kubeconfig = yamlencode({
-    apiVersion      = "v1"
-    kind            = "Config"
-    current-context = "terraform"
-    clusters = [{
-      name = module.eks.cluster_id
-      cluster = {
-        certificate-authority-data = module.eks.cluster_certificate_authority_data
-        server                     = module.eks.cluster_endpoint
-      }
-    }]
-    contexts = [{
-      name = "terraform"
-      context = {
-        cluster = module.eks.cluster_id
-        user    = "terraform"
-      }
-    }]
-    users = [{
-      name = "terraform"
-      user = {
-        token = data.aws_eks_cluster_auth.eks-cluster.token
-      }
-    }]
-  })
-
-  aws_auth_configmap_yaml = <<-EOT
-${chomp(module.eks.aws_auth_configmap_yaml)}
-${var.eks_aws_auth_configmap}
-  EOT
 }
 
 provider "aws" {
@@ -59,4 +36,18 @@ provider "aws" {
     tags = local.aws_default_tags
   }
   region = var.aws_default_region
+  assume_role {
+    role_arn = var.aws_assume_role
+  }
+}
+
+provider "kubernetes" {
+  host                   = module.eks.cluster_endpoint
+  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+
+  exec {
+    api_version = "client.authentication.k8s.io/v1alpha1"
+    command     = "aws"
+    args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_id]
+  }
 }

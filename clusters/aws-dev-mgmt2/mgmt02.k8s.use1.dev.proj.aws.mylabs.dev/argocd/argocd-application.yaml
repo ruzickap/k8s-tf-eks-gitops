@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: argocd-app-of-apps
+  namespace: argocd
+spec:
+  project: argocd-app-of-apps
+  source:
+    repoURL: https://github.com/ruzickap/k8s-tf-eks-argocd
+    #### This should be changed !!!
+    # targetRevision: HEAD
+    targetRevision: argocd-init
+    path: argocd/cluster-addons
+    helm:
+      valueFiles:
+      - ../../clusters/aws-dev-mgmt2/argocd/argocd-app-of-apps-group-values.yaml
+      - ../../clusters/aws-dev-mgmt2/mgmt02.k8s.use1.dev.proj.aws.mylabs.dev/argocd/argocd-app-of-apps-cluster-values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

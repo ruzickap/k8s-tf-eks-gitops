@@ -8,9 +8,10 @@ environment = "dev"
 tenant      = "mgmt02"
 zone        = "mylabs"
 
-# The ArgoCD Version is only used for initial ArgoCD installation
-argo-cd_version                 = "4.2.1"
-cluster_version                 = "1.21"
+# The ArgoCD Version is only used for initial ArgoCD installation (https://github.com/argoproj/argo-cd/tags)
+argocd_version = "v2.3.3"
+
+cluster_version                 = "1.22"
 cluster_endpoint_private_access = false
 cluster_endpoint_public_access  = true
 
