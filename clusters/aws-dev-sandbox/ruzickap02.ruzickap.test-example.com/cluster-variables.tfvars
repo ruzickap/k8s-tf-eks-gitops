@@ -3,7 +3,7 @@ cluster_fqdn = "ruzickap02.ruzickap.test-example.com"
 base_domain     = "ruzickap.test-example.com"
 aws_assume_role = "arn:aws:iam::801795154280:role/GitHubOidcFederatedRole"
 
-cluster_version = "1.21"
+cluster_version = "1.22"
 
 aws_vpc_cidr        = "172.16.0.0/21"
 aws_private_subnets = ["172.16.0.0/24", "172.16.1.0/24", "172.16.2.0/24"]
@@ -13,12 +13,18 @@ aws_tags_cluster_level = {
   owner = "petr.ruzicka@gmail.com"
 }
 
-eks_aws_auth_configmap = <<EOT
-    - rolearn: arn:aws:iam::729560437327:user/ruzickap
-      username: system:aws:root
-      groups:
-        - system:masters
-EOT
+aws_auth_roles = [
+  {
+    rolearn  = "arn:aws:iam::729560437327:role/Admins"
+    username = "system:aws:root"
+    groups   = ["system:masters"]
+  },
+  {
+    rolearn  = "arn:aws:iam::729560437327:user/ruzickap"
+    username = "system:aws:root"
+    groups   = ["system:masters"]
+  },
+]
 
 eks_managed_node_groups = {
   ruzickap02-ng01 = {

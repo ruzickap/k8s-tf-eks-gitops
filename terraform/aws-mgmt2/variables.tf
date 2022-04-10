@@ -1,4 +1,4 @@
-variable "argo-cd_version" {
+variable "argocd_version" {
   type        = string
   description = "ArgoCD Helm Chart version"
 }
@@ -61,6 +61,11 @@ variable "cluster_endpoint_public_access" {
 
 variable "cluster_fqdn" {
   description = "FQDN of the EKS cluster"
+  type        = string
+}
+
+variable "cluster_path" {
+  description = "Path containing the cluster tfvars and ArgoCD Application file"
   type        = string
 }
 

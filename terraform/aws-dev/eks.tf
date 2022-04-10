@@ -66,7 +66,7 @@ resource "aws_route53_record" "base_domain" {
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "18.19.0"
+  version = "18.20.1"
 
   cluster_name                    = local.cluster_name
   cluster_version                 = var.cluster_version
@@ -80,11 +80,11 @@ module "eks" {
 
   cluster_addons = {
     coredns = {
-      addon_version     = "v1.8.4-eksbuild.1"
+      addon_version     = "v1.8.7-eksbuild.1"
       resolve_conflicts = "OVERWRITE"
     }
     kube-proxy = {
-      addon_version     = "v1.21.2-eksbuild.2"
+      addon_version     = "v1.22.6-eksbuild.1"
       resolve_conflicts = "OVERWRITE"
     }
     vpc-cni = {
@@ -92,7 +92,7 @@ module "eks" {
       resolve_conflicts = "OVERWRITE"
     }
     aws-ebs-csi-driver = {
-      addon_version     = "v1.4.0-eksbuild.preview"
+      addon_version     = "v1.5.2-eksbuild.1"
       resolve_conflicts = "OVERWRITE"
     }
   }
@@ -105,26 +105,14 @@ module "eks" {
   cloudwatch_log_group_retention_in_days = var.cloudwatch_log_group_retention_in_days
   cluster_enabled_log_types              = var.cluster_enabled_log_types
 
+  manage_aws_auth_configmap = true
+  aws_auth_roles            = var.aws_auth_roles
+
   eks_managed_node_group_defaults = {
     iam_role_additional_policies = ["arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"]
   }
 
   eks_managed_node_groups = var.eks_managed_node_groups
-}
-
-resource "null_resource" "patch" {
-  triggers = {
-    kubeconfig = base64encode(local.kubeconfig)
-    cmd_patch  = "kubectl patch configmap/aws-auth --patch \"${local.aws_auth_configmap_yaml}\" -n kube-system --kubeconfig <(echo $KUBECONFIG | base64 --decode)"
-  }
-
-  provisioner "local-exec" {
-    interpreter = ["/bin/bash", "-c"]
-    environment = {
-      KUBECONFIG = self.triggers.kubeconfig
-    }
-    command = self.triggers.cmd_patch
-  }
 }
 
 # ---------------------------------------------------------------------------------------------------------------------

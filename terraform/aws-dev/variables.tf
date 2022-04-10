@@ -3,6 +3,12 @@ variable "aws_assume_role" {
   type        = string
 }
 
+variable "aws_auth_roles" {
+  description = "Additional IAM roles to add to the aws-auth ConfigMap"
+  type        = list(any)
+  default     = []
+}
+
 # Variable used only in the cluster-aws pipeline
 variable "aws_default_region" {
   description = "AWS region"
@@ -58,12 +64,6 @@ variable "cluster_fqdn" {
 variable "cluster_version" {
   description = "Desired kubernetes version. If you do not specify a value, the latest available version is used"
   type        = string
-}
-
-variable "eks_aws_auth_configmap" {
-  description = "Additional IAM roles to add to the aws-auth ConfigMap"
-  type        = string
-  default     = ""
 }
 
 variable "eks_managed_node_groups" {

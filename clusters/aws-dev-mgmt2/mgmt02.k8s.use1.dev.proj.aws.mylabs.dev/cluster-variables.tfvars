@@ -2,13 +2,16 @@ cluster_fqdn = "mgmt02.k8s.use1.dev.proj.aws.mylabs.dev"
 # Domain where TF will create NS record to point to the new "zone" `cluster_fqdn`
 base_domain     = "k8s.use1.dev.proj.aws.mylabs.dev"
 aws_assume_role = "arn:aws:iam::729560437327:role/GitHubOidcFederatedRole"
+cluster_path    = "clusters/aws-dev-mgmt2/mgmt02.k8s.use1.dev.proj.aws.mylabs.dev"
 
 environment = "dev"
 tenant      = "mgmt02"
 zone        = "mylabs"
 
-argo-cd_version                 = "4.2.2"
-cluster_version                 = "1.21"
+# The ArgoCD Version is only used for initial ArgoCD installation (https://github.com/argoproj/argo-cd/tags)
+argocd_version = "v2.3.3"
+
+cluster_version                 = "1.22"
 cluster_endpoint_private_access = false
 cluster_endpoint_public_access  = true
 

@@ -6,6 +6,14 @@ terraform {
       source  = "hashicorp/aws"
       version = "4.4.0"
     }
+    git = {
+      source  = "paultyng/git"
+      version = "0.1.0"
+    }
+    kubectl = {
+      source  = "gavinbunney/kubectl"
+      version = "1.14.0"
+    }
     kubernetes = {
       source  = "hashicorp/kubernetes"
       version = ">= 2.8.0"
@@ -13,6 +21,10 @@ terraform {
     helm = {
       source  = "hashicorp/helm"
       version = "2.4.1"
+    }
+    http = {
+      source  = "hashicorp/http"
+      version = "2.1.0"
     }
   }
   required_version = ">= 1.0.1"
@@ -51,4 +63,11 @@ provider "helm" {
     token                  = data.aws_eks_cluster_auth.eks-cluster.token
     cluster_ca_certificate = base64decode(data.aws_eks_cluster.eks-cluster.certificate_authority.0.data)
   }
+}
+
+provider "kubectl" {
+  host                   = data.aws_eks_cluster.eks-cluster.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.eks-cluster.certificate_authority.0.data)
+  token                  = data.aws_eks_cluster_auth.eks-cluster.token
+  load_config_file       = false
 }

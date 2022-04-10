@@ -39,22 +39,12 @@ if ! command -v aws &> /dev/null; then
 fi
 ```
 
-Install [AWS IAM Authenticator for Kubernetes](https://github.com/kubernetes-sigs/aws-iam-authenticator):
-
-```bash
-if ! command -v aws-iam-authenticator &> /dev/null; then
-  # https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html
-  sudo curl -s -Lo /usr/local/bin/aws-iam-authenticator "https://amazon-eks.s3.us-west-2.amazonaws.com/1.21.2/2021-07-05/bin/$(uname | sed "s/./\L&/g")/amd64/aws-iam-authenticator"
-  sudo chmod a+x /usr/local/bin/aws-iam-authenticator
-fi
-```
-
 Install [kubectl](https://github.com/kubernetes/kubectl) binary:
 
 ```bash
 if ! command -v kubectl &> /dev/null; then
   # https://github.com/kubernetes/kubectl/releases
-  sudo curl -s -Lo /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/v1.21.7/bin/$(uname | sed "s/./\L&/g" )/amd64/kubectl"
+  sudo curl -s -Lo /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/v1.22.8/bin/$(uname | sed "s/./\L&/g" )/amd64/kubectl"
   sudo chmod a+x /usr/local/bin/kubectl
 fi
 ```

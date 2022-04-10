@@ -174,24 +174,46 @@ module "iam_assumable_role_cert_manager" {
 # Argo CD
 # ---------------------------------------------------------------------------------------------------------------------
 
-resource "helm_release" "argocd" {
-  name             = "argo-cd"
-  repository       = "https://argoproj.github.io/argo-helm"
-  chart            = "argo-cd"
-  version          = var.argo-cd_version
-  namespace        = "argocd"
-  create_namespace = true
+resource "kubectl_manifest" "argo-cd_namespace" {
+  wait       = true
+  apply_only = true
+  yaml_body  = file("templates/argo-cd_namespace.yaml")
+}
 
-  values = [
-    templatefile("templates/argocd-values.yaml", {
-      test = "test"
-    })
-  ]
+resource "kubectl_manifest" "argo-cd_core-install" {
+  depends_on         = [kubectl_manifest.argo-cd_namespace]
+  for_each           = data.kubectl_file_documents.argo-cd_core-install.manifests
+  apply_only         = true
+  wait               = true
+  override_namespace = "argocd"
+  yaml_body          = each.value
 
-  # Install argo-cd and ignore any future changes - no further changes are made to the release
-  # It is only used for the initial ArgoCD deployment...
-  # ArgoCD application is deployed and you're able to manage ArgoCD from ArgoCD.
-  # https://registry.terraform.io/modules/lablabs/argocd/helm/latest
+  lifecycle {
+    ignore_changes = all
+  }
+}
+
+resource "kubectl_manifest" "argo-cd_appproject" {
+  depends_on = [kubectl_manifest.argo-cd_core-install]
+  wait       = true
+  apply_only = true
+  yaml_body  = file("templates/argo-cd_appproject.yaml")
+
+  lifecycle {
+    ignore_changes = all
+  }
+}
+
+# This App is going to https://github.com/ruzickap/k8s-tf-eks-argocd / ${var.cluster_path}/argocd
+resource "kubectl_manifest" "argo-cd_application" {
+  depends_on = [kubectl_manifest.argo-cd_appproject]
+  wait       = true
+  apply_only = true
+  yaml_body = templatefile("templates/argo-cd_application.yaml", {
+    path           = "${var.cluster_path}/argocd"
+    targetRevision = data.git_repository.current_git_repository.branch
+  })
+
   lifecycle {
     ignore_changes = all
   }
