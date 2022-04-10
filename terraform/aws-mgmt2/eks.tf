@@ -4,7 +4,7 @@
 
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "3.12.0"
+  version = "3.14.0"
 
   name = local.vpc_name
   cidr = var.aws_vpc_cidr
@@ -52,7 +52,7 @@ resource "aws_route53_record" "base_domain" {
 # ---------------------------------------------------------------------------------------------------------------------
 
 module "aws_eks_accelerator_for_terraform" {
-  source = "github.com/aws-samples/aws-eks-accelerator-for-terraform?ref=v4.0.0"
+  source = "github.com/aws-samples/aws-eks-accelerator-for-terraform?ref=v4.0.1"
 
   tenant      = var.tenant
   environment = var.environment
@@ -119,7 +119,7 @@ EOF
 
 module "iam_assumable_role_external_dns" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "4.14.0"
+  version                       = "4.18.0"
   create_role                   = true
   provider_url                  = module.aws_eks_accelerator_for_terraform.eks_oidc_issuer_url
   role_name                     = "${module.aws_eks_accelerator_for_terraform.eks_cluster_id}-iamserviceaccount-external-dns"
@@ -161,7 +161,7 @@ EOF
 
 module "iam_assumable_role_cert_manager" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "4.14.0"
+  version                       = "4.18.0"
   create_role                   = true
   provider_url                  = module.aws_eks_accelerator_for_terraform.eks_oidc_issuer_url
   role_name                     = "${module.aws_eks_accelerator_for_terraform.eks_cluster_id}-iamserviceaccount-cert-manager"
