@@ -1,0 +1,31 @@
+applications:
+  - name: podinfo
+    namespace: argocd
+    finalizers:
+      - resources-finalizer.argocd.argoproj.io
+    project: cluster-addons
+    source:
+      repoURL: https://stefanprodan.github.io/podinfo
+      targetRevision: 6.1.0
+      chart: podinfo
+      helm:
+        values: |
+          message: "message123"
+          logo: "logo123"
+          resources:
+            limits:
+            requests:
+              cpu: 2m
+              memory: 32Mi
+    destination:
+      server: https://kubernetes.default.svc
+      namespace: podinfo
+    syncPolicy:
+      automated:
+        prune: true
+        selfHeal: true
+      syncOptions:
+        - CreateNamespace=true
+    info:
+      - name: url
+        value: https://artifacthub.io/packages/helm/podinfo/podinfo
