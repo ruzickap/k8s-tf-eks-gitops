@@ -193,7 +193,7 @@ EOF
 
 module "iam_assumable_role_cert_manager" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "4.14.0"
+  version                       = "4.18.0"
   create_role                   = true
   provider_url                  = "module.eks.oidc_provider"
   role_name                     = "${module.eks.cluster_id}-iamserviceaccount-cert-manager"
