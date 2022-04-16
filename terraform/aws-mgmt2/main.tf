@@ -7,8 +7,8 @@ terraform {
       version = "4.9.0"
     }
     git = {
-      source  = "paultyng/git"
-      version = "0.1.0"
+      source  = "innovationnorway/git"
+      version = "0.1.3"
     }
     kubectl = {
       source  = "gavinbunney/kubectl"
@@ -21,6 +21,10 @@ terraform {
     http = {
       source  = "hashicorp/http"
       version = "2.1.0"
+    }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "3.3.0"
     }
   }
   required_version = ">= 1.0.1"
@@ -36,6 +40,20 @@ locals {
     var.aws_tags_group_level,
     var.aws_tags_cluster_level,
   )
+
+  flux_install = [for v in data.kubectl_file_documents.install.documents : {
+    data : yamldecode(v)
+    content : v
+    }
+  ]
+
+  flux_sync = [for v in data.kubectl_file_documents.sync.documents : {
+    data : yamldecode(v)
+    content : v
+    }
+  ]
+
+  known_hosts = "github.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg="
 }
 
 provider "aws" {

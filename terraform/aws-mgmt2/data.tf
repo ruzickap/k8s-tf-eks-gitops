@@ -1,16 +1,14 @@
 data "aws_eks_cluster" "eks-cluster" {
-  name = module.aws_eks_accelerator_for_terraform.eks_cluster_id
+  name = module.eks_blueprints.eks_cluster_id
 }
 
 data "aws_eks_cluster_auth" "eks-cluster" {
-  name = module.aws_eks_accelerator_for_terraform.eks_cluster_id
+  name = module.eks_blueprints.eks_cluster_id
 }
 
 data "aws_route53_zone" "base_domain" {
   name = var.base_domain
 }
-
-data "aws_caller_identity" "current" {}
 
 data "git_repository" "current_git_repository" {
   path = path.cwd
@@ -22,4 +20,20 @@ data "http" "argo-cd_core-install" {
 
 data "kubectl_file_documents" "argo-cd_core-install" {
   content = data.http.argo-cd_core-install.body
+}
+
+# ---------------------------------------------------------------------------------------------------------------------
+# Flux
+# ---------------------------------------------------------------------------------------------------------------------
+
+data "kubectl_file_documents" "install" {
+  content = file(fileexists("../../${var.cluster_path}/flux/flux-system/gotk-components.yaml") ? "../../${var.cluster_path}/flux/flux-system/gotk-components.yaml" : "../../${var.cluster_path}/../flux/flux-system/gotk-components.yaml")
+}
+
+data "kubectl_file_documents" "sync" {
+  content = file("../../${var.cluster_path}/flux/flux-system/gotk-sync.yaml")
+}
+
+data "kubectl_file_documents" "apply" {
+  content = file(fileexists("../../${var.cluster_path}/flux/flux-system/gotk-components.yaml") ? "../../${var.cluster_path}/flux/flux-system/gotk-components.yaml" : "../../${var.cluster_path}/../flux/flux-system/gotk-components.yaml")
 }
