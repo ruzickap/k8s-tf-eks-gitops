@@ -51,8 +51,8 @@ resource "aws_route53_record" "base_domain" {
 # Create the EKS cluster
 # ---------------------------------------------------------------------------------------------------------------------
 
-module "aws_eks_accelerator_for_terraform" {
-  source = "github.com/aws-samples/aws-eks-accelerator-for-terraform?ref=v4.0.1"
+module "eks_blueprints" {
+  source = "github.com/aws-ia/terraform-aws-eks-blueprints?ref=v4.0.2"
 
   tenant      = var.tenant
   environment = var.environment
@@ -77,7 +77,6 @@ module "aws_eks_accelerator_for_terraform" {
 
   tags = local.aws_default_tags
 
-  # EKS MANAGED NODE GROUPS
   managed_node_groups = var.managed_node_groups
 }
 
@@ -85,8 +84,50 @@ module "aws_eks_accelerator_for_terraform" {
 # IRSA
 # ---------------------------------------------------------------------------------------------------------------------
 
+resource "aws_iam_policy" "cert_manager" {
+  name        = "${module.eks_blueprints.eks_cluster_id}-cert-manager"
+  description = "Policy allowing external-dns to change Route53 entries"
+  tags        = local.aws_default_tags
+  policy      = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "route53:GetChange",
+      "Resource": "arn:aws:route53:::change/${aws_route53_zone.cluster_fqdn.zone_id}"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "route53:ChangeResourceRecordSets",
+        "route53:ListResourceRecordSets"
+      ],
+      "Resource": "arn:aws:route53:::hostedzone/${aws_route53_zone.cluster_fqdn.zone_id}"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "route53:ListHostedZonesByName",
+      "Resource": "*"
+    }
+  ]
+}
+EOF
+}
+
+module "iam_assumable_role_cert_manager" {
+  source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
+  version                       = "4.18.0"
+  create_role                   = true
+  provider_url                  = module.eks_blueprints.eks_oidc_issuer_url
+  role_name                     = "${module.eks_blueprints.eks_cluster_id}-iamserviceaccount-cert-manager"
+  role_description              = "Allow cert-manager to change Route53 entries"
+  role_policy_arns              = [aws_iam_policy.cert_manager.arn]
+  oidc_fully_qualified_subjects = ["system:serviceaccount:cert-manager:cert-manager"]
+}
+
 resource "aws_iam_policy" "external_dns" {
-  name        = "${module.aws_eks_accelerator_for_terraform.eks_cluster_id}-external-dns"
+  name        = "${module.eks_blueprints.eks_cluster_id}-external-dns"
   description = "Policy allowing external-dns to change Route53 entries"
   tags        = local.aws_default_tags
   policy      = <<EOF
@@ -121,53 +162,11 @@ module "iam_assumable_role_external_dns" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
   version                       = "4.18.0"
   create_role                   = true
-  provider_url                  = module.aws_eks_accelerator_for_terraform.eks_oidc_issuer_url
-  role_name                     = "${module.aws_eks_accelerator_for_terraform.eks_cluster_id}-iamserviceaccount-external-dns"
+  provider_url                  = module.eks_blueprints.eks_oidc_issuer_url
+  role_name                     = "${module.eks_blueprints.eks_cluster_id}-iamserviceaccount-external-dns"
   role_description              = "Allow external-dns to change Route53 entries"
   role_policy_arns              = [aws_iam_policy.external_dns.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:external-dns:external-dns"]
-}
-
-resource "aws_iam_policy" "cert_manager" {
-  name        = "${module.aws_eks_accelerator_for_terraform.eks_cluster_id}-cert-manager"
-  description = "Policy allowing external-dns to change Route53 entries"
-  tags        = local.aws_default_tags
-  policy      = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": "route53:GetChange",
-      "Resource": "arn:aws:route53:::change/${aws_route53_zone.cluster_fqdn.zone_id}"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "route53:ChangeResourceRecordSets",
-        "route53:ListResourceRecordSets"
-      ],
-      "Resource": "arn:aws:route53:::hostedzone/${aws_route53_zone.cluster_fqdn.zone_id}"
-    },
-    {
-      "Effect": "Allow",
-      "Action": "route53:ListHostedZonesByName",
-      "Resource": "*"
-    }
-  ]
-}
-EOF
-}
-
-module "iam_assumable_role_cert_manager" {
-  source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "4.18.0"
-  create_role                   = true
-  provider_url                  = module.aws_eks_accelerator_for_terraform.eks_oidc_issuer_url
-  role_name                     = "${module.aws_eks_accelerator_for_terraform.eks_cluster_id}-iamserviceaccount-cert-manager"
-  role_description              = "Allow cert-manager to change Route53 entries"
-  role_policy_arns              = [aws_iam_policy.cert_manager.arn]
-  oidc_fully_qualified_subjects = ["system:serviceaccount:cert-manager:cert-manager"]
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -217,4 +216,53 @@ resource "kubectl_manifest" "argo-cd_application" {
   lifecycle {
     ignore_changes = all
   }
+}
+
+# ---------------------------------------------------------------------------------------------------------------------
+# Flux
+# ---------------------------------------------------------------------------------------------------------------------
+
+resource "tls_private_key" "main" {
+  algorithm   = "ECDSA"
+  ecdsa_curve = "P256"
+}
+
+resource "kubectl_manifest" "flux_namespace" {
+  wait       = true
+  apply_only = true
+  yaml_body  = file("templates/flux_namespace.yaml")
+}
+
+resource "kubernetes_secret" "flux" {
+  depends_on = [kubectl_manifest.flux_namespace]
+
+  metadata {
+    name      = "flux-system"
+    namespace = "flux-system"
+  }
+
+  data = {
+    identity       = tls_private_key.main.private_key_pem
+    "identity.pub" = tls_private_key.main.public_key_pem
+    known_hosts    = local.known_hosts
+  }
+}
+
+resource "kubectl_manifest" "install" {
+  for_each   = { for v in local.flux_install : lower(join("/", compact([v.data.apiVersion, v.data.kind, lookup(v.data.metadata, "namespace", ""), v.data.metadata.name]))) => v.content }
+  depends_on = [kubernetes_secret.flux]
+  yaml_body  = each.value
+}
+
+resource "kubectl_manifest" "sync" {
+  for_each   = { for v in local.flux_sync : lower(join("/", compact([v.data.apiVersion, v.data.kind, lookup(v.data.metadata, "namespace", ""), v.data.metadata.name]))) => v.content }
+  depends_on = [kubectl_manifest.install]
+  yaml_body  = each.value
+}
+
+resource "github_repository_deploy_key" "main" {
+  title      = var.cluster_fqdn
+  repository = replace(data.git_repository.current_git_repository.url, "/.*/(.*).git/", "$1")
+  key        = tls_private_key.main.public_key_openssh
+  read_only  = true
 }

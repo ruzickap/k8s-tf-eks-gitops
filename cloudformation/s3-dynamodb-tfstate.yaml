@@ -8,6 +8,7 @@ Parameters:
 
 Resources:
   TerraformRemoteStateS3Bucket:
+    # checkov:skip=CKV_AWS_18:Access logging is not needed for S3 bucket used by Terraform
     Type: AWS::S3::Bucket
     Properties:
       AccessControl: Private
