@@ -7,9 +7,7 @@ spec:
   project: cluster-addons
   source:
     repoURL: https://github.com/ruzickap/k8s-tf-eks-argocd
-    #### This should be changed !!!
-    # targetRevision: HEAD
-    targetRevision: argocd
+    targetRevision: HEAD
     path: argocd/cluster-addons
     helm:
       valueFiles:
