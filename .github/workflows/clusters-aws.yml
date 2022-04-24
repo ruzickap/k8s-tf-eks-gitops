@@ -41,3 +41,5 @@ jobs:
       clusters: ${{ github.event.inputs.clusters }}
       terraform_action: ${{ github.event.inputs.action }}
       env-variables: ${{ github.event.inputs.env-variables }}
+    secrets:
+      CREATE_FLUX_DEPLOY_KEY_GITHUB_TOKEN: ${{ secrets.CREATE_FLUX_DEPLOY_KEY_GITHUB_TOKEN }}

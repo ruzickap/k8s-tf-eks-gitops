@@ -15,6 +15,10 @@ on:
         description: Environment variable(s)
         required: true
         type: string
+    secrets:
+      CREATE_FLUX_DEPLOY_KEY_GITHUB_TOKEN:
+        description: GitHub token used to create Flux deploy key
+        required: true
 
 jobs:
   generate-cluster-aws-matrix:
@@ -62,6 +66,7 @@ jobs:
       TF_CLI_ARGS_apply: "-auto-approve"
       TF_CLI_ARGS_destroy: "-auto-approve"
       TF_IN_AUTOMATION: "true"
+      TF_VAR_github_token: ${{ secrets.CREATE_FLUX_DEPLOY_KEY_GITHUB_TOKEN }}
       # https://github.com/helm/helm/releases
       HELM_VERSION: "v3.6.0"
       # https://github.com/kubernetes/kubectl/releases
