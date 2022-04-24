@@ -14,3 +14,7 @@ aws_tags_group_level = {
   department          = "myit"
   charge-code         = "4321"
 }
+
+# github_token is used to create Flux deploy key
+# This is a "secret" and should be paased to teraform using TF_VAR_github_token variable
+# github_token = "xxxxxxx"

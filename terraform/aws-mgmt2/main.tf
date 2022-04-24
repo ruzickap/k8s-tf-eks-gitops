@@ -10,6 +10,10 @@ terraform {
       source  = "innovationnorway/git"
       version = "0.1.3"
     }
+    github = {
+      source  = "integrations/github"
+      version = ">= 4.23.0"
+    }
     kubectl = {
       source  = "gavinbunney/kubectl"
       version = "1.14.0"
@@ -63,6 +67,10 @@ provider "aws" {
   #   tags = local.aws_default_tags
   # }
   region = var.aws_default_region
+}
+
+provider "github" {
+  token = var.github_token
 }
 
 provider "kubernetes" {

@@ -262,7 +262,7 @@ resource "kubectl_manifest" "sync" {
 
 resource "github_repository_deploy_key" "main" {
   title      = var.cluster_fqdn
-  repository = replace(data.git_repository.current_git_repository.url, "/.*/(.*).git/", "$1")
+  repository = join("", regex(".*/([^.]*)", data.git_repository.current_git_repository.url))
   key        = tls_private_key.main.public_key_openssh
   read_only  = true
 }

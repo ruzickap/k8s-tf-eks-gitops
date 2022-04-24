@@ -90,6 +90,12 @@ variable "cluster_version" {
   description = "Desired kubernetes version. If you do not specify a value, the latest available version is used"
 }
 
+variable "github_token" {
+  type        = string
+  sensitive   = true
+  description = "GitHub token used to create Flux deploy key"
+}
+
 variable "map_roles" {
   description = "Additional IAM roles to add to the aws-auth ConfigMap"
   type = list(object({
