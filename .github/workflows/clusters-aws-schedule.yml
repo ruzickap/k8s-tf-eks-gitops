@@ -46,6 +46,8 @@ jobs:
       clusters: ${{ needs.scheduled-run-time-check.outputs.scheduled_clusters }}
       terraform_action: apply
       env-variables: "'TF_LOG=ERROR' 'TF_DATA_DIR=.terraform'"
+    secrets:
+      CREATE_FLUX_DEPLOY_KEY_GITHUB_TOKEN: ${{ secrets.CREATE_FLUX_DEPLOY_KEY_GITHUB_TOKEN }}
 
   scheduled-check:
     name: "Test cluster access"
@@ -124,3 +126,5 @@ jobs:
       clusters: ${{ needs.scheduled-run-time-check.outputs.scheduled_clusters }}
       terraform_action: destroy
       env-variables: "'TF_LOG=ERROR' 'TF_DATA_DIR=.terraform'"
+    secrets:
+      CREATE_FLUX_DEPLOY_KEY_GITHUB_TOKEN: ${{ secrets.CREATE_FLUX_DEPLOY_KEY_GITHUB_TOKEN }}
