@@ -6,9 +6,9 @@ authors = ["Petr Ruzicka"]
 
 [output.html]
 additional-css = ["theme/css/custom.css"]
-edit-url-template = "https://github.com/ruzickap/k8s-tf-eks-argocd/edit/main/docs/{path}"
-git-repository-url = "https://github.com/ruzickap/k8s-tf-eks-argocd"
-site-url = "/k8s-tf-eks-argocd/"
+edit-url-template = "https://github.com/ruzickap/k8s-tf-eks-gitops/edit/main/docs/{path}"
+git-repository-url = "https://github.com/ruzickap/k8s-tf-eks-gitops"
+site-url = "/k8s-tf-eks-gitops/"
 
 [preprocessor.toc]
 command = "mdbook-toc"

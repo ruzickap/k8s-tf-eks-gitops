@@ -4,6 +4,8 @@ CloudFlare
 Kubernetes
 OpenID
 awscli
+gotk-components
 kubectl
 kustomize
 nameservers
+yaml

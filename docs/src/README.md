@@ -1,7 +1,7 @@
 # Amazon EKS installation using Terraform, GitHub Actions and ArgoCD
 
-* GitHub repository: [https://github.com/ruzickap/k8s-tf-eks-argocd](https://github.com/ruzickap/k8s-tf-eks-argocd)
-* Web Pages: [https://ruzickap.github.io/k8s-tf-eks-argocd](https://ruzickap.github.io/k8s-tf-eks-argocd)
+* GitHub repository: [https://github.com/ruzickap/k8s-tf-eks-gitops](https://github.com/ruzickap/k8s-tf-eks-gitops)
+* Web Pages: [https://ruzickap.github.io/k8s-tf-eks-gitops](https://ruzickap.github.io/k8s-tf-eks-gitops)
 
 ## Requirements
 

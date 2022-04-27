@@ -174,8 +174,8 @@ Example: [AWS federation comes to GitHub Actions](https://awsteele.com/blog/2021
 
 ```shell
 aws cloudformation deploy --region=eu-central-1 --capabilities CAPABILITY_NAMED_IAM \
-  --parameter-overrides "GitHubFullRepositoryName=ruzickap/k8s-tf-eks-argocd" \
-  --stack-name "${USER}-k8s-tf-eks-argocd-gh-action-iam-role-oidc" \
+  --parameter-overrides "GitHubFullRepositoryName=ruzickap/k8s-tf-eks-gitops" \
+  --stack-name "${USER}-k8s-tf-eks-gitops-gh-action-iam-role-oidc" \
   --template-file "./cloudformation/gh-action-iam-role-oidc.yaml" \
   --tags "Owner=petr.ruzicka@gmail.com"
 ```
