@@ -203,7 +203,7 @@ resource "kubectl_manifest" "argo-cd_appproject" {
   }
 }
 
-# This App is going to https://github.com/ruzickap/k8s-tf-eks-argocd / ${var.cluster_path}/argocd
+# This App is going to https://github.com/ruzickap/k8s-tf-eks-gitops / ${var.cluster_path}/argocd
 resource "kubectl_manifest" "argo-cd_application" {
   depends_on = [kubectl_manifest.argo-cd_appproject]
   wait       = true

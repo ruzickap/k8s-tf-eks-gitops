@@ -42,7 +42,7 @@ echo -e "\n# ------------------------ Code -------------------------"
 cat << \EOF
 CURRENT_ASSUME_ROLE_ARN=$( aws sts get-caller-identity --query Arn --output text | sed 's/sts/iam/;s/assumed-role/role/' )
 if [[ ! "${CURRENT_ASSUME_ROLE_ARN}" =~ "${AWS_ASSUME_ROLE}" ]]; then
-  eval $(aws sts assume-role --role-arn "${AWS_ASSUME_ROLE}" --role-session-name "${USER}@$(hostname -f)-k8s-tf-eks-argocd-$(date +%s)" --duration-seconds 36000 | jq -r '.Credentials | "export AWS_ACCESS_KEY_ID=\(.AccessKeyId)\nexport AWS_SECRET_ACCESS_KEY=\(.SecretAccessKey)\nexport AWS_SESSION_TOKEN=\(.SessionToken)\n"')
+  eval $(aws sts assume-role --role-arn "${AWS_ASSUME_ROLE}" --role-session-name "${USER}@$(hostname -f)-k8s-tf-eks-gitops-$(date +%s)" --duration-seconds 36000 | jq -r '.Credentials | "export AWS_ACCESS_KEY_ID=\(.AccessKeyId)\nexport AWS_SECRET_ACCESS_KEY=\(.SecretAccessKey)\nexport AWS_SESSION_TOKEN=\(.SessionToken)\n"')
 fi
 
 aws sts get-caller-identity

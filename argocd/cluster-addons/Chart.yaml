@@ -4,7 +4,7 @@ description: This chart installs the [app-of-apps](https://argoproj.github.io/ar
 type: application
 version: "0.0.1"
 appVersion: "0.0.1"
-home: https://github.com/ruzickap/k8s-tf-eks-argocd
+home: https://github.com/ruzickap/k8s-tf-eks-gitops
 icon: https://raw.githubusercontent.com/cncf/artwork/7408f84d4f146956c749eb4b61a1d87f81d54f4f/projects/argo/icon/color/argo-icon-color.svg
 keywords:
   - argocd
@@ -13,7 +13,7 @@ keywords:
   - applications
   - app-of-apps
 sources:
-  - https://github.com/ruzickap/k8s-tf-eks-argocd/argocd/cluster-addons
+  - https://github.com/ruzickap/k8s-tf-eks-gitops/argocd/cluster-addons
 maintainers:
   - name: ruzickap
     email: petr.ruzicka@gmail.com

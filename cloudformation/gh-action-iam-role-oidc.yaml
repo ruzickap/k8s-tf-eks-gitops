@@ -3,7 +3,7 @@ AWSTemplateFormatVersion: "2010-09-09"
 Parameters:
   GitHubFullRepositoryName:
     Type: String
-    Default: ruzickap/k8s-tf-eks-argocd
+    Default: ruzickap/k8s-tf-eks-gitops
 
 Resources:
   User:

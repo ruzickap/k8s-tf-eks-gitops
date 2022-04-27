@@ -6,7 +6,7 @@ metadata:
 spec:
   project: argocd-init-project
   source:
-    repoURL: https://github.com/ruzickap/k8s-tf-eks-argocd
+    repoURL: https://github.com/ruzickap/k8s-tf-eks-gitops
     targetRevision: ${targetRevision}
     path: ${path}
   destination:
