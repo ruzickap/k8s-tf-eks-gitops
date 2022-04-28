@@ -2,8 +2,8 @@ apiVersion: v2
 name: app-of-apps
 description: This chart installs the [app-of-apps](https://argoproj.github.io/argo-cd/operator-manual/cluster-bootstrapping/#app-of-apps-pattern) declared in `argocd/apps` directory for ArgoCD
 type: application
-version: "0.0.1"
-appVersion: "0.0.1"
+version: 0.0.1
+appVersion: 0.0.1
 home: https://github.com/ruzickap/k8s-tf-eks-gitops
 icon: https://raw.githubusercontent.com/cncf/artwork/7408f84d4f146956c749eb4b61a1d87f81d54f4f/projects/argo/icon/color/argo-icon-color.svg
 keywords:

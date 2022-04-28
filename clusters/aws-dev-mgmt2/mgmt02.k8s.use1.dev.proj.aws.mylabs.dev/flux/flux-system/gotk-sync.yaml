@@ -18,6 +18,8 @@ metadata:
   name: flux-system
   namespace: flux-system
 spec:
+  decryption:
+    provider: sops
   interval: 10m0s
   path: ./clusters/aws-dev-mgmt2/mgmt02.k8s.use1.dev.proj.aws.mylabs.dev/flux
   prune: true
