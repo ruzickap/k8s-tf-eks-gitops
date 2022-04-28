@@ -1,0 +1,11 @@
+{
+  // https://github.com/jr0dd/home-ops/blob/main/.github/renovate.json5
+  "username": "renovate",
+  "repositories": ["ruzickap/k8s-tf-eks-gitops"],
+  "requireConfig": false,
+  "gitAuthor": "Renovate Bot <bot@renovateapp.com>",
+  "suppressNotifications": [
+    "prIgnoreNotification"
+  ],
+  "rebaseWhen": "conflicted"
+}
