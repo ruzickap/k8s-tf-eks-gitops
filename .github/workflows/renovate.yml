@@ -1,0 +1,22 @@
+name: Renovate
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0/15 * * * *'
+
+jobs:
+  renovate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Flux CLI
+        uses: fluxcd/flux2/action@main
+
+      - name: Self-hosted Renovate
+        uses: renovatebot/github-action@v32
+        with:
+          configurationFile: example/renovate-config.js
+          token: ${{ secrets.PERSONAL_GITHUB_TOKEN_FOR_GITHUB_ACTIONS }}

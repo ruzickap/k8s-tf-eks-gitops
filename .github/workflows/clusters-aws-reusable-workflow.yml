@@ -151,6 +151,15 @@ jobs:
             echo "${ENV_VARIABLE}" | tee -a "${GITHUB_ENV}"
           done
 
+      - name: 💡 Amazon EKS cluster access (kubeconfig)
+        if: ${{ inputs.terraform_action == 'apply' }}
+        run: |
+          cat << EOF
+          export KUBECONFIG="/tmp/kubeconfig-${CLUSTER_NAME}.conf"
+          eval "\$(aws sts assume-role --role-arn "${AWS_ASSUME_ROLE}" --role-session-name "$USER@\$(hostname -f)-k8s-tf-eks-gitops-\$(date +%s)" --duration-seconds 36000 | jq -r '.Credentials | "export AWS_ACCESS_KEY_ID=\(.AccessKeyId)\nexport AWS_SECRET_ACCESS_KEY=\(.SecretAccessKey)\nexport AWS_SESSION_TOKEN=\(.SessionToken)\n"')"
+          aws eks update-kubeconfig --region "${AWS_DEFAULT_REGION}" --name "${CLUSTER_NAME}" --kubeconfig "\$KUBECONFIG"
+          EOF
+
       - name: 💡🔪 Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -246,14 +255,12 @@ jobs:
             -var-file="${PWD}/${CLUSTER_PATH}/../group-variables.tfvars" \
             -var-file="${PWD}/${CLUSTER_PATH}/cluster-variables.tfvars"
 
-      - name: 💡 Terraform output action (contains "kubeconfig")
+      - name: 💡 Access Amazon EKS cluster and list nodes
         if: ${{ inputs.terraform_action == 'apply' }}
         run: |
           export KUBECONFIG="/tmp/kubeconfig-${CLUSTER_NAME}.conf"
           aws eks update-kubeconfig --region "${AWS_DEFAULT_REGION}" --name "${CLUSTER_NAME}" --kubeconfig "${KUBECONFIG}"
-          kubectl get nodes
-          echo -e "\n\n\n*** Amazon EKS access commands ***\n"
-          terraform -chdir="${TERRAFORM_CODE_DIR}" output -raw amazon_eks_kubectl_commands
+          kubectl get nodes -o wide --show-labels
 
       - name: 🔪 Delete Volumes / Snapshost created by k8s cluster
         if: ${{ startsWith(inputs.terraform_action, 'destroy') }}
