@@ -1,11 +1,31 @@
 {
   // https://github.com/jr0dd/home-ops/blob/main/.github/renovate.json5
-  "username": "renovate",
-  "repositories": ["ruzickap/k8s-tf-eks-gitops"],
-  "requireConfig": false,
+  "branchPrefix": "bot-renovate",
   "gitAuthor": "Renovate Bot <bot@renovateapp.com>",
-  "suppressNotifications": [
-    "prIgnoreNotification"
+  "labels": ["renovate"],
+  "packageRules": [
+    {
+      "matchDatasources": ["terraform-provider"],
+      "matchUpdateTypes": ["minor","patch"],
+      "addLabels": ["terraform","terraform-provider"],
+      "automerge": true,
+      "stabilityDays": 3,
+    },
+    {
+      "matchDatasources": ["terraform-module"],
+      "addLabels": ["terraform","terraform-module"],
+    },
+    {
+      "matchDatasources": ["github-releases"],
+      "matchUpdateTypes": ["minor","patch"],
+      "addLabels": ["flux","github-releases"],
+      "stabilityDays": 3,
+    }
   ],
-  "rebaseWhen": "conflicted"
+  "prBodyTemplate": "{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{controls}}}",
+  "repositories": ["ruzickap/k8s-tf-eks-gitops"],
+  "suppressNotifications": [
+    "prIgnoreNotification",
+  ],
+  "username": "renovate",
 }
