@@ -66,7 +66,7 @@ resource "aws_route53_record" "base_domain" {
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "18.20.1"
+  version = "18.20.5"
 
   cluster_name                    = local.cluster_name
   cluster_version                 = var.cluster_version
@@ -152,7 +152,7 @@ EOF
 
 module "iam_assumable_role_external_dns" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "4.18.0"
+  version                       = "4.23.0"
   create_role                   = true
   provider_url                  = "module.eks.oidc_provider"
   role_name                     = "${module.eks.cluster_id}-iamserviceaccount-external-dns"
@@ -193,7 +193,7 @@ EOF
 
 module "iam_assumable_role_cert_manager" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "4.18.0"
+  version                       = "4.23.0"
   create_role                   = true
   provider_url                  = "module.eks.oidc_provider"
   role_name                     = "${module.eks.cluster_id}-iamserviceaccount-cert-manager"
