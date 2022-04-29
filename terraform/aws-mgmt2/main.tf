@@ -4,7 +4,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "4.9.0"
+      version = "4.12.0"
     }
     git = {
       source  = "innovationnorway/git"
@@ -20,7 +20,7 @@ terraform {
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "2.10.0"
+      version = "2.11.0"
     }
     http = {
       source  = "hashicorp/http"
