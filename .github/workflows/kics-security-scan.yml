@@ -2,12 +2,12 @@ name: kics-security-scan
 
 on:
   workflow_dispatch:
-  push:
-    branches-ignore:
-      - main
-    paths:
-      - cloudformation/**
-      - terraform/**
+  # push:
+  #   branches-ignore:
+  #     - main
+  #   paths:
+  #     - cloudformation/**
+  #     - terraform/**
 
 jobs:
   kics-job:
