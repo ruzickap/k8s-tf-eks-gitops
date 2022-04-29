@@ -1,4 +1,4 @@
-variable "argocd_version" {
+variable "argocd_core_version" {
   type        = string
   description = "ArgoCD Helm Chart version"
 }
@@ -94,6 +94,12 @@ variable "github_token" {
   type        = string
   sensitive   = true
   description = "GitHub token used to create Flux deploy key"
+}
+
+variable "gitops" {
+  description = "GitOps tool (flux / argocd)"
+  type        = string
+  default     = ""
 }
 
 variable "map_roles" {
