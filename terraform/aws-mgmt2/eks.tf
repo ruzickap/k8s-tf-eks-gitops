@@ -205,6 +205,7 @@ resource "kubectl_manifest" "argo-cd_appproject" {
 
 # This App is going to https://github.com/ruzickap/k8s-tf-eks-gitops / ${var.cluster_path}/argocd
 resource "kubectl_manifest" "argo-cd_application" {
+  count      = var.gitops == "argocd" ? 1 : 0
   depends_on = [kubectl_manifest.argo-cd_appproject]
   wait       = true
   apply_only = true
@@ -255,7 +256,7 @@ resource "kubectl_manifest" "install" {
 }
 
 resource "kubectl_manifest" "sync" {
-  for_each   = { for v in local.flux_sync : lower(join("/", compact([v.data.apiVersion, v.data.kind, lookup(v.data.metadata, "namespace", ""), v.data.metadata.name]))) => v.content }
+  for_each   = { for v in local.flux_sync : lower(join("/", compact([v.data.apiVersion, v.data.kind, lookup(v.data.metadata, "namespace", ""), v.data.metadata.name]))) => v.content if var.gitops == "flux" }
   depends_on = [kubectl_manifest.install]
   yaml_body  = each.value
 }
