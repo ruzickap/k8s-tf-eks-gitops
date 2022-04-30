@@ -6,7 +6,7 @@ on:
     - cron: "0 0 * * *"
 
 env:
-  SCHEDULED_CLUSTERS: ".*(/ruzickap01.k8s.use1.dev.proj.aws.mylabs.dev$).*"
+  SCHEDULED_CLUSTERS: ".*(/mgmt02.k8s.use1.dev.proj.aws.mylabs.dev$).*"
   # https://github.com/kubernetes/kubectl/releases
   KUBECTL_VERSION: "v1.22.8"
 
