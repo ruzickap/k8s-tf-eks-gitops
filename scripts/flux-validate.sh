@@ -54,7 +54,7 @@ find ./clusters -maxdepth 2 -type f -name '*.yaml' -print0 | while IFS= read -r 
 done
 
 # mirror kustomize-controller build options
-kustomize_flags="--load-restrictor=LoadRestrictionsNone --reorder=legacy"
+kustomize_flags="--load-restrictor=LoadRestrictionsNone"
 kustomize_config="kustomization.yaml"
 
 echo "INFO - Validating kustomize overlays"

@@ -6,8 +6,8 @@ on:
     branches-ignore:
       - main
     paths:
-      - "**.yml"
-      - "**.yaml"
+      - "clusters/**.yml"
+      - "flux/**.yaml"
       - kustomization.yaml
 
 jobs:
