@@ -77,6 +77,9 @@ jobs:
             sudo chmod a+x /usr/local/bin/kubectl
           fi
 
+      - name: Setup Flux
+        uses: fluxcd/flux2/action@main
+
       - name: 💡🔪 Get and display environment variables
         run: |
           set -euxo pipefail
@@ -116,7 +119,7 @@ jobs:
           aws eks update-kubeconfig --region "${AWS_DEFAULT_REGION}" --name "${CLUSTER_NAME}" --kubeconfig "${KUBECONFIG}"
           kubectl get nodes -o wide --show-labels
           kubectl get namespaces
-          kubectl get gitrepositories,kustomizations,helmrepositories,helmreleases -A
+          flux get all --all-namespaces
           kubectl get applications,applicationsets -A
 
   scheduled-delete:

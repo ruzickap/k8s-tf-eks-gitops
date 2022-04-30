@@ -1,0 +1,52 @@
+name: Flux e2e
+
+on:
+  workflow_dispatch:
+  push:
+    branches-ignore:
+      - main
+    paths:
+      - "**/flux/**"
+
+jobs:
+  flux-e2e:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Flux
+        uses: fluxcd/flux2/action@main
+
+      - name: Create k8s Kind Cluster
+        uses: helm/kind-action@v1.2.0
+
+      - name: Install Flux in Kubernetes Kind
+        run: flux install
+
+      - name: Setup cluster reconciliation
+        run: |
+          flux create source git flux-system \
+            --url=${{ github.event.repository.html_url }} \
+            --branch="${GITHUB_REF#refs/heads/}""
+          flux create kustomization flux-system \
+            --source=flux-system \
+            --path=clusters/aws-dev-mgmt2/mgmt02.k8s.use1.dev.proj.aws.mylabs.dev/flux
+
+      - name: Verify cluster reconciliation
+        run: |
+          kubectl wait kustomization --for=condition=ready --timeout=5m --all-namespaces --all
+
+      - name: Verify helm reconciliation
+        run: |
+          kubectl wait helmrelease --for=condition=ready --timeout=5m --all-namespaces --all
+
+      - name: Debug failure
+        if: failure()
+        run: |
+          kubectl -n flux-system get all
+          kubectl -n flux-system logs deploy/source-controller
+          kubectl -n flux-system logs deploy/kustomize-controller
+          kubectl -n flux-system logs deploy/helm-controller
+          flux get all --all-namespaces
