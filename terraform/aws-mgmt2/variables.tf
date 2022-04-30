@@ -74,9 +74,15 @@ variable "cloudwatch_log_group_retention_in_days" {
   type        = number
 }
 
+variable "email" {
+  type        = string
+  description = "Email used for Let's Encrypt"
+}
+
+
 variable "environment" {
   type        = string
-  description = "Environment area, e.g. prod or preprod "
+  description = "Environment area, e.g. prod or staging"
 }
 
 variable "cluster_kms_key_deletion_window_in_days" {

@@ -228,10 +228,36 @@ resource "tls_private_key" "main" {
   ecdsa_curve = "P256"
 }
 
+resource "github_repository_deploy_key" "main" {
+  title      = var.cluster_fqdn
+  repository = join("", regex(".*/([^.]*)", data.git_repository.current_git_repository.url))
+  key        = tls_private_key.main.public_key_openssh
+  read_only  = true
+}
+
+# Problems with terraform destroy: https://github.com/fluxcd/terraform-provider-flux/issues/67
 resource "kubectl_manifest" "flux_namespace" {
   wait       = true
   apply_only = true
   yaml_body  = file("templates/flux_namespace.yaml")
+}
+
+resource "kubernetes_config_map" "cluster-apps-vars-terraform" {
+  depends_on = [kubectl_manifest.flux_namespace]
+  metadata {
+    name      = "cluster-apps-vars-terraform"
+    namespace = "flux-system"
+  }
+
+  data = {
+    CLUSTER_FQDN = var.cluster_fqdn
+    CLUSTER_NAME = local.cluster_name
+    CLUSTER_PATH = var.cluster_path
+    EMAIL        = var.email
+    ENVIRONMENT  = var.environment
+    # Environment=dev,Team=test
+    TAGS_INLINE = local.tags_inline
+  }
 }
 
 resource "kubernetes_secret" "flux" {
@@ -259,11 +285,4 @@ resource "kubectl_manifest" "sync" {
   for_each   = { for v in local.flux_sync : lower(join("/", compact([v.data.apiVersion, v.data.kind, lookup(v.data.metadata, "namespace", ""), v.data.metadata.name]))) => v.content if var.gitops == "flux" }
   depends_on = [kubectl_manifest.install]
   yaml_body  = each.value
-}
-
-resource "github_repository_deploy_key" "main" {
-  title      = var.cluster_fqdn
-  repository = join("", regex(".*/([^.]*)", data.git_repository.current_git_repository.url))
-  key        = tls_private_key.main.public_key_openssh
-  read_only  = true
 }

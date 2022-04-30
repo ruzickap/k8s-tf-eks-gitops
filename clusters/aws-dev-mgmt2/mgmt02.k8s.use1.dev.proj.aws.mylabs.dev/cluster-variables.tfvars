@@ -8,6 +8,9 @@ environment = "dev"
 tenant      = "mgmt02"
 zone        = "mylabs"
 
+# Email (used for Let's Encrypt)
+email = "petr.ruzicka@gmail.com"
+
 # Choose GitOps tool [ flux / argocd ]
 gitops = "flux"
 

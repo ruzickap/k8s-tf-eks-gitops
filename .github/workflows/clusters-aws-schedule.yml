@@ -108,13 +108,16 @@ jobs:
           role-session-name: GitHubOidcFederatedRole
           aws-region: ${{ env.AWS_DEFAULT_REGION }}
 
-      - name: Access cluster using kubectl
+      - name: 💡 Access Amazon EKS cluster and list nodes, Flux and ArgoCD details
         run: |
           set -euxo pipefail
+          sleep 100
           export KUBECONFIG="/tmp/kubeconfig-${CLUSTER_NAME}.conf"
           aws eks update-kubeconfig --region "${AWS_DEFAULT_REGION}" --name "${CLUSTER_NAME}" --kubeconfig "${KUBECONFIG}"
-          kubectl get nodes -o wide
-          kubectl get pods -A
+          kubectl get nodes -o wide --show-labels
+          kubectl get namespaces
+          kubectl get gitrepositories,kustomizations,helmrepositories,helmreleases -A
+          kubectl get applications,applicationsets -A
 
   scheduled-delete:
     name: "sched"
