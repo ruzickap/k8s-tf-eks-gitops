@@ -42,12 +42,12 @@ find ./clusters -type f -name '*.yaml' -print0 | while IFS= read -r -d $'\0' fil
     yq e 'true' "$file" > /dev/null
 done
 
-kubeconform_config="-strict -ignore-missing-schemas -schema-location default -schema-location /tmp/flux-crd-schemas -verbose"
+kubeconform_config=( "-strict" "-ignore-missing-schemas" "-schema-location" "default" "-schema-location" "/tmp/flux-crd-schemas" "-verbose")
 
 echo "INFO - Validating clusters"
 find ./clusters -maxdepth 2 -type f -name '*.yaml' -print0 | while IFS= read -r -d $'\0' file;
   do
-    kubeconform "$kubeconform_config" "${file}"
+    kubeconform "${kubeconform_config[@]}" "${file}"
     if [[ ${PIPESTATUS[0]} != 0 ]]; then
       exit 1
     fi
@@ -62,7 +62,7 @@ find . -type f -name $kustomize_config -print0 | while IFS= read -r -d $'\0' fil
   do
     echo "INFO - Validating kustomization ${file/%$kustomize_config}"
     kustomize build "${file/%$kustomize_config}" "$kustomize_flags" | \
-      kubeconform "$kubeconform_config"
+      kubeconform "${kubeconform_config[@]}"
     if [[ ${PIPESTATUS[0]} != 0 ]]; then
       exit 1
     fi

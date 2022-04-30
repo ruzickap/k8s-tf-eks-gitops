@@ -23,28 +23,45 @@ jobs:
         uses: helm/kind-action@v1.2.0
 
       - name: Install Flux in Kubernetes Kind
-        run: flux install
+        run: |
+          set -euo pipefail
+          flux install
+
+      - name: Create ConfigMap/cluster-apps-vars-terraform
+        run: |
+          set -euo pipefail
+          kubectl create configmap -n flux-system cluster-apps-vars-terraform \
+            --from-literal=CLUSTER_FQDN=mgmt02.k8s.use1.dev.proj.aws.mylabs.dev \
+            --from-literal=CLUSTER_NAME=mgmt02 \
+            --from-literal=CLUSTER_PATH=clusters/aws-dev-mgmt2/mgmt02.k8s.use1.dev.proj.aws.mylabs.dev \
+            --from-literal=EMAIL=myemail@example.com \
+            --from-literal=ENVIRONMENT=dev \
+            --from-literal=TAGS_INLINE=tag1=test1,tag2=test2,tag3=test3
 
       - name: Setup cluster reconciliation
         run: |
+          set -euo pipefail
           flux create source git flux-system \
             --url=${{ github.event.repository.html_url }} \
-            --branch="${GITHUB_REF#refs/heads/}""
+            --branch="${GITHUB_REF#refs/heads/}"
           flux create kustomization flux-system \
             --source=flux-system \
             --path=clusters/aws-dev-mgmt2/mgmt02.k8s.use1.dev.proj.aws.mylabs.dev/flux
 
       - name: Verify cluster reconciliation
         run: |
+          set -euo pipefail
           kubectl wait kustomization --for=condition=ready --timeout=5m --all-namespaces --all
 
       - name: Verify helm reconciliation
         run: |
+          set -euo pipefail
           kubectl wait helmrelease --for=condition=ready --timeout=5m --all-namespaces --all
 
       - name: Debug failure
         if: failure()
         run: |
+          set -euo pipefail
           kubectl -n flux-system get all
           kubectl -n flux-system logs deploy/source-controller
           kubectl -n flux-system logs deploy/kustomize-controller
