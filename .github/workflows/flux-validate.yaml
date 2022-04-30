@@ -1,0 +1,26 @@
+name: Flux validate
+
+on:
+  workflow_dispatch:
+  push:
+    branches-ignore:
+      - main
+    paths:
+      - "**.yml"
+      - "**.yaml"
+      - kustomization.yaml
+
+jobs:
+  flux-validate:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Intall kubeconform
+        run: |
+          curl -s -L "https://github.com/yannh/kubeconform/releases/download/v0.4.13/kubeconform-$(uname | sed "s/./\L&/g")-amd64.tar.gz" -o - | tar xzf - -C /usr/local/bin/ kubeconform
+
+      - name: Validate manifests
+        run: ./scripts/flux-validate.sh
