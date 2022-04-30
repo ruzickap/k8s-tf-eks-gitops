@@ -43,6 +43,9 @@ locals {
     var.aws_tags_cluster_level,
   )
 
+  # Environment=dev,Team=test,Owner=aaaa
+  tags_inline = join(",", [for key, value in local.aws_default_tags : "${key}=${value}"])
+
   flux_install = [for v in data.kubectl_file_documents.install.documents : {
     data : yamldecode(v)
     content : v

@@ -9,7 +9,7 @@
       "matchUpdateTypes": ["minor","patch"],
       "addLabels": ["terraform","terraform-provider"],
       "automerge": true,
-      "stabilityDays": 3,
+      "stabilityDays": 1,
     },
     {
       "matchDatasources": ["terraform-module"],

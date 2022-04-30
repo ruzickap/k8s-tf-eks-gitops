@@ -255,13 +255,6 @@ jobs:
             -var-file="${PWD}/${CLUSTER_PATH}/../group-variables.tfvars" \
             -var-file="${PWD}/${CLUSTER_PATH}/cluster-variables.tfvars"
 
-      - name: 💡 Access Amazon EKS cluster and list nodes
-        if: ${{ inputs.terraform_action == 'apply' }}
-        run: |
-          export KUBECONFIG="/tmp/kubeconfig-${CLUSTER_NAME}.conf"
-          aws eks update-kubeconfig --region "${AWS_DEFAULT_REGION}" --name "${CLUSTER_NAME}" --kubeconfig "${KUBECONFIG}"
-          kubectl get nodes -o wide --show-labels
-
       - name: 🔪 Delete Volumes / Snapshost created by k8s cluster
         if: ${{ startsWith(inputs.terraform_action, 'destroy') }}
         run: |
