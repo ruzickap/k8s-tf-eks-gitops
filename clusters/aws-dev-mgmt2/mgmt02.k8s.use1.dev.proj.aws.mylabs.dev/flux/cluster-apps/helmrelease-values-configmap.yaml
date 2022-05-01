@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: helmrelease-values-mgmt02.k8s.use1.dev.proj.aws.mylabs.dev
+  namespace: podinfo
+data:
+  podinfo:
+    ui:
+      message: "cluster level"
+  cert-manager:
+    test: "test123"

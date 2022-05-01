@@ -7,7 +7,7 @@ on:
       - main
     paths:
       - "clusters/**.yml"
-      - "flux/**.yaml"
+      - "**/flux/**.yaml"
       - kustomization.yaml
 
 jobs:

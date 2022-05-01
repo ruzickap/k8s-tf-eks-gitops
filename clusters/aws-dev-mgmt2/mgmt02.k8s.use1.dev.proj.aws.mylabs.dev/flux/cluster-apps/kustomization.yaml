@@ -9,3 +9,5 @@ resources:
 
 # Cluster specific applications
 - ../../../../../flux/cluster-apps/polaris/
+
+- helmrelease-values-configmap.yaml

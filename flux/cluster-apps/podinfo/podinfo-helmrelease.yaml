@@ -13,3 +13,28 @@ spec:
         namespace: flux-system
       version: 6.0.3
   interval: 1m
+  valuesFrom:
+    - kind: ConfigMap
+      name: helmrelease-values-mgmt02.k8s.use1.dev.proj.aws.mylabs.dev
+      valuesKey: podinfo
+      optional: true
+    - kind: ConfigMap
+      name: helmrelease-values-aws-dev-mgmt2
+      valuesKey: podinfo
+      optional: true
+    - kind: ConfigMap
+      name: cluster-values
+      valuesKey: podinfo
+      optional: true
+    - kind: Secret
+      name: helmrelease-values-mgmt02.k8s.use1.dev.proj.aws.mylabs.dev
+      valuesKey: podinfo
+      optional: true
+    - kind: Secret
+      name: helmrelease-values-aws-dev-mgmt2
+      valuesKey: podinfo
+      optional: true
+    - kind: Secret
+      name: helmrelease-values-cluster
+      valuesKey: podinfo
+      optional: true
