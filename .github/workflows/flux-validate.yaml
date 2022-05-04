@@ -6,9 +6,13 @@ on:
     branches-ignore:
       - main
     paths:
+      - .github/workflows/flux-validate.yaml
       - "clusters/**.yml"
       - "**/flux/**.yaml"
       - kustomization.yaml
+
+env:
+  KUBECONFORM_VERSION: v0.4.13
 
 jobs:
   flux-validate:
@@ -20,7 +24,7 @@ jobs:
 
       - name: Intall kubeconform
         run: |
-          curl -s -L "https://github.com/yannh/kubeconform/releases/download/v0.4.13/kubeconform-$(uname | sed "s/./\L&/g")-amd64.tar.gz" -o - | tar xzf - -C /usr/local/bin/ kubeconform
+          curl -s -L "https://github.com/yannh/kubeconform/releases/download/${{ env.KUBECONFORM_VERSION }}/kubeconform-$(uname | sed "s/./\L&/g")-amd64.tar.gz" -o - | tar xzf - -C /usr/local/bin/ kubeconform
 
       - name: Validate manifests
         run: ./scripts/flux-validate.sh

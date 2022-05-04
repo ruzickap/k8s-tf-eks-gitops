@@ -21,6 +21,9 @@
       "automerge": true,
     }
   ],
+  "patch": {
+    "automerge": true
+  },
   "prBodyTemplate": "{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{controls}}}",
   "repositories": ["ruzickap/k8s-tf-eks-gitops"],
   "suppressNotifications": [

@@ -168,7 +168,7 @@ localhost | CHANGED => {
 ## Allow GH Actions to connect to AWS accounts
 
 You also need to allow GitHub Action to connect to the AWS account(s) where you
-want to provision the clusters using [Configuring OpenID Connect in Amazon Web Services](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services).
+want to provision the clusters.
 
 Example: [AWS federation comes to GitHub Actions](https://awsteele.com/blog/2021/09/15/aws-federation-comes-to-github-actions.html)
 
@@ -213,3 +213,11 @@ gh workflow run clusters-aws.yml -f clusters=".*" -f action="destroy"
 ## ArgoCD
 
 * [App of Apps Best Practices](https://medium.com/dzerolabs/turbocharge-argocd-with-app-of-apps-pattern-and-kustomized-helm-ea4993190e7c)
+
+## Flux
+
+```bash
+flux get all --all-namespaces
+flux tree kustomization flux-system
+flux logs
+```
