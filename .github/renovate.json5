@@ -9,7 +9,6 @@
       "matchUpdateTypes": ["minor","patch"],
       "addLabels": ["terraform","terraform-provider"],
       "automerge": true,
-      "stabilityDays": 1,
     },
     {
       "matchDatasources": ["terraform-module"],
@@ -19,7 +18,7 @@
       "matchDatasources": ["github-releases"],
       "matchUpdateTypes": ["minor","patch"],
       "addLabels": ["flux","github-releases"],
-      "stabilityDays": 3,
+      "automerge": true,
     }
   ],
   "prBodyTemplate": "{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{controls}}}",
