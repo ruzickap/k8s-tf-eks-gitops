@@ -6,7 +6,11 @@ on:
     branches-ignore:
       - main
     paths:
+      - .github/workflows/flux-e2e.yaml
       - "**/flux/**"
+
+env:
+  CLUSTER_PATH: clusters/aws-dev-mgmt2/mgmt02.k8s.use1.dev.proj.aws.mylabs.dev
 
 jobs:
   flux-e2e:
@@ -18,50 +22,62 @@ jobs:
 
       - name: Setup Flux
         uses: fluxcd/flux2/action@main
+        with:
+          version: 0.29.5
 
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.2.0
 
       - name: Install Flux in Kubernetes Kind
         run: |
-          set -euo pipefail
+          set -euxo pipefail
           flux install
+
+      - name: Set other env variables
+        run: |
+          set -euxo pipefail
+          CLUSTER_FQDN=$(basename ${{ env.CLUSTER_PATH }})
+          cat >> "${GITHUB_ENV}" << EOF
+          CLUSTER_FQDN=${CLUSTER_FQDN}
+          CLUSTER_NAME=${CLUSTER_FQDN%%.*}
+          CLUSTER_PATH=${{ env.CLUSTER_PATH }}
+          EOF
 
       - name: Create ConfigMap/cluster-apps-vars-terraform
         run: |
-          set -euo pipefail
+          set -euxo pipefail
           kubectl create configmap -n flux-system cluster-apps-vars-terraform \
-            --from-literal=CLUSTER_FQDN=mgmt02.k8s.use1.dev.proj.aws.mylabs.dev \
-            --from-literal=CLUSTER_NAME=mgmt02 \
-            --from-literal=CLUSTER_PATH=clusters/aws-dev-mgmt2/mgmt02.k8s.use1.dev.proj.aws.mylabs.dev \
+            --from-literal=CLUSTER_FQDN="${CLUSTER_FQDN}" \
+            --from-literal=CLUSTER_NAME="${CLUSTER_NAME}" \
+            --from-literal=CLUSTER_PATH="${CLUSTER_PATH}" \
             --from-literal=EMAIL=myemail@example.com \
             --from-literal=ENVIRONMENT=dev \
             --from-literal=TAGS_INLINE=tag1=test1,tag2=test2,tag3=test3
 
       - name: Setup cluster reconciliation
         run: |
-          set -euo pipefail
+          set -euxo pipefail
           flux create source git flux-system \
-            --url=${{ github.event.repository.html_url }} \
+            --url="${{ github.event.repository.html_url }}" \
             --branch="${GITHUB_REF#refs/heads/}"
           flux create kustomization flux-system \
             --source=flux-system \
-            --path=clusters/aws-dev-mgmt2/mgmt02.k8s.use1.dev.proj.aws.mylabs.dev/flux
+            --path="${CLUSTER_PATH}/flux/"
 
       - name: Verify cluster reconciliation
         run: |
-          set -euo pipefail
+          set -euxo pipefail
           kubectl wait kustomization --for=condition=ready --timeout=5m --all-namespaces --all
 
       - name: Verify helm reconciliation
         run: |
-          set -euo pipefail
+          set -euxo pipefail
           kubectl wait helmrelease --for=condition=ready --timeout=5m --all-namespaces --all
 
       - name: Debug failure
         if: failure()
         run: |
-          set -euo pipefail
+          set -euxo pipefail
           kubectl -n flux-system get all
           kubectl -n flux-system logs deploy/source-controller
           kubectl -n flux-system logs deploy/kustomize-controller
