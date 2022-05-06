@@ -94,21 +94,29 @@ jobs:
 
           if ! command -v helm &> /dev/null; then
             curl -s https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash -s -- --version ${{ env.HELM_VERSION }}
+          else
+            helm version
           fi
 
           if ! command -v aws &> /dev/null; then
             curl -sL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
             unzip -q -o /tmp/awscliv2.zip -d /tmp/
             sudo /tmp/aws/install
+          else
+            aws --version
           fi
 
           if ! command -v kubectl &> /dev/null; then
             sudo curl -s -Lo /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/${{ env.KUBECTL_VERSION }}/bin/$(uname | sed "s/./\L&/g" )/amd64/kubectl"
             sudo chmod a+x /usr/local/bin/kubectl
+          else
+            kubectl version
           fi
 
           if ! command -v kustomize &> /dev/null; then
             curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | sudo bash -s ${{ env.KUSTOMIZE_VERSION }} /usr/local/bin/
+          else
+            kustomize version
           fi
 
       - name: 💡🔪 Get and display environment variables
