@@ -110,7 +110,7 @@ jobs:
             sudo curl -s -Lo /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/${{ env.KUBECTL_VERSION }}/bin/$(uname | sed "s/./\L&/g" )/amd64/kubectl"
             sudo chmod a+x /usr/local/bin/kubectl
           else
-            kubectl version
+            kubectl version --client=true
           fi
 
           if ! command -v kustomize &> /dev/null; then
@@ -218,15 +218,15 @@ jobs:
         run: |
           set -euxo pipefail
 
-          if [[ "$(aws eks list-clusters)" =~ \"${CLUSTER_NAME}\" ]] ; then
-            export KUBECONFIG="/tmp/kubeconfig-${CLUSTER_NAME}.conf"
-            aws eks update-kubeconfig --name "${CLUSTER_NAME}" --kubeconfig "${KUBECONFIG}"
+          # if [[ "$(aws eks list-clusters)" =~ \"${CLUSTER_NAME}\" ]] ; then
+          #   export KUBECONFIG="/tmp/kubeconfig-${CLUSTER_NAME}.conf"
+          #   aws eks update-kubeconfig --name "${CLUSTER_NAME}" --kubeconfig "${KUBECONFIG}"
 
-            # !!! TODO - stop argo sync, delete all services which are type=Loadbalancers + uninstall external-dns
-            kubectl get nodes
-            kubectl delete deployments -A -l app.kubernetes.io/name=external-dns
-            rm "/tmp/kubeconfig-${CLUSTER_NAME}.conf"
-          fi
+          #   # !!! TODO - stop argo sync, delete all services which are type=Loadbalancers + uninstall external-dns
+          #   kubectl get nodes
+          #   kubectl delete deployments -A -l app.kubernetes.io/name=external-dns
+          #   rm "/tmp/kubeconfig-${CLUSTER_NAME}.conf"
+          # fi
 
           # Remove Network ELBs
           for NETWORK_ELB_ARN in $(aws elbv2 describe-load-balancers --query "LoadBalancers[].LoadBalancerArn" --output=text) ; do
