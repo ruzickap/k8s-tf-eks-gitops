@@ -72,10 +72,10 @@ jobs:
             sudo /tmp/aws/install
           fi
 
-          if ! command -v kubectl &> /dev/null; then
-            sudo curl -s -Lo /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/${{ env.KUBECTL_VERSION }}/bin/$(uname | sed "s/./\L&/g" )/amd64/kubectl"
-            sudo chmod a+x /usr/local/bin/kubectl
-          fi
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v2.0
+        with:
+          version: ${{ env.KUBECTL_VERSION }}
 
       - name: Setup Flux
         uses: fluxcd/flux2/action@main
