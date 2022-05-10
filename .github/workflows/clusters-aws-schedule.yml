@@ -73,7 +73,7 @@ jobs:
           fi
 
       - name: Setup kubectl
-        uses: azure/setup-kubectl@v2.0
+        uses: azure/setup-kubectl@v2.1
         with:
           version: ${{ env.KUBECTL_VERSION }}
 
