@@ -33,8 +33,10 @@ Install [AWS CLI](https://aws.amazon.com/cli/) binary:
 
 ```bash
 if ! command -v aws &> /dev/null; then
-  curl -sL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
-  unzip -q -o /tmp/awscliv2.zip -d /tmp/
+  # renovate: datasource=github-tags depName=awscli packageName=aws/aws-cli
+  AWSCLI_VERSION="2.7.1"
+  curl -sL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${AWSCLI_VERSION}.zip" -o "/tmp/awscli.zip"
+  unzip -q -o /tmp/awscli.zip -d /tmp/
   sudo /tmp/aws/install
 fi
 ```
@@ -43,8 +45,9 @@ Install [kubectl](https://github.com/kubernetes/kubectl) binary:
 
 ```bash
 if ! command -v kubectl &> /dev/null; then
-  # https://github.com/kubernetes/kubectl/releases
-  sudo curl -s -Lo /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/v1.22.8/bin/$(uname | sed "s/./\L&/g" )/amd64/kubectl"
+  # renovate: datasource=github-tags depName=kubectl packageName=kubernetes/kubectl extractVersion=^kubernetes-(?<version>.+)$
+  KUBECTL_VERSION="1.22.1"
+  sudo curl -s -Lo /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/$(uname | sed "s/./\L&/g" )/amd64/kubectl"
   sudo chmod a+x /usr/local/bin/kubectl
 fi
 ```
@@ -53,8 +56,9 @@ Install [Helm](https://helm.sh/):
 
 ```bash
 if ! command -v helm &> /dev/null; then
-  # https://github.com/helm/helm/releases
-  curl -s https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash -s -- --version v3.7.1
+  # renovate: datasource=github-tags depName=helm packageName=helm/helm
+  HELM_VERSION="3.8.1"
+  curl -s https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash -s -- --version "v${HELM_VERSION}"
 fi
 ```
 
@@ -62,8 +66,9 @@ Install [kustomize](https://kustomize.io/):
 
 ```bash
 if ! command -v kustomize &> /dev/null; then
-  # https://github.com/kubernetes-sigs/kustomize/releases
-  curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | sudo bash -s 4.4.1 /usr/local/bin/
+  # renovate: datasource=github-tags depName=kustomize packageName=kubernetes-sigs/kustomize extractVersion=^kustomize\/v(?<version>.+)$
+  KUSTOMIZE_VERSION="4.5.1"
+  curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | sudo bash -s "${KUSTOMIZE_VERSION}" /usr/local/bin/
 fi
 ```
 

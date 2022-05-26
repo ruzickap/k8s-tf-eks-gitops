@@ -1,0 +1,51 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "branchPrefix": "renovate/",
+  "labels": ["renovate"],
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["major"],
+      "addLabels": ["renovate/major"],
+    },
+    {
+      "matchUpdateTypes": ["minor"],
+      "addLabels": ["renovate/minor"],
+    },
+    {
+      "matchUpdateTypes": ["patch"],
+      "ignoreTests": true,
+      "automergeType": "branch",
+      "automerge": true,
+    },
+
+    {
+      "description": "autoMerge only patch releases for karpenter due to eksctl support",
+      "matchPackageNames": ["karpenter"],
+      "matchUpdateTypes": ["major", "minor"],
+      "enabled": false
+    },
+
+    // This should be removed once the issue will be fixed...
+    {
+      "description": "autoMerge only patch releases for kubectl due issue: https://github.com/aws/aws-cli/issues/6920",
+      "matchPackageNames": ["kubectl"],
+      "matchUpdateTypes": ["major", "minor"],
+      "enabled": false,
+    },
+  ],
+  "prBodyTemplate": "{{{table}}}{{{notes}}}{{{changelogs}}}",
+  "rebaseWhen": "behind-base-branch",
+  "regexManagers": [
+    {
+      // https://github.com/renovatebot/renovate/discussions/14366
+      "fileMatch": [ "^docs/src/part-.*\\.md$" ],
+      "matchStrings": [
+        // Matches: RANCHER_HELM_CHART_VERSION="2.6.4" and AWSCLI_VERSION="2.7.1"
+        "# renovate: datasource=(?<datasource>.+?) depName=(?<depName>.+?) packageName=(?<packageName>.+?)(?: versioning=(?<versioning>.+?))?(?: registryUrl=(?<registryUrl>.+?))?\\s.*_VERSION=\"?(?<currentValue>.+?)\"?\\s",
+        "# renovate: datasource=(?<datasource>.+?) depName=(?<depName>.+?) packageName=(?<packageName>.+?)\\s*.*version:\\s+\"?(?<currentValue>.+?)\"?\\s",
+      ],
+      "extractVersionTemplate": "{{#if extractVersion}}{{{extractVersion}}}{{else}}^v?(?<version>.+)${{/if}}",
+    },
+  ],
+  "separateMinorPatch": true,
+}
