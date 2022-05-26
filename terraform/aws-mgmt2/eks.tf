@@ -52,7 +52,7 @@ resource "aws_route53_record" "base_domain" {
 # ---------------------------------------------------------------------------------------------------------------------
 
 module "eks_blueprints" {
-  source = "github.com/aws-ia/terraform-aws-eks-blueprints?ref=v4.0.4"
+  source = "github.com/aws-ia/terraform-aws-eks-blueprints?ref=v4.0.6"
 
   tenant      = var.tenant
   environment = var.environment
