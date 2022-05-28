@@ -37,12 +37,9 @@
   "rebaseWhen": "behind-base-branch",
   "regexManagers": [
     {
-      // https://github.com/renovatebot/renovate/discussions/14366
       "fileMatch": [ "^docs/src/part-.*\\.md$" ],
       "matchStrings": [
-        // Matches: RANCHER_HELM_CHART_VERSION="2.6.4" and AWSCLI_VERSION="2.7.1"
-        "# renovate: datasource=(?<datasource>.+?) depName=(?<depName>.+?) packageName=(?<packageName>.+?)(?: versioning=(?<versioning>.+?))?(?: registryUrl=(?<registryUrl>.+?))?\\s.*_VERSION=\"?(?<currentValue>.+?)\"?\\s",
-        "# renovate: datasource=(?<datasource>.+?) depName=(?<depName>.+?) packageName=(?<packageName>.+?)\\s*.*version:\\s+\"?(?<currentValue>.+?)\"?\\s",
+        "# renovate: datasource=(?<datasource>.+?) depName=(?<depName>.+?)( versioning=(?<versioning>.*?))?( extractVersion=(?<extractVersion>.+?))?( registryUrl=(?<registryUrl>.+?))?\\s.*(=|:\\s+)\"?(?<currentValue>.+?)\"?\\s",
       ],
       "extractVersionTemplate": "{{#if extractVersion}}{{{extractVersion}}}{{else}}^v?(?<version>.+)${{/if}}",
     },
