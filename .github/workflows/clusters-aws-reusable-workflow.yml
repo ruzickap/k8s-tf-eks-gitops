@@ -61,7 +61,8 @@ jobs:
     needs: generate-cluster-aws-matrix
     env:
       # Terraform variables (https://www.terraform.io/docs/cli/config/environment-variables.html)
-      TERRAFORM_VERSION: "1.1.2"
+      # renovate: datasource=github-tags depName=hashicorp/terraform
+      TERRAFORM_VERSION: "1.2.1"
       TF_INPUT: "0"
       TF_CLI_ARGS_apply: "-auto-approve"
       TF_CLI_ARGS_destroy: "-auto-approve"
