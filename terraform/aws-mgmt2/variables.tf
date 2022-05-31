@@ -79,7 +79,6 @@ variable "email" {
   description = "Email used for Let's Encrypt"
 }
 
-
 variable "environment" {
   type        = string
   description = "Environment area, e.g. prod or staging"
@@ -137,14 +136,4 @@ variable "managed_node_groups" {
 variable "terraform_code_dir" {
   description = "Path to terraform code (not used in the code)"
   type        = string
-}
-
-variable "tenant" {
-  type        = string
-  description = "Account Name or unique account unique id e.g., apps or management or aws007"
-}
-
-variable "zone" {
-  type        = string
-  description = "zone, e.g. dev or qa or load or ops etc..."
 }
