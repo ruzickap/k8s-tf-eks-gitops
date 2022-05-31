@@ -5,8 +5,6 @@ aws_assume_role = "arn:aws:iam::729560437327:role/GitHubOidcFederatedRole"
 cluster_path    = "clusters/aws-dev-mgmt2/mgmt02.k8s.use1.dev.proj.aws.mylabs.dev"
 
 environment = "dev"
-tenant      = "mgmt02"
-zone        = "mylabs"
 
 # Email (used for Let's Encrypt)
 email = "petr.ruzicka@gmail.com"

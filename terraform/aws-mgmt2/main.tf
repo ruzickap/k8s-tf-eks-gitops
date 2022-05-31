@@ -6,30 +6,25 @@ terraform {
       source = "hashicorp/aws"
     }
     git = {
-      source  = "innovationnorway/git"
-      version = "0.1.3"
+      source = "innovationnorway/git"
     }
     github = {
-      source  = "integrations/github"
-      version = ">= 4.23.0"
+      source = "integrations/github"
     }
     kubectl = {
-      source  = "gavinbunney/kubectl"
-      version = "1.14.0"
+      source = "gavinbunney/kubectl"
     }
     kubernetes = {
       source = "hashicorp/kubernetes"
     }
     http = {
-      source  = "hashicorp/http"
-      version = "2.1.0"
+      source = "hashicorp/http"
     }
     tls = {
-      source  = "hashicorp/tls"
-      version = "3.4.0"
+      source = "hashicorp/tls"
     }
   }
-  required_version = ">= 1.0.1"
+  required_version = ">= 1.2.1"
 }
 
 locals {

@@ -35,7 +35,10 @@
   "rebaseWhen": "behind-base-branch",
   "regexManagers": [
     {
-      "fileMatch": [ "^docs/src/part-.*\\.md$" ],
+      "fileMatch": [
+        "^docs/src/part-.*\\.md$",
+        "^\\.github/workflows/clusters-aws-reusable-workflow\\.yml$",
+      ],
       "matchStrings": [
         "# renovate: datasource=(?<datasource>.+?) depName=(?<depName>.+?)( versioning=(?<versioning>.+?))?( extractVersion=(?<extractVersion>.+?))?( registryUrl=(?<registryUrl>.+?))?\\s.*(=|:\\s+)\"?(?<currentValue>.+?)\"?\\s",
       ],

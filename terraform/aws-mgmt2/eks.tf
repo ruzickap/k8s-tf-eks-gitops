@@ -54,10 +54,6 @@ resource "aws_route53_record" "base_domain" {
 module "eks_blueprints" {
   source = "github.com/aws-ia/terraform-aws-eks-blueprints?ref=v4.0.7"
 
-  tenant      = var.tenant
-  environment = var.environment
-  zone        = var.zone
-
   # EKS Cluster VPC and Subnet mandatory config
   vpc_id             = module.vpc.vpc_id
   private_subnet_ids = module.vpc.private_subnets
