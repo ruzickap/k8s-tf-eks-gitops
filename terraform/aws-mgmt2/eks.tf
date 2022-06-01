@@ -113,7 +113,7 @@ EOF
 
 module "iam_assumable_role_cert_manager" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "5.0.0"
+  version                       = "5.1.0"
   create_role                   = true
   provider_url                  = module.eks_blueprints.eks_oidc_issuer_url
   role_name                     = "${module.eks_blueprints.eks_cluster_id}-iamserviceaccount-cert-manager"
@@ -156,7 +156,7 @@ EOF
 
 module "iam_assumable_role_external_dns" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "5.0.0"
+  version                       = "5.1.0"
   create_role                   = true
   provider_url                  = module.eks_blueprints.eks_oidc_issuer_url
   role_name                     = "${module.eks_blueprints.eks_cluster_id}-iamserviceaccount-external-dns"
