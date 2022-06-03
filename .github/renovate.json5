@@ -1,7 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "branchPrefix": "renovate/",
-  "labels": ["renovate", "renovate/{{depName}}", "renovate/{{updateType}}"],
+  "labels": ["renovate", "renovate/{{replace '.*/' '' depName}}", "renovate/{{updateType}}"],
   "packageRules": [
     {
       "matchUpdateTypes": ["patch"],
@@ -21,6 +21,12 @@
       "matchUpdateTypes": ["minor"],
       "automergeType": "branch",
       "automerge": true,
+    },
+
+    {
+      "description": "Ignore terraform-aws-eks-blueprints updates",
+      "matchPackageNames": ["github.com/aws-ia/terraform-aws-eks-blueprints"],
+      "automerge": false,
     },
 
     // This should be removed once the issue will be fixed...
