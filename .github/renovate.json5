@@ -28,14 +28,6 @@
       "matchPackageNames": ["github.com/aws-ia/terraform-aws-eks-blueprints"],
       "automerge": false,
     },
-
-    // This should be removed once the issue will be fixed...
-    {
-      "description": "autoMerge only patch releases for kubectl due issue: https://github.com/aws/aws-cli/issues/6920",
-      "matchPackageNames": ["kubernetes/kubectl"],
-      "matchUpdateTypes": ["major", "minor"],
-      "enabled": false,
-    },
   ],
   "prBodyTemplate": "{{{table}}}{{{notes}}}{{{changelogs}}}",
   "rebaseWhen": "behind-base-branch",
