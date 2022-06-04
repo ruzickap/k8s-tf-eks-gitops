@@ -24,12 +24,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Markdown Lint
-        uses: ruzickap/action-my-markdown-linter@v1
-        with:
-          exclude: |
-            CHANGELOG.md
-
       - name: Install Node.js 16
         uses: actions/setup-node@v3
         with:

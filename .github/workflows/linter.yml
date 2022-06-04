@@ -62,12 +62,10 @@ jobs:
       - name: Lint Code Base
         uses: github/super-linter/slim@v4
         env:
-          DEFAULT_BRANCH: main
-          ERROR_ON_MISSING_EXEC_BIT: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          FILTER_REGEX_EXCLUDE: ".*/kustomization.ya?ml$|.*/templates/.*.ya?ml$|.*/flux-system/gotk-components.yaml"
-          KUBERNETES_KUBEVAL_OPTIONS: --ignore-missing-schemas
-          USE_FIND_ALGORITHM: true
-          VALIDATE_ALL_CODEBASE: false
+          LINTER_RULES_PATH: .
+          FILTER_REGEX_EXCLUDE: "(CHANGELOG.md|argocd/cluster-addons/templates/.*)"
+          VALIDATE_ALL_CODEBASE: true
           VALIDATE_CSS: false
-          VALIDATE_TERRAFORM_TERRASCAN: false
+          VALIDATE_KUBERNETES_KUBEVAL: false
+          # VALIDATE_TERRAFORM_TERRASCAN: false
