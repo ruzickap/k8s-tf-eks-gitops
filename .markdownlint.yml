@@ -5,4 +5,4 @@ MD013:
   tables: false
 
 # Inline HTML - https://github.com/DavidAnson/markdownlint/blob/master/doc/Rules.md#md033
-MD033:
+# MD033:
