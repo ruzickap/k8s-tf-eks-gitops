@@ -23,7 +23,7 @@ jobs:
       - name: Setup Flux
         uses: fluxcd/flux2/action@main
         with:
-          version: 0.29.5
+          version: 0.30.2
 
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.2.0
