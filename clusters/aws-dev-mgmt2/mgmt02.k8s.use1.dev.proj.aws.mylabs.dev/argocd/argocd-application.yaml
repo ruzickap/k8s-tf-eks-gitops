@@ -11,8 +11,8 @@ spec:
     path: argocd/cluster-addons
     helm:
       valueFiles:
-      - ../../clusters/aws-dev-mgmt2/argocd/argocd-cluster-addons-group-values.yaml
-      - ../../clusters/aws-dev-mgmt2/mgmt02.k8s.use1.dev.proj.aws.mylabs.dev/argocd/argocd-cluster-addons-cluster-values.yaml
+        - ../../clusters/aws-dev-mgmt2/argocd/argocd-cluster-addons-group-values.yaml
+        - ../../clusters/aws-dev-mgmt2/mgmt02.k8s.use1.dev.proj.aws.mylabs.dev/argocd/argocd-cluster-addons-cluster-values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd

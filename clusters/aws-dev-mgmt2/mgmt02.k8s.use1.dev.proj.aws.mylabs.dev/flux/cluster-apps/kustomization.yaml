@@ -1,13 +1,12 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
-# Main group applications
-- ../../../../flux/cluster-apps
+  # Main group applications
+  - ../../../../flux/cluster-apps
 
-# Cluster group applications
-- ../../../flux/cluster-apps
+  # Cluster group applications
+  - ../../../flux/cluster-apps
 
 # Cluster specific applications
 - ../../../../../flux/cluster-apps/polaris/
-
 - helmrelease-values-configmap.yaml
