@@ -51,7 +51,7 @@ jobs:
 
   scheduled-check:
     name: "Test cluster access"
-    needs: [ scheduled-run-time-check, scheduled-create ]
+    needs: [scheduled-run-time-check, scheduled-create]
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -124,7 +124,7 @@ jobs:
 
   scheduled-delete:
     name: "sched"
-    needs: [ scheduled-run-time-check, scheduled-create, scheduled-check ]
+    needs: [scheduled-run-time-check, scheduled-create, scheduled-check]
     if: ${{ needs.scheduled-run-time-check.outputs.scheduled_run != 'false' }}
     uses: ./.github/workflows/clusters-aws-reusable-workflow.yml
     with:

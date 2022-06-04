@@ -3,7 +3,6 @@
 # ---------------------------------------------------------------------------------------------------------------------
 
 module "vpc" {
-  #ts:skip=aws_vpc Ensure VPC flow logging is enabled in all VPCs
   source  = "terraform-aws-modules/vpc/aws"
   version = "3.14.0"
 
