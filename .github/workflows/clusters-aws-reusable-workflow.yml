@@ -73,7 +73,7 @@ jobs:
       # renovate: datasource=github-tags depName=kubernetes/kubectl extractVersion=^kubernetes-(?<version>.+)$
       KUBECTL_VERSION: "1.22.8"
       # renovate: datasource=github-tags depName=kubernetes-sigs/kustomize extractVersion=^kustomize\/v(?<version>.+)$
-      KUSTOMIZE_VERSION: "4.4.1"
+      KUSTOMIZE_VERSION: "4.5.5"
     # Allow only one execution of terraform per cluster (other executions will wait until first will complete)
     concurrency:
       group: cluster-aws-pipeline-${{ matrix.stage }}
