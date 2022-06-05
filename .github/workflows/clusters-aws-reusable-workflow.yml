@@ -68,11 +68,11 @@ jobs:
       TF_CLI_ARGS_destroy: "-auto-approve"
       TF_IN_AUTOMATION: "true"
       TF_VAR_github_token: ${{ secrets.CREATE_FLUX_DEPLOY_KEY_GITHUB_TOKEN }}
-      # https://github.com/helm/helm/releases
-      HELM_VERSION: "v3.6.0"
-      # https://github.com/kubernetes/kubectl/releases
-      KUBECTL_VERSION: "v1.22.8"
-      # https://github.com/kubernetes-sigs/kustomize/releases
+      # renovate: datasource=github-tags depName=helm/helm
+      HELM_VERSION: "3.6.0"
+      # renovate: datasource=github-tags depName=kubernetes/kubectl extractVersion=^kubernetes-(?<version>.+)$
+      KUBECTL_VERSION: "1.22.8"
+      # renovate: datasource=github-tags depName=kubernetes-sigs/kustomize extractVersion=^kustomize\/v(?<version>.+)$
       KUSTOMIZE_VERSION: "4.4.1"
     # Allow only one execution of terraform per cluster (other executions will wait until first will complete)
     concurrency:
@@ -110,12 +110,12 @@ jobs:
       - name: Setup kubectl
         uses: azure/setup-kubectl@v2.1
         with:
-          version: ${{ env.KUBECTL_VERSION }}
+          version: v${{ env.KUBECTL_VERSION }}
 
       - name: Setup helm
         uses: azure/setup-helm@v1
         with:
-          version: ${{ env.HELM_VERSION }}
+          version: v${{ env.HELM_VERSION }}
 
       - name: 💡🔪 Get and display environment variables
         run: |
