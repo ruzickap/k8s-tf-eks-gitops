@@ -14,7 +14,6 @@ jobs:
     name: "Scheduled run time check"
     runs-on: ubuntu-latest
     outputs:
-      scheduled_run: ${{ steps.scheduled_run.outputs.scheduled_run }}
       scheduled_clusters: ${{ steps.scheduled_run.outputs.scheduled_clusters }}
       scheduled_clusters_matrix: ${{ steps.scheduled_run.outputs.scheduled_clusters_matrix }}
     steps:
@@ -51,21 +50,29 @@ jobs:
           echo "*** SCHEDULED_CLUSTERS: ${SCHEDULED_CLUSTERS}"
 
           if [[ -n "${SCHEDULED_CLUSTERS}" ]]; then
-            echo "::set-output name=scheduled_run::true"
-            echo "::set-output name=scheduled_clusters_matrix::$( echo -n "${SCHEDULED_CLUSTERS:1}" | jq -c -R -s 'split("|")')"
             SCHEDULED_CLUSTERS=".*(${SCHEDULED_CLUSTERS:1}).*"
             echo "SCHEDULED_CLUSTERS=${SCHEDULED_CLUSTERS}" >> "${GITHUB_ENV}"
-          else
-            echo "::set-output name=scheduled_run::false"
           fi
 
           # This is workaround for: https://github.community/t/reusable-workflow-env-context-not-available-in-jobs-job-id-with/206111/3
           echo "::set-output name=scheduled_clusters::${SCHEDULED_CLUSTERS}"
+          echo "::set-output name=scheduled_clusters_matrix::$( echo -n "${SCHEDULED_CLUSTERS:1}" | jq -c -R -s 'split("|")')"
+
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        if: ${{ steps.scheduled_run.outputs.scheduled_clusters_matrix != '[]' }}
+        env:
+          SLACK_CHANNEL: general
+          SLACK_ICON_EMOJI: ":github_octocat:"
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_TITLE: ${{ github.repository }}
+          SLACK_MESSAGE: "Scheduled Clusters: \"${{ steps.scheduled_run.outputs.scheduled_clusters }}\"\nChnaged Files:\n${{ steps.changed-files.outputs.all_changed_files }}\n<@U01S52AUB1A>"
+          SLACK_FOOTER:
+          SLACK_LINK_NAMES: true
 
   scheduled-create:
-    name: "sched"
     needs: scheduled-run-time-check
-    if: ${{ needs.scheduled-run-time-check.outputs.scheduled_run != 'false' }}
+    if: ${{ needs.scheduled-run-time-check.outputs.scheduled_clusters_matrix != '[]' }}
     uses: ./.github/workflows/clusters-aws-reusable-workflow.yml
     with:
       clusters: ${{ needs.scheduled-run-time-check.outputs.scheduled_clusters }}
@@ -82,9 +89,6 @@ jobs:
       contents: read
     if: ${{ needs.scheduled-run-time-check.outputs.scheduled_clusters_matrix != '[""]' }}
     needs: [scheduled-run-time-check, scheduled-create]
-    env:
-      # renovate: datasource=github-tags depName=kubernetes/kubectl extractVersion=^kubernetes-(?<version>.+)$
-      KUBECTL_VERSION: "1.24.1"
     strategy:
       # Do not cancel matrix jobs if one of them fails
       fail-fast: false
@@ -156,9 +160,8 @@ jobs:
           kubectl get applications,applicationsets -A || true
 
   scheduled-delete:
-    name: "sched"
     needs: [scheduled-run-time-check, scheduled-check]
-    if: ${{ needs.scheduled-run-time-check.outputs.scheduled_run != 'false' }}
+    if: ${{ needs.scheduled-run-time-check.outputs.scheduled_clusters_matrix != '[]' }}
     uses: ./.github/workflows/clusters-aws-reusable-workflow.yml
     with:
       # https://github.community/t/reusable-workflow-env-context-not-available-in-jobs-job-id-with/206111
