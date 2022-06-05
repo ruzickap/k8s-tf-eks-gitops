@@ -3,6 +3,8 @@ name: shellcheck
 on:
   workflow_dispatch:
   push:
+    branches-ignore:
+      - main
 
 jobs:
   shellcheck:
