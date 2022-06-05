@@ -24,7 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Install Node.js 16
+      - name: Install Node.js
         uses: actions/setup-node@v3
         with:
           # renovate: datasource=github-tags depName=nodejs/node versioning=node

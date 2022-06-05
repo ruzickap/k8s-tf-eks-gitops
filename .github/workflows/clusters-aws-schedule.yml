@@ -3,11 +3,9 @@ name: clusters-aws-schedule
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "2 2 * * */2"
 
 env:
-  SCHEDULED_CLUSTERS: ".*(/mgmt02.k8s.use1.dev.proj.aws.mylabs.dev$).*"
-  # https://github.com/kubernetes/kubectl/releases
   # renovate: datasource=github-tags depName=kubernetes/kubectl extractVersion=^kubernetes-(?<version>.+)$
   KUBECTL_VERSION: "1.24.1"
 
@@ -18,23 +16,49 @@ jobs:
     outputs:
       scheduled_run: ${{ steps.scheduled_run.outputs.scheduled_run }}
       scheduled_clusters: ${{ steps.scheduled_run.outputs.scheduled_clusters }}
+      scheduled_clusters_matrix: ${{ steps.scheduled_run.outputs.scheduled_clusters_matrix }}
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
         with:
           fetch-depth: 2
 
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v22.2
+
       - name: 💡 Scheduled run time check
         id: scheduled_run
         run: |
           set -euxo pipefail
 
-          # Check if there was a change in git repo in passed 24 hours
-          # https://github.community/t/trigger-action-on-schedule-only-if-there-are-changes-to-the-branch/17887/4
-          if [[ -z "$(git rev-list --after='24 hours' ${{ github.sha }})" ]]; then
-            echo "*** Git repository hasn't been changed in passed 24 hours - skipping next tasks..."
+          ALL_CHANGED_FILES=" ${{ steps.changed-files.outputs.all_changed_files }}"
+          echo "*** ALL_CHANGED_FILES: ${ALL_CHANGED_FILES}"
+
+          SCHEDULED_CLUSTERS=""
+          if [[ "${ALL_CHANGED_FILES}" =~ mgmt01.k8s.use1.dev.proj.aws.mylabs.dev|\ terraform/aws-mgmt ]]; then
+            SCHEDULED_CLUSTERS+="|mgmt01.k8s.use1.dev.proj.aws.mylabs.dev"
+          fi
+
+          if [[ "${ALL_CHANGED_FILES}" =~ /mgmt02.k8s.use1.dev.proj.aws.mylabs.dev/|/aws-dev-mgmt2/(group-variables.tfvars|flux/|argocd/)|\ flux/|\ argocd/|\ terraform/aws-mgmt2/ ]]; then
+            SCHEDULED_CLUSTERS+="|mgmt02.k8s.use1.dev.proj.aws.mylabs.dev"
+          fi
+
+          if [[ "${ALL_CHANGED_FILES}" =~ ruzickap01.k8s.use1.dev.proj.aws.mylabs.dev|aws-dev-sandbox/group-variables.tfvars|\ terraform/aws-dev ]]; then
+            SCHEDULED_CLUSTERS+="|ruzickap01.k8s.use1.dev.proj.aws.mylabs.dev"
+          fi
+
+          echo "*** SCHEDULED_CLUSTERS: ${SCHEDULED_CLUSTERS}"
+
+          if [[ -n "${SCHEDULED_CLUSTERS}" ]]; then
+            echo "::set-output name=scheduled_run::true"
+            echo "::set-output name=scheduled_clusters_matrix::$( echo -n "${SCHEDULED_CLUSTERS:1}" | jq -c -R -s 'split("|")')"
+            SCHEDULED_CLUSTERS=".*(${SCHEDULED_CLUSTERS:1}).*"
+            echo "SCHEDULED_CLUSTERS=${SCHEDULED_CLUSTERS}" >> "${GITHUB_ENV}"
+          else
             echo "::set-output name=scheduled_run::false"
           fi
+
           # This is workaround for: https://github.community/t/reusable-workflow-env-context-not-available-in-jobs-job-id-with/206111/3
           echo "::set-output name=scheduled_clusters::${SCHEDULED_CLUSTERS}"
 
@@ -51,12 +75,21 @@ jobs:
       CREATE_FLUX_DEPLOY_KEY_GITHUB_TOKEN: ${{ secrets.CREATE_FLUX_DEPLOY_KEY_GITHUB_TOKEN }}
 
   scheduled-check:
-    name: "Test cluster access"
-    needs: [scheduled-run-time-check, scheduled-create]
+    name: "${{ matrix.stage }}"
     runs-on: ubuntu-latest
     permissions:
       id-token: write
       contents: read
+    if: ${{ needs.scheduled-run-time-check.outputs.scheduled_clusters_matrix != '[""]' }}
+    needs: [scheduled-run-time-check, scheduled-create]
+    env:
+      # renovate: datasource=github-tags depName=kubernetes/kubectl extractVersion=^kubernetes-(?<version>.+)$
+      KUBECTL_VERSION: "1.24.1"
+    strategy:
+      # Do not cancel matrix jobs if one of them fails
+      fail-fast: false
+      matrix:
+        stage: ${{ fromJSON(needs.scheduled-run-time-check.outputs.scheduled_clusters_matrix) }}
     steps:
       - name: 💡🔪 Check out repository code
         uses: actions/checkout@v3
@@ -98,7 +131,7 @@ jobs:
             echo "::set-output name=${TF_CODE_VARIABLE^^}::${VARIABLE_HELPER}"
           }
 
-          CLUSTER_PATH=$(find clusters -maxdepth 2 -mindepth 2 -type d -regextype "posix-extended" ! -regex '.*/(argocd|flux)' -regex '.*${{ env.SCHEDULED_CLUSTERS }}.*')
+          CLUSTER_PATH=$(find clusters -maxdepth 2 -mindepth 2 -type d -regextype "posix-extended" ! -regex '.*/(argocd|flux)' -regex ".*${{ matrix.stage }}.*")
 
           get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "aws_default_region"
           get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "aws_assume_role"
@@ -115,17 +148,16 @@ jobs:
       - name: 💡 Access Amazon EKS cluster and list nodes, Flux and ArgoCD details
         run: |
           set -euxo pipefail
-          sleep 100
           export KUBECONFIG="/tmp/kubeconfig-${CLUSTER_NAME}.conf"
           aws eks update-kubeconfig --region "${AWS_DEFAULT_REGION}" --name "${CLUSTER_NAME}" --kubeconfig "${KUBECONFIG}"
           kubectl get nodes -o wide --show-labels
           kubectl get namespaces
           flux get all --all-namespaces
-          kubectl get applications,applicationsets -A
+          kubectl get applications,applicationsets -A || true
 
   scheduled-delete:
     name: "sched"
-    needs: [scheduled-run-time-check, scheduled-create, scheduled-check]
+    needs: [scheduled-run-time-check, scheduled-check]
     if: ${{ needs.scheduled-run-time-check.outputs.scheduled_run != 'false' }}
     uses: ./.github/workflows/clusters-aws-reusable-workflow.yml
     with:
