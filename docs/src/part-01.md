@@ -72,6 +72,17 @@ if ! command -v kustomize &> /dev/null; then
 fi
 ```
 
+Install [flux](https://fluxcd.io/):
+
+```bash
+if ! command -v flux &> /dev/null; then
+  # shellcheck disable=SC2034
+  # renovate: datasource=github-tags depName=fluxcd/flux2
+  FLUX_VERSION="0.24.1"
+  curl -s https://fluxcd.io/install.sh | sudo -E bash
+fi
+```
+
 ## Configure AWS Route 53 Domain delegation
 
 > This should be done only once.

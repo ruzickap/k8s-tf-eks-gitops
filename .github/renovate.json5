@@ -35,7 +35,7 @@
     {
       "fileMatch": [
         "^docs/src/part-.*\\.md$",
-        "^\\.github/workflows/clusters-aws-reusable-workflow\\.yml$",
+        "^\\.github/workflows/.*\\.yml$",
       ],
       "matchStrings": [
         "# renovate: datasource=(?<datasource>.+?) depName=(?<depName>.+?)( versioning=(?<versioning>.+?))?( extractVersion=(?<extractVersion>.+?))?( registryUrl=(?<registryUrl>.+?))?\\s.*(=|:\\s+)\"?(?<currentValue>.+?)\"?\\s",
