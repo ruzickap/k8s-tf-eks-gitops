@@ -8,7 +8,8 @@ on:
 env:
   SCHEDULED_CLUSTERS: ".*(/mgmt02.k8s.use1.dev.proj.aws.mylabs.dev$).*"
   # https://github.com/kubernetes/kubectl/releases
-  KUBECTL_VERSION: "v1.22.8"
+  # renovate: datasource=github-tags depName=kubernetes/kubectl extractVersion=^kubernetes-(?<version>.+)$
+  KUBECTL_VERSION: "1.22.8"
 
 jobs:
   scheduled-run-time-check:
@@ -75,7 +76,7 @@ jobs:
       - name: Setup kubectl
         uses: azure/setup-kubectl@v2.1
         with:
-          version: ${{ env.KUBECTL_VERSION }}
+          version: v${{ env.KUBECTL_VERSION }}
 
       - name: Setup Flux
         uses: fluxcd/flux2/action@main
