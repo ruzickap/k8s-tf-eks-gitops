@@ -9,7 +9,7 @@ env:
   SCHEDULED_CLUSTERS: ".*(/mgmt02.k8s.use1.dev.proj.aws.mylabs.dev$).*"
   # https://github.com/kubernetes/kubectl/releases
   # renovate: datasource=github-tags depName=kubernetes/kubectl extractVersion=^kubernetes-(?<version>.+)$
-  KUBECTL_VERSION: "1.22.8"
+  KUBECTL_VERSION: "1.24.1"
 
 jobs:
   scheduled-run-time-check:
