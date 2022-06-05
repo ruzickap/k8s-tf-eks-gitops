@@ -34,8 +34,8 @@
   "regexManagers": [
     {
       "fileMatch": [
-        "^docs/src/part-.*\\.md$",
         "^\\.github/workflows/.*\\.yml$",
+        "^docs/src/part-.*\\.md$",
       ],
       "matchStrings": [
         "# renovate: datasource=(?<datasource>.+?) depName=(?<depName>.+?)( versioning=(?<versioning>.+?))?( extractVersion=(?<extractVersion>.+?))?( registryUrl=(?<registryUrl>.+?))?\\s.*(=|:\\s+)\"?(?<currentValue>.+?)\"?\\s",
