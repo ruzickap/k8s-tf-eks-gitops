@@ -69,7 +69,7 @@ jobs:
       TF_IN_AUTOMATION: "true"
       TF_VAR_github_token: ${{ secrets.CREATE_FLUX_DEPLOY_KEY_GITHUB_TOKEN }}
       # renovate: datasource=github-tags depName=helm/helm
-      HELM_VERSION: "3.6.0"
+      HELM_VERSION: "3.9.0"
       # renovate: datasource=github-tags depName=kubernetes/kubectl extractVersion=^kubernetes-(?<version>.+)$
       KUBECTL_VERSION: "1.22.8"
       # renovate: datasource=github-tags depName=kubernetes-sigs/kustomize extractVersion=^kustomize\/v(?<version>.+)$
