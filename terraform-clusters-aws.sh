@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
-get_variable_from_group_cluster_tfvars () {
+get_variable_from_group_cluster_tfvars() {
   local CLUSTER_PATH="$1" TF_CODE_VARIABLE="$2" VARIABLE_HELPER
 
-  if grep -q "${TF_CODE_VARIABLE}" "${CLUSTER_PATH}/cluster-variables.tfvars" ; then
+  if grep -q "${TF_CODE_VARIABLE}" "${CLUSTER_PATH}/cluster-variables.tfvars"; then
     VARIABLE_HELPER=$(awk -F \" "/^${TF_CODE_VARIABLE}/ { print \$2 }" "${CLUSTER_PATH}/cluster-variables.tfvars")
   else
     VARIABLE_HELPER=$(awk -F \" "/^${TF_CODE_VARIABLE}/ { print \$2 }" "${CLUSTER_PATH}/../group-variables.tfvars")

@@ -47,7 +47,7 @@ Install [kubectl](https://github.com/kubernetes/kubectl) binary:
 if ! command -v kubectl &> /dev/null; then
   # renovate: datasource=github-tags depName=kubernetes/kubectl extractVersion=^kubernetes-(?<version>.+)$
   KUBECTL_VERSION="1.24.1"
-  sudo curl -s -Lo /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/$(uname | sed "s/./\L&/g" )/amd64/kubectl"
+  sudo curl -s -Lo /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/$(uname | sed "s/./\L&/g")/amd64/kubectl"
   sudo chmod a+x /usr/local/bin/kubectl
 fi
 ```

@@ -1,6 +1,5 @@
 # https://github.com/argoproj/argo-helm/blob/master/charts/argo-cd/templates/argocd-configs/applications.yaml
 {{- range .Values.applications }}
----
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:

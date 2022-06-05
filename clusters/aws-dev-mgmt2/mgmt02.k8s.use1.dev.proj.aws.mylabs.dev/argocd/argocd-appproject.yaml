@@ -6,10 +6,10 @@ metadata:
 spec:
   description: ArgoCD Project for Cluster addons
   sourceRepos:
-  - '*'
+    - '*'
   destinations:
-  - namespace: '*'
-    server: https://kubernetes.default.svc
+    - namespace: '*'
+      server: https://kubernetes.default.svc
   clusterResourceWhitelist:
-  - group: '*'
-    kind: '*'
+    - group: '*'
+      kind: '*'
