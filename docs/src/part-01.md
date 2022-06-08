@@ -78,7 +78,7 @@ Install [flux](https://fluxcd.io/):
 if ! command -v flux &> /dev/null; then
   # shellcheck disable=SC2034
   # renovate: datasource=github-tags depName=fluxcd/flux2
-  FLUX_VERSION="0.30.2"
+  FLUX_VERSION="0.31.0"
   curl -s https://fluxcd.io/install.sh | sudo -E bash
 fi
 ```
