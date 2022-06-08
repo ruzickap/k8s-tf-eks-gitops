@@ -24,7 +24,7 @@ jobs:
         uses: fluxcd/flux2/action@main
         with:
           # renovate: datasource=github-tags depName=fluxcd/flux2
-          version: 0.30.2
+          version: 0.31.0
 
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.2.0
