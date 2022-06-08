@@ -34,7 +34,7 @@
   "regexManagers": [
     {
       "fileMatch": [
-        "^\\.github/workflows/.*\\.yml$",
+        "^\\.github/workflows/.*\\.ya?ml$",
         "^docs/src/part-.*\\.md$",
       ],
       "matchStrings": [
