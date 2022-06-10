@@ -49,6 +49,34 @@ jobs:
 
           echo "*** SCHEDULED_CLUSTERS: ${SCHEDULED_CLUSTERS}"
 
+          cat > payload-slack-content.json << EOF
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": ":rocket: *<${{ github.event.repository.html_url }}|${{ github.repository }}>* | *<${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}|GitHub Actions>*\n<@U01S52AUB1A>"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Scheduled Clusters*: ${SCHEDULED_CLUSTERS//|/\\\n• }"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Chnaged Files*: ${ALL_CHANGED_FILES// /\\\n• }"
+                  }
+                }
+              ]
+            }
+          EOF
+
           if [[ -n "${SCHEDULED_CLUSTERS}" ]]; then
             SCHEDULED_CLUSTERS=".*(${SCHEDULED_CLUSTERS:1}).*"
             echo "SCHEDULED_CLUSTERS=${SCHEDULED_CLUSTERS}" >> "${GITHUB_ENV}"
@@ -58,17 +86,14 @@ jobs:
           echo "::set-output name=scheduled_clusters::${SCHEDULED_CLUSTERS}"
           echo "::set-output name=scheduled_clusters_matrix::$( echo -n "${SCHEDULED_CLUSTERS:1}" | jq -c -R -s 'split("|")')"
 
-      - name: Slack Notification
-        uses: rtCamp/action-slack-notify@v2
+      - name: Send Slack message
+        uses: slackapi/slack-github-action@v1.18.0
         if: ${{ steps.scheduled_run.outputs.scheduled_clusters_matrix != '[]' }}
+        with:
+          payload-file-path: payload-slack-content.json
         env:
-          SLACK_CHANNEL: general
-          SLACK_ICON_EMOJI: ":github_octocat:"
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_TITLE: ${{ github.repository }}
-          SLACK_MESSAGE: "Scheduled Clusters: \"${{ steps.scheduled_run.outputs.scheduled_clusters }}\"\nChnaged Files:\n${{ steps.changed-files.outputs.all_changed_files }}\n<@U01S52AUB1A>"
-          SLACK_FOOTER:
-          SLACK_LINK_NAMES: true
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
 
   scheduled-create:
     needs: scheduled-run-time-check
