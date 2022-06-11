@@ -26,5 +26,7 @@ spec:
     name: flux-system
   postBuild:
     substituteFrom:
+      # ConfigMap containing variables like CLUSTER_FQDN, CLUSTER_NAME, CLUSTER_PATH, ...
+      # They are defined in the Terraform flux section: resource "kubernetes_config_map" "cluster-apps-vars-terraform"
       - kind: ConfigMap
         name: cluster-apps-vars-terraform

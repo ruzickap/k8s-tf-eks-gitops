@@ -8,6 +8,7 @@ spec:
     - name: sources
   # detect drift and undo kubectl edits every minute
   interval: 1m
+  # Variables are taken from `flux-system/gotk-sync.yaml` stored in ConfigMap `cluster-apps-vars-terraform`
   path: ${CLUSTER_PATH}/flux/cluster-apps
   prune: true
   sourceRef:

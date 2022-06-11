@@ -13,7 +13,8 @@ email = "petr.ruzicka@gmail.com"
 gitops = "flux"
 
 # The ArgoCD Version is only used for initial ArgoCD installation (https://github.com/argoproj/argo-cd/tags)
-argocd_core_version = "v2.3.3"
+# renovate: datasource=github-tags depName=argoproj/argo-cd
+argocd_core_version = "2.3.3"
 
 cluster_version                 = "1.22"
 cluster_endpoint_private_access = false
