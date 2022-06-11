@@ -20,7 +20,7 @@ data "git_repository" "current_git_repository" {
 
 
 data "http" "argo-cd_core-install" {
-  url = "https://raw.githubusercontent.com/argoproj/argo-cd/${var.argocd_core_version}/manifests/core-install.yaml"
+  url = "https://raw.githubusercontent.com/argoproj/argo-cd/v${var.argocd_core_version}/manifests/core-install.yaml"
 }
 
 data "kubectl_file_documents" "argo-cd_core-install" {

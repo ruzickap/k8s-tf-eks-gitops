@@ -1,4 +1,4 @@
-# Kustomization for sources are needed, becaus they will be used as "dependency"
+# Kustomization for sources are needed, because they will be used as "dependency"
 # for "applications"
 # Sources must be installed "first"
 
@@ -9,6 +9,7 @@ metadata:
   namespace: flux-system
 spec:
   interval: 5m0s
+  # Variables are taken from `flux-system/gotk-sync.yaml` stored in ConfigMap `cluster-apps-vars-terraform`
   path: ${CLUSTER_PATH}/flux/sources
   prune: true
   sourceRef:
