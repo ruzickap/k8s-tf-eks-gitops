@@ -1,6 +1,12 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "branchPrefix": "renovate/",
+  "flux": {
+    "fileMatch": ["flux/.+\\.ya?ml$"]
+  },
+  "kubernetes": {
+    "fileMatch": ["\\.ya?ml$"]
+  },
   "labels": ["renovate", "renovate/{{replace '.*/' '' depName}}", "renovate/{{updateType}}"],
   "packageRules": [
     {
