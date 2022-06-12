@@ -11,5 +11,5 @@ spec:
         kind: HelmRepository
         name: kubernetes-dashboard
         namespace: flux-system
-      version: 5.0.5
+      version: 5.7.0
   interval: 1m
