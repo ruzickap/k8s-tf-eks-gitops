@@ -56,7 +56,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": ":rocket: *<${{ github.event.repository.html_url }}|${{ github.repository }}>* | *<${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}|GitHub Actions>*\n<@U01S52AUB1A>"
+                    "text": ":rocket: [$(date "+%F %R")] *<${{ github.event.repository.html_url }}|${{ github.repository }}>* | *<${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}|GitHub Actions>*\n<@U01S52AUB1A>"
                   }
                 },
                 {
