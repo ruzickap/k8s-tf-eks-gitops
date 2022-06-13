@@ -292,3 +292,9 @@ jobs:
 
           aws cloudformation delete-stack --stack-name "${CLUSTER_FQDN//./-}-s3-dynamodb-tfstate"
           aws cloudformation wait stack-delete-complete --stack-name "${CLUSTER_FQDN//./-}-s3-dynamodb-tfstate"
+
+      - name: Setup tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: true

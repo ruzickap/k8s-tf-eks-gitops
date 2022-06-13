@@ -11,5 +11,5 @@ spec:
         kind: HelmRepository
         name: fairwinds-stable
         namespace: flux-system
-      version: 4.2.3
+      version: 5.1.0
   interval: 1m

@@ -9,3 +9,5 @@ resources:
 
   # Cluster specific applications
   - ../../../../../flux/cluster-apps/polaris/
+
+  - podinfo-cluster-helmrelease-values.yaml
