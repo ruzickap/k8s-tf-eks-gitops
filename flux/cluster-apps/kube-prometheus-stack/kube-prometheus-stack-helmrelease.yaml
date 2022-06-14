@@ -1,0 +1,25 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: kube-prometheus-stack
+  namespace: kube-prometheus-stack
+spec:
+  chart:
+    spec:
+      chart: kube-prometheus-stack
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community
+        namespace: flux-system
+      version: 27.0.0
+  interval: 1m
+  valuesFrom:
+    - kind: ConfigMap
+      name: kube-prometheus-stack-main-helmrelease-values
+      optional: true
+    - kind: ConfigMap
+      name: kube-prometheus-stack-group-helmrelease-values
+      optional: true
+    - kind: ConfigMap
+      name: kube-prometheus-stack-cluster-helmrelease-values
+      optional: true

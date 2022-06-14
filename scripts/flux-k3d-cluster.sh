@@ -49,13 +49,14 @@ k3d kubeconfig write ${CLUSTER_NAME} --overwrite --output "${KUBECONFIG}"
 
 flux install
 
-kubectl create configmap -n flux-system cluster-apps-vars-terraform \
-  --from-literal=CLUSTER_PATH=${CLUSTER_PATH} \
-  --from-literal=CLUSTER_FQDN=${CLUSTER_FQDN} \
-  --from-literal=CLUSTER_NAME=${CLUSTER_NAME} \
-  --from-literal=EMAIL=${EMAIL} \
-  --from-literal=ENVIRONMENT=${ENVIRONMENT} \
-  --from-literal=TAGS_INLINE=tag1=test1,tag2=test2,tag3=test3
+kubectl create configmap -n flux-system cluster-apps-vars-terraform-configmap \
+  --from-literal=CLUSTER_PATH="${CLUSTER_PATH}" \
+  --from-literal=CLUSTER_FQDN="${CLUSTER_FQDN}" \
+  --from-literal=CLUSTER_NAME="${CLUSTER_NAME}" \
+  --from-literal=EMAIL="${EMAIL}" \
+  --from-literal=ENVIRONMENT="${ENVIRONMENT}" \
+  --from-literal=SLACK_CHANNEL="mylabs" \
+  --from-literal=TAGS_INLINE="tag1=test1,tag2=test2,tag3=test3"
 
 flux create source git flux-system \
   --url="$(gh repo view --json url --jq '.url')" \

@@ -1,0 +1,294 @@
+defaultRules:
+  rules:
+    etcd: false
+    kubernetesSystem: false
+    kubeScheduler: false
+additionalPrometheusRulesMap:
+  # Flux rule: https://toolkit.fluxcd.io/guides/monitoring/
+  rule-name:
+    groups:
+      - name: GitOpsToolkit
+        rules:
+          - alert: ReconciliationFailure
+            expr: max(gotk_reconcile_condition{status="False",type="Ready"}) by (namespace, name, kind) + on(namespace, name, kind) (max(gotk_reconcile_condition{status="Deleted"}) by (namespace, name, kind)) * 2 == 1
+            for: 10m
+            labels:
+              severity: page
+            annotations:
+              summary: '{{ $labels.kind }} {{ $labels.namespace }}/{{ $labels.name }} reconciliation has been failing for more than ten minutes.'
+alertmanager:
+  config:
+    global:
+      # Slack Webhook URL - secret xxxx TODO !!!!
+      slack_api_url: ${SLACK_WEBHOOK_URL}
+      smtp_smarthost: "mailhog.mailhog.svc.cluster.local:1025"
+      smtp_from: "alertmanager@${CLUSTER_FQDN}"
+    route:
+      group_by: ["alertname", "job"]
+      receiver: slack-notifications
+      routes:
+        - match:
+            severity: warning
+          continue: true
+          receiver: slack-notifications
+        - match:
+            severity: warning
+          receiver: email-notifications
+    receivers:
+      - name: "email-notifications"
+        email_configs:
+          - to: "notification@${CLUSTER_FQDN}"
+            require_tls: false
+      - name: "slack-notifications"
+        slack_configs:
+          - channel: "#${SLACK_CHANNEL}"
+            send_resolved: True
+            icon_url: "https://avatars3.githubusercontent.com/u/3380462"
+            title: '{{ template "slack.cp.title" . }}'
+            text: '{{ template "slack.cp.text" . }}'
+            footer: "https://${CLUSTER_FQDN}"
+            actions:
+              - type: button
+                text: 'Runbook :blue_book:'
+                url: '{{ (index .Alerts 0).Annotations.runbook_url }}'
+              - type: button
+                text: 'Query :mag:'
+                url: '{{ (index .Alerts 0).GeneratorURL }}'
+              - type: button
+                text: 'Silence :no_bell:'
+                url: '{{ template "__alert_silence_link" . }}'
+    templates:
+      - "/etc/alertmanager/config/cp-slack-templates.tmpl"
+  templateFiles:
+    cp-slack-templates.tmpl: |-
+      {{ define "slack.cp.title" -}}
+        [{{ .Status | toUpper -}}
+        {{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{- end -}}
+        ] {{ template "__alert_severity_prefix_title" . }} {{ .CommonLabels.alertname }}
+      {{- end }}
+      {{/* The test to display in the alert */}}
+      {{ define "slack.cp.text" -}}
+        {{ range .Alerts }}
+            *Alert:* {{ .Annotations.message}}
+            *Details:*
+            {{ range .Labels.SortedPairs }} - *{{ .Name }}:* `{{ .Value }}`
+            {{ end }}
+            *-----*
+          {{ end }}
+      {{- end }}
+      {{ define "__alert_silence_link" -}}
+        {{ .ExternalURL }}/#/silences/new?filter=%7B
+        {{- range .CommonLabels.SortedPairs -}}
+          {{- if ne .Name "alertname" -}}
+            {{- .Name }}%3D"{{- .Value -}}"%2C%20
+          {{- end -}}
+        {{- end -}}
+          alertname%3D"{{ .CommonLabels.alertname }}"%7D
+      {{- end }}
+      {{ define "__alert_severity_prefix" -}}
+          {{ if ne .Status "firing" -}}
+          :white_check_mark:
+          {{- else if eq .Labels.severity "critical" -}}
+          :fire:
+          {{- else if eq .Labels.severity "warning" -}}
+          :warning:
+          {{- else -}}
+          :question:
+          {{- end }}
+      {{- end }}
+      {{ define "__alert_severity_prefix_title" -}}
+          {{ if ne .Status "firing" -}}
+          :white_check_mark:
+          {{- else if eq .CommonLabels.severity "critical" -}}
+          :fire:
+          {{- else if eq .CommonLabels.severity "warning" -}}
+          :warning:
+          {{- else if eq .CommonLabels.severity "info" -}}
+          :information_source:
+          {{- else if eq .CommonLabels.status_icon "information" -}}
+          :information_source:
+          {{- else -}}
+          :question:
+          {{- end }}
+      {{- end }}
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    annotations:
+      nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/auth
+      nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/start?rd=$scheme://$host$request_uri
+    hosts:
+      - alertmanager.${CLUSTER_FQDN}
+    paths: ["/"]
+    pathType: ImplementationSpecific
+    tls:
+      - hosts:
+          - alertmanager.${CLUSTER_FQDN}
+# https://github.com/grafana/helm-charts/blob/main/charts/grafana/values.yaml
+grafana:
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    annotations:
+      nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/auth
+      nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/start?rd=$scheme://$host$request_uri
+    hosts:
+      - grafana.${CLUSTER_FQDN}
+    paths: ["/"]
+    pathType: ImplementationSpecific
+    tls:
+      - hosts:
+          - grafana.${CLUSTER_FQDN}
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+        - name: "default"
+          orgId: 1
+          folder: ""
+          type: file
+          disableDeletion: false
+          editable: true
+          options:
+            path: /var/lib/grafana/dashboards/default
+  dashboards:
+    default:
+      k8s-cluster-summary:
+        gnetId: 8685
+        revision: 1
+        datasource: Prometheus
+      node-exporter-full:
+        gnetId: 1860
+        revision: 24
+        datasource: Prometheus
+      prometheus-2-0-overview:
+        gnetId: 3662
+        revision: 2
+        datasource: Prometheus
+      stians-disk-graphs:
+        gnetId: 9852
+        revision: 1
+        datasource: Prometheus
+      kubernetes-apiserver:
+        gnetId: 12006
+        revision: 1
+        datasource: Prometheus
+      ingress-nginx:
+        gnetId: 9614
+        revision: 1
+        datasource: Prometheus
+      ingress-nginx2:
+        gnetId: 11875
+        revision: 1
+        datasource: Prometheus
+      istio-mesh:
+        gnetId: 7639
+        revision: 101
+        datasource: Prometheus
+      istio-performance:
+        gnetId: 11829
+        revision: 101
+        datasource: Prometheus
+      istio-service:
+        gnetId: 7636
+        revision: 101
+        datasource: Prometheus
+      istio-workload:
+        gnetId: 7630
+        revision: 101
+        datasource: Prometheus
+      istio-control-plane:
+        gnetId: 7645
+        revision: 101
+        datasource: Prometheus
+      jaeger:
+        gnetId: 10001
+        revision: 2
+        datasource: Prometheus
+      # https://github.com/fluxcd/flux2/blob/main/manifests/monitoring/grafana/dashboards/cluster.json
+      gitops-toolkit-control-plane:
+        url: https://raw.githubusercontent.com/fluxcd/flux2/c98cd106218b0fdead155bd9a0b0a5666e5c3e15/manifests/monitoring/grafana/dashboards/control-plane.json
+        datasource: Prometheus
+      gitops-toolkit-cluster:
+        url: https://raw.githubusercontent.com/fluxcd/flux2/80cf5fa7291242f87458a426fccb57abfd8c66ee/manifests/monitoring/grafana/dashboards/cluster.json
+        datasource: Prometheus
+      kyverno-policy-report:
+        gnetId: 13995
+        revision: 4
+        datasource: Prometheus
+      kyverno-policy-reports:
+        gnetId: 13968
+        revision: 2
+        datasource: Prometheus
+      external-dns:
+        gnetId: 15038
+        revision: 1
+        datasource: Prometheus
+      kubernetes-monitor:
+        gnetId: 15398
+        revision: 5
+        datasource: Prometheus
+      cluster-autoscaler-stats:
+        gnetId: 12623
+        revision: 1
+        datasource: Prometheus
+      kubernetes-addons-velero-stats:
+        gnetId: 11055
+        revision: 2
+        datasource: Prometheus
+  grafana.ini:
+    server:
+      root_url: https://grafana.${CLUSTER_FQDN}
+    # Using oauth2-proxy instead of default Grafana Oauth
+    auth.anonymous:
+      enabled: true
+      org_role: Admin
+  smtp:
+    enabled: true
+    host: "mailhog.mailhog.svc.cluster.local:1025"
+    from_address: grafana@${CLUSTER_FQDN}
+kubeControllerManager:
+  enabled: false
+kubeEtcd:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeProxy:
+  enabled: false
+prometheusOperator:
+  tls:
+    enabled: false
+  admissionWebhooks:
+    enabled: false
+prometheus:
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    annotations:
+      nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/auth
+      nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/start?rd=$scheme://$host$request_uri
+    paths: ["/"]
+    pathType: ImplementationSpecific
+    hosts:
+      - prometheus.${CLUSTER_FQDN}
+    tls:
+      - hosts:
+          - prometheus.${CLUSTER_FQDN}
+  prometheusSpec:
+    externalLabels:
+      cluster: ${CLUSTER_FQDN}
+    externalUrl: https://prometheus.${CLUSTER_FQDN}
+    ruleSelectorNilUsesHelmValues: false
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    retention: 7d
+    retentionSize: 1GB
+    walCompression: true
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: gp3
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 2Gi

@@ -76,6 +76,18 @@ module "eks_blueprints" {
   managed_node_groups = var.managed_node_groups
 }
 
+# module "eks_blueprints_kubernetes_addons" {
+#   source = "github.com/aws-ia/terraform-aws-eks-blueprints//modules/kubernetes-addons?ref=v4.0.9"
+
+#   eks_cluster_id = module.eks_blueprints.eks_cluster_id
+
+#   # EKS Addons
+#   enable_amazon_eks_vpc_cni            = true
+#   enable_amazon_eks_coredns            = true
+#   enable_amazon_eks_kube_proxy         = true
+#   enable_amazon_eks_aws_ebs_csi_driver = true
+# }
+
 # ---------------------------------------------------------------------------------------------------------------------
 # IRSA
 # ---------------------------------------------------------------------------------------------------------------------
@@ -165,6 +177,40 @@ module "iam_assumable_role_external_dns" {
   oidc_fully_qualified_subjects = ["system:serviceaccount:external-dns:external-dns"]
 }
 
+resource "aws_iam_policy" "kustomize-controller" {
+  name        = "${module.eks_blueprints.eks_cluster_id}-kustomize-controller"
+  description = "Policy allowing Flux kustomize-controller to access KMS"
+  tags        = local.aws_default_tags
+  policy      = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "kms:Decrypt",
+        "kms:DescribeKey"
+      ],
+      "Resource": [
+        "${var.flux_kustomize_controller_kms_key_arn}"
+      ]
+    }
+  ]
+}
+EOF
+}
+
+module "iam_assumable_role_kustomize_controller" {
+  source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
+  version                       = "5.1.0"
+  create_role                   = true
+  provider_url                  = module.eks_blueprints.eks_oidc_issuer_url
+  role_name                     = "${module.eks_blueprints.eks_cluster_id}-iamserviceaccount-kustomize-controller"
+  role_description              = "Allow Flux kustomize-controller to access KMS"
+  role_policy_arns              = [aws_iam_policy.kustomize-controller.arn]
+  oidc_fully_qualified_subjects = ["system:serviceaccount:flux-system:kustomize-controller"]
+}
+
 # ---------------------------------------------------------------------------------------------------------------------
 # Argo CD
 # ---------------------------------------------------------------------------------------------------------------------
@@ -238,21 +284,39 @@ resource "kubectl_manifest" "flux_namespace" {
   yaml_body  = file("templates/flux_namespace.yaml")
 }
 
-resource "kubernetes_config_map" "cluster-apps-vars-terraform" {
+resource "kubernetes_config_map" "cluster-apps-vars-terraform-configmap" {
   depends_on = [kubectl_manifest.flux_namespace]
   metadata {
-    name      = "cluster-apps-vars-terraform"
+    name      = "cluster-apps-vars-terraform-configmap"
     namespace = "flux-system"
   }
 
   data = {
-    CLUSTER_FQDN = var.cluster_fqdn
-    CLUSTER_NAME = local.cluster_name
-    CLUSTER_PATH = var.cluster_path
-    EMAIL        = var.email
-    ENVIRONMENT  = var.environment
+    CLUSTER_FQDN  = var.cluster_fqdn
+    CLUSTER_NAME  = local.cluster_name
+    CLUSTER_PATH  = var.cluster_path
+    EMAIL         = var.email
+    ENVIRONMENT   = var.environment
+    SLACK_CHANNEL = var.slack_channel
     # Environment=dev,Team=test
     TAGS_INLINE = local.tags_inline
+  }
+}
+
+# I'm creating service account in advance, because if I change the service
+# account annotation created by Flux installation later then existing pod kustomize-controller
+# need to be restarted - which is not easy to do...
+resource "kubernetes_service_account" "kustomize-controller" {
+  depends_on = [kubectl_manifest.flux_namespace]
+  metadata {
+    name      = "kustomize-controller"
+    namespace = "flux-system"
+    annotations = {
+      "eks.amazonaws.com/role-arn" = "${module.iam_assumable_role_kustomize_controller.iam_role_arn}"
+    }
+  }
+  lifecycle {
+    ignore_changes = all
   }
 }
 
@@ -273,7 +337,7 @@ resource "kubernetes_secret" "flux" {
 
 resource "kubectl_manifest" "install" {
   for_each   = { for v in local.flux_install : lower(join("/", compact([v.data.apiVersion, v.data.kind, lookup(v.data.metadata, "namespace", ""), v.data.metadata.name]))) => v.content }
-  depends_on = [kubernetes_secret.flux]
+  depends_on = [kubernetes_secret.flux, kubernetes_service_account.kustomize-controller]
   yaml_body  = each.value
 }
 

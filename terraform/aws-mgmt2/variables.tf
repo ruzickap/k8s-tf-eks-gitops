@@ -74,6 +74,17 @@ variable "cloudwatch_log_group_retention_in_days" {
   type        = number
 }
 
+variable "cluster_kms_key_deletion_window_in_days" {
+  type        = number
+  default     = 30
+  description = "The waiting period, specified in number of days (7 - 30). After the waiting period ends, AWS KMS deletes the KMS key"
+}
+
+variable "cluster_version" {
+  type        = string
+  description = "Desired kubernetes version. If you do not specify a value, the latest available version is used"
+}
+
 variable "email" {
   type        = string
   description = "Email used for Let's Encrypt"
@@ -84,15 +95,9 @@ variable "environment" {
   description = "Environment area, e.g. prod or staging"
 }
 
-variable "cluster_kms_key_deletion_window_in_days" {
-  type        = number
-  default     = 30
-  description = "The waiting period, specified in number of days (7 - 30). After the waiting period ends, AWS KMS deletes the KMS key"
-}
-
-variable "cluster_version" {
+variable "flux_kustomize_controller_kms_key_arn" {
   type        = string
-  description = "Desired kubernetes version. If you do not specify a value, the latest available version is used"
+  description = "KMS Key ARN used for encrypting and decrypting secrests using SOPS + Flux"
 }
 
 variable "github_token" {
@@ -130,6 +135,11 @@ variable "map_users" {
 variable "managed_node_groups" {
   description = "Map of maps of eks_node_groups to create"
   type        = any
+}
+
+variable "slack_channel" {
+  description = "Slack Channel"
+  type        = string
 }
 
 # Variable used only in the cluster-aws pipeline

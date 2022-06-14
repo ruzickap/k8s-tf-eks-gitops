@@ -83,6 +83,21 @@ if ! command -v flux &> /dev/null; then
 fi
 ```
 
+## Create KMS key for SOPS
+
+> This should be done only once.
+
+Create KMS key which will be used to encrypt/decrypt the secrets stored in git
+repository used by Flux.
+
+```bash
+aws cloudformation deploy --region=eu-central-1 \
+  --stack-name "kms-key-sops" --template-file "./cloudformation/kms-key-sops.yaml"
+```
+
+This key should not be deleted otherwise you need to re-encrypt all secrets in
+git repository.
+
 ## Configure AWS Route 53 Domain delegation
 
 > This should be done only once.
@@ -236,4 +251,18 @@ gh workflow run clusters-aws.yml -f clusters=".*" -f action="destroy"
 flux get all --all-namespaces
 flux tree kustomization flux-system
 flux logs
+```
+
+### Edit secrets by SOPS
+
+Encrypt `^(data|stringData)$` field in file:
+
+```bash
+sops --encrypt --in-place clusters/aws-dev-mgmt2/mgmt02.k8s.use1.dev.proj.aws.mylabs.dev/flux/cluster-apps-secrets.yaml
+```
+
+Edit encrypted file:
+
+```bash
+sops cluster-apps-group-secrets.yaml
 ```

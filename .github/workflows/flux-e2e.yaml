@@ -11,6 +11,7 @@ on:
 
 env:
   CLUSTER_PATH: clusters/aws-dev-mgmt2/mgmt02.k8s.use1.dev.proj.aws.mylabs.dev
+  SLACK_CHANNEL: mylabs
 
 jobs:
   flux-e2e:
@@ -44,16 +45,17 @@ jobs:
           CLUSTER_PATH=${{ env.CLUSTER_PATH }}
           EOF
 
-      - name: Create ConfigMap/cluster-apps-vars-terraform
+      - name: Create ConfigMap/cluster-apps-vars-terraform-configmap
         run: |
           set -euxo pipefail
-          kubectl create configmap -n flux-system cluster-apps-vars-terraform \
+          kubectl create configmap -n flux-system cluster-apps-vars-terraform-configmap \
             --from-literal=CLUSTER_FQDN="${CLUSTER_FQDN}" \
             --from-literal=CLUSTER_NAME="${CLUSTER_NAME}" \
             --from-literal=CLUSTER_PATH="${CLUSTER_PATH}" \
-            --from-literal=EMAIL=myemail@example.com \
-            --from-literal=ENVIRONMENT=dev \
-            --from-literal=TAGS_INLINE=tag1=test1,tag2=test2,tag3=test3
+            --from-literal=EMAIL="myemail@example.com" \
+            --from-literal=ENVIRONMENT="dev" \
+            --from-literal=SLACK_CHANNEL="${SLACK_CHANNEL}" \
+            --from-literal=TAGS_INLINE="tag1=test1,tag2=test2,tag3=test3"
 
       - name: Setup cluster reconciliation
         run: |

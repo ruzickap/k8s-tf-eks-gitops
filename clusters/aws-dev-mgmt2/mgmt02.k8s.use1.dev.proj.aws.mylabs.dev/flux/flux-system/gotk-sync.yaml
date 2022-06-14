@@ -7,7 +7,7 @@ metadata:
 spec:
   interval: 1m0s
   ref:
-    branch: main
+    branch: flux-apps
   secretRef:
     name: flux-system
   url: ssh://git@github.com/ruzickap/k8s-tf-eks-gitops.git
@@ -27,6 +27,8 @@ spec:
   postBuild:
     substituteFrom:
       # ConfigMap containing variables like CLUSTER_FQDN, CLUSTER_NAME, CLUSTER_PATH, ...
-      # They are defined in the Terraform flux section: resource "kubernetes_config_map" "cluster-apps-vars-terraform"
+      # They are defined in the Terraform flux section: resource "kubernetes_config_map" "cluster-apps-vars-terraform-configmap"
       - kind: ConfigMap
-        name: cluster-apps-vars-terraform
+        name: cluster-apps-vars-terraform-configmap
+  decryption:
+    provider: sops

@@ -1,0 +1,4 @@
+creation_rules:
+  - path_regex: clusters/.*.ya?ml
+    encrypted_regex: '^(data|stringData)$'
+    kms: arn:aws:kms:eu-central-1:729560437327:alias/sops
