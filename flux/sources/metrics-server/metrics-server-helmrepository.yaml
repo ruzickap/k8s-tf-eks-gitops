@@ -1,8 +1,8 @@
 apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
-  name: podinfo
+  name: metrics-server
   namespace: flux-system
 spec:
   interval: 1h0m0s
-  url: https://stefanprodan.github.io/podinfo
+  url: https://kubernetes-sigs.github.io/metrics-server/

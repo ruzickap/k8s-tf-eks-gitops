@@ -4,6 +4,9 @@ base_domain     = "k8s.use1.dev.proj.aws.mylabs.dev"
 aws_assume_role = "arn:aws:iam::729560437327:role/GitHubOidcFederatedRole"
 cluster_path    = "clusters/aws-dev-mgmt2/mgmt02.k8s.use1.dev.proj.aws.mylabs.dev"
 
+# Key used for encrypting and decrypting secrests using SOPS + Flux
+flux_kustomize_controller_kms_key_arn = "arn:aws:kms:eu-central-1:729560437327:alias/sops"
+
 environment = "dev"
 
 # Email (used for Let's Encrypt)
@@ -38,7 +41,7 @@ map_roles = [
 
 map_users = [
   {
-    userarn  = "arn:aws:iam::729560437327:user/ruzickap"
+    userarn  = "arn:aws:iam::729560437327:user/aws-cli"
     username = "system:aws:root"
     groups   = ["system:masters"]
   },
