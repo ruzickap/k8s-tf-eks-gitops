@@ -1,13 +1,11 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: podinfo-group-helmrelease-values
-  namespace: podinfo
-data:
-  values.yaml: |
-    ui:
-      color: "#34577c"
-      message: "group-helmrelease-values"
-    ingress:
-      enabled: true
-      className: nginx
+ui:
+  color: "#34577c"
+  message: "group-helmrelease-values"
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: ${CLUSTER_FQDN}
+      paths:
+        - path: /
+          pathType: ImplementationSpecific

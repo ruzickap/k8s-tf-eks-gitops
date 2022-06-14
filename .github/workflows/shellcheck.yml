@@ -5,6 +5,10 @@ on:
   push:
     branches-ignore:
       - main
+    paths:
+      - '**.sh'
+      - '**.md'
+      - .github/workflows/shellcheck.yml
 
 jobs:
   shellcheck:
