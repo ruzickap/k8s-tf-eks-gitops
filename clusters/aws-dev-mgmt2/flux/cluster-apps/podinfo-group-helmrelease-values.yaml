@@ -5,7 +5,12 @@ ingress:
   enabled: true
   className: nginx
   hosts:
-    - host: ${CLUSTER_FQDN}
+    - host: podinfo.${CLUSTER_FQDN}
       paths:
         - path: /
           pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - podinfo.${CLUSTER_FQDN}
+# serviceMonitor:
+#   enabled: true
