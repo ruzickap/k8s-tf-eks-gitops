@@ -13,3 +13,13 @@ spec:
         namespace: flux-system
       version: 5.7.0
   interval: 1m
+  valuesFrom:
+    - kind: ConfigMap
+      name: kubernetes-dashboard-main-helmrelease-values
+      optional: true
+    - kind: ConfigMap
+      name: kubernetes-dashboard-group-helmrelease-values
+      optional: true
+    - kind: ConfigMap
+      name: kubernetes-dashboard-cluster-helmrelease-values
+      optional: true

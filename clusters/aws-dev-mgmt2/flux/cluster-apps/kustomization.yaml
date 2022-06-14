@@ -9,5 +9,10 @@ configMapGenerator:
     files:
       - values.yaml=podinfo-group-helmrelease-values.yaml
 
+  - name: kubernetes-dashboard-group-helmrelease-values
+    namespace: kubernetes-dashboard
+    files:
+      - values.yaml=kubernetes-dashboard-group-helmrelease-values.yaml
+
 configurations:
   - kustomizeconfig.yaml

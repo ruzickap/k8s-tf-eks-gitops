@@ -1,0 +1,12 @@
+ingress:
+  enabled: true
+  className: "nginx"
+  hosts:
+    - kubernetes-dashboard.${CLUSTER_FQDN}
+  tls:
+    - hosts:
+        - kubernetes-dashboard.${CLUSTER_FQDN}
+# metricsScraper:
+#   enabled: true
+serviceAccount:
+  name: kubernetes-dashboard-admin
