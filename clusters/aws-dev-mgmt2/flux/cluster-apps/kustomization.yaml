@@ -3,6 +3,10 @@ kind: Kustomization
 resources:
   - ../../../../flux/cluster-apps/podinfo
 
+generatorOptions:
+  labels:
+    type: group-helmrelease-values
+
 configMapGenerator:
   - name: podinfo-group-helmrelease-values
     namespace: podinfo
