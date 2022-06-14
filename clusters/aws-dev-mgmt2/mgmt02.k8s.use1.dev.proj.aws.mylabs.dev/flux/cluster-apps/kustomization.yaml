@@ -10,4 +10,11 @@ resources:
   # Cluster specific applications
   - ../../../../../flux/cluster-apps/polaris/
 
-  - podinfo-cluster-helmrelease-values.yaml
+configMapGenerator:
+  - name: podinfo-cluster-helmrelease-values
+    namespace: podinfo
+    files:
+      - values.yaml=podinfo-cluster-helmrelease-values.yaml
+
+configurations:
+  - kustomizeconfig.yaml
