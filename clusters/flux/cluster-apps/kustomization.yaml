@@ -3,6 +3,10 @@ kind: Kustomization
 resources:
   - ../../../flux/cluster-apps/kubernetes-dashboard
 
+generatorOptions:
+  labels:
+    type: main-helmrelease-values
+
 configMapGenerator:
   - name: podinfo-main-helmrelease-values
     namespace: podinfo
