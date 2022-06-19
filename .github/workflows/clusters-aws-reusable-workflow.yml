@@ -36,7 +36,7 @@ jobs:
           set -euxo pipefail
 
           # Find cluster names matching the given regexp (and exclude `argocd|flux` directory)
-          CLUSTERS=$(find clusters -maxdepth 2 -mindepth 2 -type d -regextype "posix-extended" ! -regex '.*/(argocd|flux)' -regex '${{ inputs.clusters }}' -printf "%f\n" | sort)
+          CLUSTERS=$(find clusters/*/*\.*\.* -maxdepth 0 -mindepth 0 -type d -regextype "posix-extended" -regex '${{ inputs.clusters }}' -printf "%f\n" | sort)
 
           echo "*** Export list of clusters"
           # shellcheck disable=SC2001
@@ -139,7 +139,7 @@ jobs:
           echo -e "💊 Action: ${{ inputs.terraform_action }}"
 
           # Find cluster path based on cluster FQDN (matrix.stage)
-          CLUSTER_PATH=$(find clusters -maxdepth 2 -mindepth 2 -type d -regextype "posix-extended" ! -regex '.*/(argocd|flux)' -regex '.*${{ matrix.stage }}.*')
+          CLUSTER_PATH=$(find clusters/*/*\.*\.* -maxdepth 0 -mindepth 0 -type d -regextype "posix-extended" -regex '.*${{ matrix.stage }}.*')
           echo -e "\n🍏 Cluster path: ${CLUSTER_PATH}"
           echo "CLUSTER_PATH=${CLUSTER_PATH}" >> "${GITHUB_ENV}"
 
@@ -299,5 +299,6 @@ jobs:
       - name: Setup tmate session
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
+        timeout-minutes: 15
         with:
           limit-access-to-actor: true

@@ -23,7 +23,7 @@ if [[ "$#" -eq 0 ]] || [[ ! -d .git ]]; then
   exit 1
 fi
 
-CLUSTER_PATH=$(find clusters -maxdepth 2 -mindepth 2 -type d -regextype "posix-extended" -regex ".*/${1}\$.*")
+CLUSTER_PATH=$(find clusters/*/*\.*\.* -maxdepth 0 -mindepth 0 -type d -regextype "posix-extended" -regex ".*/${1}\$.*")
 echo -e "\n#🍏 Cluster path: ${CLUSTER_PATH}\n"
 
 echo "# ---------------------------------------------------"
