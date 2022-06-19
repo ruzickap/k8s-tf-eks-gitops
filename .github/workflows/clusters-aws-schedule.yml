@@ -49,7 +49,7 @@ jobs:
 
           echo "*** SCHEDULED_CLUSTERS: ${SCHEDULED_CLUSTERS}"
 
-          cat > payload-slack-content.json << EOF
+          cat << EOF | tee payload-slack-content.json
             {
               "blocks": [
                 {
@@ -84,7 +84,7 @@ jobs:
 
           # This is workaround for: https://github.community/t/reusable-workflow-env-context-not-available-in-jobs-job-id-with/206111/3
           echo "::set-output name=scheduled_clusters::${SCHEDULED_CLUSTERS}"
-          echo "::set-output name=scheduled_clusters_matrix::$( echo -n "${SCHEDULED_CLUSTERS:1}" | jq -c -R -s 'split("|")')"
+          echo "::set-output name=scheduled_clusters_matrix::$( echo -n "${SCHEDULED_CLUSTERS}" | jq -c -R -s 'split("|")')"
 
       - name: Send Slack message
         uses: slackapi/slack-github-action@v1.19.0
@@ -92,7 +92,7 @@ jobs:
         with:
           payload-file-path: payload-slack-content.json
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
 
   scheduled-create:
@@ -160,7 +160,7 @@ jobs:
             echo "::set-output name=${TF_CODE_VARIABLE^^}::${VARIABLE_HELPER}"
           }
 
-          CLUSTER_PATH=$(find clusters -maxdepth 2 -mindepth 2 -type d -regextype "posix-extended" ! -regex '.*/(argocd|flux)' -regex ".*${{ matrix.stage }}.*")
+          CLUSTER_PATH=$(find clusters/*/*\.*\.* -maxdepth 0 -mindepth 0 -type d -regextype "posix-extended" -regex ".*${{ matrix.stage }}.*")
 
           get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "aws_default_region"
           get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "aws_assume_role"
