@@ -34,6 +34,7 @@ jobs:
           ALL_CHANGED_FILES=" ${{ steps.changed-files.outputs.all_changed_files }}"
           echo "*** ALL_CHANGED_FILES: ${ALL_CHANGED_FILES}"
 
+          # For each /terrafrom/<code> select one cluster which will be built
           SCHEDULED_CLUSTERS=""
           if [[ "${ALL_CHANGED_FILES}" =~ mgmt01.k8s.use1.dev.proj.aws.mylabs.dev|\ terraform/aws-mgmt ]]; then
             SCHEDULED_CLUSTERS+="|mgmt01.k8s.use1.dev.proj.aws.mylabs.dev"
@@ -49,6 +50,7 @@ jobs:
 
           echo "*** SCHEDULED_CLUSTERS: ${SCHEDULED_CLUSTERS}"
 
+          # github.event.repository.html_url can not be used when running as "scheduled"
           cat << EOF | tee payload-slack-content.json
             {
               "blocks": [
@@ -56,7 +58,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": ":rocket: [$(date "+%F %R")] *<${{ github.event.repository.html_url }}|${{ github.repository }}>* | *<${{ github.event.repository.html_url }}/actions/runs/${{ github.run_id }}|GitHub Actions>*\n<@U01S52AUB1A>"
+                    "text": ":rocket: [$(date "+%F %R")] *<https://github.com/${{ github.repository }}|${{ github.repository }}>* | GH Actions: *<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|${{ github.workflow }}>*\n<@U01S52AUB1A>"
                   }
                 },
                 {
@@ -70,21 +72,20 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "*Chnaged Files*: ${ALL_CHANGED_FILES// /\\\n• }"
+                    "text": "*Changed Files*: ${ALL_CHANGED_FILES// /\\\n• https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/}"
                   }
                 }
               ]
             }
           EOF
 
-          if [[ -n "${SCHEDULED_CLUSTERS}" ]]; then
-            SCHEDULED_CLUSTERS=".*(${SCHEDULED_CLUSTERS:1}).*"
-            echo "SCHEDULED_CLUSTERS=${SCHEDULED_CLUSTERS}" >> "${GITHUB_ENV}"
-          fi
+          # In case no clusters were selected SCHEDULED_CLUSTERS_REGEXP is not going to be used, because scheduled_clusters_matrix = '[]'
+          SCHEDULED_CLUSTERS_REGEXP=".*(${SCHEDULED_CLUSTERS:1}).*"
+          echo "SCHEDULED_CLUSTERS=${SCHEDULED_CLUSTERS_REGEXP}" >> "${GITHUB_ENV}"
 
           # This is workaround for: https://github.community/t/reusable-workflow-env-context-not-available-in-jobs-job-id-with/206111/3
           echo "::set-output name=scheduled_clusters::${SCHEDULED_CLUSTERS}"
-          echo "::set-output name=scheduled_clusters_matrix::$( echo -n "${SCHEDULED_CLUSTERS}" | jq -c -R -s 'split("|")')"
+          echo "::set-output name=scheduled_clusters_matrix::$( echo -n "${SCHEDULED_CLUSTERS:1}" | jq -c -R -s 'split("|")' )"
 
       - name: Send Slack message
         uses: slackapi/slack-github-action@v1.19.0
@@ -120,30 +121,18 @@ jobs:
       matrix:
         stage: ${{ fromJSON(needs.scheduled-run-time-check.outputs.scheduled_clusters_matrix) }}
     steps:
-      - name: 💡🔪 Check out repository code
+      - name: 💡 Check out repository code
         uses: actions/checkout@v3
 
-      - name: 💡🔪 Install necessary tools/packages
-        run: |
-          set -euxo pipefail
-          sudo apt update -qq
-          sudo apt-get install -y -qq curl gettext-base git jq unzip > /dev/null
-
-          if ! command -v aws &> /dev/null; then
-            curl -sL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
-            unzip -q -o /tmp/awscliv2.zip -d /tmp/
-            sudo /tmp/aws/install
-          fi
-
-      - name: Setup kubectl
+      - name: 💡 Setup kubectl
         uses: azure/setup-kubectl@v2.1
         with:
           version: v${{ env.KUBECTL_VERSION }}
 
-      - name: Setup Flux
+      - name: 💡 Setup Flux
         uses: fluxcd/flux2/action@main
 
-      - name: 💡🔪 Get and display environment variables
+      - name: 💡 Get and display environment variables
         run: |
           set -euxo pipefail
 
@@ -167,7 +156,7 @@ jobs:
           get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "cluster_fqdn"
           echo "CLUSTER_NAME=${CLUSTER_FQDN%%.*}" | tee -a "${GITHUB_ENV}"
 
-      - name: 💡🔪 Configure AWS credentials
+      - name: 💡 Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           role-to-assume: ${{ env.AWS_ASSUME_ROLE }}
