@@ -85,32 +85,17 @@ jobs:
       - name: 💡🔪 Check out repository code
         uses: actions/checkout@v3
 
-      - name: 💡🔪 Install necessary tools/packages
-        run: |
-          set -euxo pipefail
-          sudo apt update -qq
-          sudo apt-get install -y -qq curl gettext-base git jq unzip > /dev/null
+      - name: 💡🔪 Setup kustomize
+        uses: imranismail/setup-kustomize@v1
+        with:
+          kustomize-version: ${{ env.KUSTOMIZE_VERSION }}
 
-          if ! command -v aws &> /dev/null; then
-            curl -sL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
-            unzip -q -o /tmp/awscliv2.zip -d /tmp/
-            sudo /tmp/aws/install
-          else
-            aws --version
-          fi
-
-          if ! command -v kustomize &> /dev/null; then
-            curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | sudo bash -s ${{ env.KUSTOMIZE_VERSION }} /usr/local/bin/
-          else
-            kustomize version
-          fi
-
-      - name: Setup kubectl
+      - name: 💡🔪 Setup kubectl
         uses: azure/setup-kubectl@v2.1
         with:
           version: v${{ env.KUBECTL_VERSION }}
 
-      - name: Setup helm
+      - name: 💡🔪 Setup helm
         uses: azure/setup-helm@v1
         with:
           version: v${{ env.HELM_VERSION }}
