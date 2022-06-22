@@ -42,7 +42,8 @@ find ./clusters -type f -name '*.yaml' -print0 | while IFS= read -r -d $'\0' fil
     yq e 'true' "$file" > /dev/null
 done
 
-kubeconform_config=( "-strict" "-ignore-missing-schemas" "-schema-location" "default" "-schema-location" "/tmp/flux-crd-schemas" "-verbose")
+# -skip=Secret is used due to SOPS: https://github.com/yannh/kubeconform/issues/98
+kubeconform_config=( "-strict" "-ignore-missing-schemas" "-schema-location" "default" "-schema-location" "/tmp/flux-crd-schemas" "-skip=Secret" "-verbose")
 
 echo "INFO - Validating clusters"
 find ./clusters -maxdepth 2 -type f -name '*.yaml' -print0 | while IFS= read -r -d $'\0' file;

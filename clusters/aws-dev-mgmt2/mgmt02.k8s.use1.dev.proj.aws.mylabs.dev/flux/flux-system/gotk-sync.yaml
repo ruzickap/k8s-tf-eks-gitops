@@ -30,5 +30,3 @@ spec:
       # They are defined in the Terraform flux section: resource "kubernetes_config_map" "cluster-apps-vars-terraform-configmap"
       - kind: ConfigMap
         name: cluster-apps-vars-terraform-configmap
-  decryption:
-    provider: sops
