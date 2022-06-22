@@ -24,4 +24,4 @@ spec:
       - kind: Secret
         name: cluster-apps-secrets
       - kind: Secret
-        name: cluster-apps-secrets-group
+        name: cluster-apps-group-secrets
