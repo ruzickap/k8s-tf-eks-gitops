@@ -20,7 +20,7 @@ aws_auth_roles = [
     groups   = ["system:masters"]
   },
   {
-    rolearn  = "arn:aws:iam::729560437327:user/ruzickap"
+    rolearn  = "arn:aws:iam::729560437327:user/aws-cli"
     username = "system:aws:root"
     groups   = ["system:masters"]
   },

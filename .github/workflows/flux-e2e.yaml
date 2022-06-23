@@ -12,6 +12,9 @@ on:
 env:
   CLUSTER_PATH: clusters/aws-dev-mgmt2/mgmt02.k8s.use1.dev.proj.aws.mylabs.dev
   SLACK_CHANNEL: mylabs
+  # Details needed to allow Flux get KMS to decrypt SOPS encrypted files
+  AWS_ASSUME_ROLE: "arn:aws:iam::729560437327:role/GitHubOidcFederatedRole"
+  AWS_DEFAULT_REGION: us-east-1
 
 jobs:
   flux-e2e:
@@ -35,11 +38,27 @@ jobs:
           set -euxo pipefail
           flux install
 
+      - name: 💡🔪 Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ env.AWS_ASSUME_ROLE }}
+          role-session-name: GitHubOidcFederatedRole
+          aws-region: ${{ env.AWS_DEFAULT_REGION }}
+
+      - name: Add AWS credentials to allow flux to access the KMS
+        run: |
+          kubectl create secret generic aws-creds -n flux-system \
+            --from-literal=AWS_ACCESS_KEY_ID="${AWS_SECRET_ACCESS_KEY}" \
+            --from-literal=AWS_SECRET_ACCESS_KEY="${AWS_ACCESS_KEY_ID}" \
+            --from-literal=AWS_SESSION_TOKEN="${AWS_SESSION_TOKEN}" \
+            --from-literal=AWS_ROLE_ARN="${AWS_ROLE_ARN}" \
+            --from-literal=AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION}"
+
       - name: Set other env variables
         run: |
           set -euxo pipefail
           CLUSTER_FQDN=$(basename ${{ env.CLUSTER_PATH }})
-          cat >> "${GITHUB_ENV}" << EOF
+          cat << EOF | tee -a "${GITHUB_ENV}"
           CLUSTER_FQDN=${CLUSTER_FQDN}
           CLUSTER_NAME=${CLUSTER_FQDN%%.*}
           CLUSTER_PATH=${{ env.CLUSTER_PATH }}
@@ -67,6 +86,10 @@ jobs:
             --source=flux-system \
             --path="${CLUSTER_PATH}/flux/"
 
+          # Stop synchronizing the flux-system to allow modification of deployment/kustomize-controller
+          flux suspend kustomization flux-system
+          kubectl patch deployment kustomize-controller -n flux-system -p '{"spec": {"template": {"spec": {"containers": [{"name":"manager", "envFrom": [{"secretRef":{"name":"aws-creds"}}] }] }}}}'
+
       - name: Verify cluster reconciliation
         run: |
           set -euxo pipefail
@@ -82,3 +105,9 @@ jobs:
           kubectl -n flux-system logs deploy/source-controller
           kubectl -n flux-system logs deploy/kustomize-controller
           kubectl -n flux-system logs deploy/helm-controller
+
+      - name: Setup tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: true
