@@ -1,0 +1,3 @@
+# This is needed for metrics-server running in kind (flux-e2e tests)
+args:
+  - --kubelet-insecure-tls

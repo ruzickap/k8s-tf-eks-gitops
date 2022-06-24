@@ -25,7 +25,9 @@ Resources:
           - Sid: Enable User Permissions
             Effect: Allow
             Principal:
-              AWS: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:user/${UserName}"
+              AWS:
+                - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:user/${UserName}"
+                - !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/GitHubOidcFederatedRole"
             Action:
               - "kms:Encrypt"
               - "kms:Decrypt"

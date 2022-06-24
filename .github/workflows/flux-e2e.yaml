@@ -19,8 +19,10 @@ env:
 jobs:
   flux-e2e:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     steps:
-
       - name: Checkout
         uses: actions/checkout@v3
 
@@ -48,10 +50,9 @@ jobs:
       - name: Add AWS credentials to allow flux to access the KMS
         run: |
           kubectl create secret generic aws-creds -n flux-system \
-            --from-literal=AWS_ACCESS_KEY_ID="${AWS_SECRET_ACCESS_KEY}" \
-            --from-literal=AWS_SECRET_ACCESS_KEY="${AWS_ACCESS_KEY_ID}" \
+            --from-literal=AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID}" \
+            --from-literal=AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY}" \
             --from-literal=AWS_SESSION_TOKEN="${AWS_SESSION_TOKEN}" \
-            --from-literal=AWS_ROLE_ARN="${AWS_ROLE_ARN}" \
             --from-literal=AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION}"
 
       - name: Set other env variables
@@ -93,7 +94,8 @@ jobs:
       - name: Verify cluster reconciliation
         run: |
           set -euxo pipefail
-          kubectl wait kustomization --for=condition=ready --timeout=5m --all-namespaces --all
+          # flux-system kustomization needs to be excluded because it was suspended
+          kubectl wait kustomization --for=condition=ready --timeout=5m -n flux-system cluster-apps cluster-apps-secrets sources
           kubectl wait helmrelease --for=condition=ready --timeout=5m --all-namespaces --all
 
       - name: Debug failure
