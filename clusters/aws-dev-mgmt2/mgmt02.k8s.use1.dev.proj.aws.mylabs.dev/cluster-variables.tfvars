@@ -5,7 +5,7 @@ aws_assume_role = "arn:aws:iam::729560437327:role/GitHubOidcFederatedRole"
 cluster_path    = "clusters/aws-dev-mgmt2/mgmt02.k8s.use1.dev.proj.aws.mylabs.dev"
 
 # Key used for encrypting and decrypting secrests using SOPS + Flux
-flux_kustomize_controller_kms_key_arn = "arn:aws:kms:eu-central-1:729560437327:alias/sops"
+flux_kustomize_controller_kms_key_arn = "arn:aws:kms:eu-central-1:729560437327:key/f2d53be5-7422-41a5-a463-2fbf6912402b"
 
 environment = "dev"
 

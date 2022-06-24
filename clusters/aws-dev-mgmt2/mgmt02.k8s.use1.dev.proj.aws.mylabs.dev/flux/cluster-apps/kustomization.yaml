@@ -20,5 +20,10 @@ configMapGenerator:
     files:
       - values.yaml=podinfo-cluster-helmrelease-values.yaml
 
+  - name: metrics-server-cluster-helmrelease-values
+    namespace: metrics-server
+    files:
+      - values.yaml=metrics-server-cluster-helmrelease-values.yaml
+
 configurations:
   - kustomizeconfig.yaml

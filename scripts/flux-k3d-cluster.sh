@@ -19,7 +19,24 @@ get_variable_from_group_cluster_tfvars() {
 set -euo pipefail
 
 if [[ "$#" -eq 0 ]] || [[ ! -d .git ]]; then
-  echo -e "\nRun in top of the git repository.\nUsage: ./scripts/flux-k3d-cluster.sh mgmt02.k8s.use1.dev.proj.aws.mylabs.dev | sh -x\n"
+  cat << \EOF
+Run in top of the git repository.
+Usage: ./scripts/flux-k3d-cluster.sh mgmt02.k8s.use1.dev.proj.aws.mylabs.dev | sh -x"
+
+Required tools:
+
+# Linux tools
+apt install -y curl docker.io git snapd
+
+# k3d
+curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
+
+# kubectl
+snap install kubectl --classic
+
+# Flux
+curl -s https://fluxcd.io/install.sh | bash
+EOF
   exit 1
 fi
 
@@ -38,6 +55,10 @@ get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "environment"
 echo -e "\n# ------------------------ Code -------------------------"
 
 cat << \EOF
+: "${AWS_ACCESS_KEY_ID?}"
+: "${AWS_SECRET_ACCESS_KEY?}"
+: "${AWS_DEFAULT_REGION?}"
+
 export KUBECONFIG="/tmp/kubeconfig-${CLUSTER_NAME}.conf"
 
 k3d cluster create "${CLUSTER_NAME}" \
@@ -58,12 +79,21 @@ kubectl create configmap -n flux-system cluster-apps-vars-terraform-configmap \
   --from-literal=SLACK_CHANNEL="mylabs" \
   --from-literal=TAGS_INLINE="tag1=test1,tag2=test2,tag3=test3"
 
+kubectl create secret generic aws-creds -n flux-system \
+  --from-literal=AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID}" \
+  --from-literal=AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY}" \
+  --from-literal=AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION}"
+
 flux create source git flux-system \
   --url="$(gh repo view --json url --jq '.url')" \
   --branch="$(git rev-parse --abbrev-ref HEAD)"
 flux create kustomization flux-system \
   --source=flux-system \
   --path="${CLUSTER_PATH}/flux/"
+
+# Stop synchronizing the flux-system to allow modification of deployment/kustomize-controller
+flux suspend kustomization flux-system
+kubectl patch deployment kustomize-controller -n flux-system -p '{"spec": {"template": {"spec": {"containers": [{"name":"manager", "envFrom": [{"secretRef":{"name":"aws-creds"}}] }] }}}}'
 
 echo "export KUBECONFIG=/tmp/kubeconfig-${CLUSTER_NAME}.conf"
 echo "http://localhost:8080/dashboard/"

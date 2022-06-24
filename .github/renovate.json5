@@ -4,6 +4,15 @@
   "flux": {
     "fileMatch": ["flux/.+\\.ya?ml$"]
   },
+  // ignore individual fluxcd images
+  "ignoreDeps": [
+    "ghcr.io/fluxcd/helm-controller",
+    "ghcr.io/fluxcd/image-automation-controller",
+    "ghcr.io/fluxcd/image-reflector-controller",
+    "ghcr.io/fluxcd/kustomize-controller",
+    "ghcr.io/fluxcd/notification-controller",
+    "ghcr.io/fluxcd/source-controller"
+  ],
   "kubernetes": {
     "fileMatch": ["\\.ya?ml$"]
   },
