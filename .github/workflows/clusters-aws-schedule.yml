@@ -36,7 +36,7 @@ jobs:
 
           # For each /terrafrom/<code> select one cluster which will be built
           SCHEDULED_CLUSTERS=""
-          if [[ "${ALL_CHANGED_FILES}" =~ mgmt01.k8s.use1.dev.proj.aws.mylabs.dev|\ terraform/aws-mgmt ]]; then
+          if [[ "${ALL_CHANGED_FILES}" =~ mgmt01.k8s.use1.dev.proj.aws.mylabs.dev|\ terraform/aws-mgmt/ ]]; then
             SCHEDULED_CLUSTERS+="|mgmt01.k8s.use1.dev.proj.aws.mylabs.dev"
           fi
 
@@ -84,7 +84,7 @@ jobs:
           echo "SCHEDULED_CLUSTERS=${SCHEDULED_CLUSTERS_REGEXP}" >> "${GITHUB_ENV}"
 
           # This is workaround for: https://github.community/t/reusable-workflow-env-context-not-available-in-jobs-job-id-with/206111/3
-          echo "::set-output name=scheduled_clusters::${SCHEDULED_CLUSTERS}"
+          echo "::set-output name=scheduled_clusters::${SCHEDULED_CLUSTERS_REGEXP}"
           echo "::set-output name=scheduled_clusters_matrix::$( echo -n "${SCHEDULED_CLUSTERS:1}" | jq -c -R -s 'split("|")' )"
 
       - name: Send Slack message
