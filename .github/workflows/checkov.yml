@@ -21,8 +21,6 @@ jobs:
       - name: Run checkov
         uses: bridgecrewio/checkov-action@master
         with:
-          # Skip ArgoCD checks
-          skip_check: CKV_ARGO_1,CKV_ARGO_2
           output_format: sarif
           quiet: true
 

@@ -307,7 +307,7 @@ resource "kubernetes_config_map" "cluster-apps-vars-terraform-configmap" {
 # account annotation created by Flux installation later then existing pod kustomize-controller
 # need to be restarted - which is not easy to do...
 resource "kubernetes_service_account" "kustomize-controller" {
-  depends_on = [kubectl_manifest.flux_namespace]
+  depends_on = [kubectl_manifest.flux_namespace, kubectl_manifest.flux_install]
   metadata {
     name      = "kustomize-controller"
     namespace = "flux-system"
@@ -335,14 +335,15 @@ resource "kubernetes_secret" "flux" {
   }
 }
 
-resource "kubectl_manifest" "install" {
-  for_each   = { for v in local.flux_install : lower(join("/", compact([v.data.apiVersion, v.data.kind, lookup(v.data.metadata, "namespace", ""), v.data.metadata.name]))) => v.content }
-  depends_on = [kubernetes_secret.flux, kubernetes_service_account.kustomize-controller]
+resource "kubectl_manifest" "flux_install" {
+  for_each = { for v in local.flux_install : lower(join("/", compact([v.data.apiVersion, v.data.kind, lookup(v.data.metadata, "namespace", ""), v.data.metadata.name]))) => v.content }
+  # depends_on = [kubernetes_secret.flux, kubernetes_service_account.kustomize-controller]
+  depends_on = [kubernetes_secret.flux]
   yaml_body  = each.value
 }
 
-resource "kubectl_manifest" "sync" {
+resource "kubectl_manifest" "flux_sync" {
   for_each   = { for v in local.flux_sync : lower(join("/", compact([v.data.apiVersion, v.data.kind, lookup(v.data.metadata, "namespace", ""), v.data.metadata.name]))) => v.content if var.gitops == "flux" }
-  depends_on = [kubectl_manifest.install]
+  depends_on = [kubectl_manifest.flux_install]
   yaml_body  = each.value
 }

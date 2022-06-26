@@ -6,7 +6,7 @@ on:
       clusters:
         description: Cluster list
         # See details in `find` manual and look for `-regextype "posix-extended"` and `-regex`
-        default: .*(/ruzickap01.k8s.use1.dev.proj.aws.mylabs.dev$|/aws-dev-sandbox/).*
+        default: .*(/aws-dev-mgmt2/|/mgmt02.k8s.use1.dev.proj.aws.mylabs.dev$).*
         required: true
       action:
         type: choice
