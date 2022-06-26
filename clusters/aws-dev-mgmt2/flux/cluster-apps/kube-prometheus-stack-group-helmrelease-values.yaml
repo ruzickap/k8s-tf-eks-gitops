@@ -7,15 +7,15 @@ additionalPrometheusRulesMap:
   # Flux rule: https://toolkit.fluxcd.io/guides/monitoring/
   rule-name:
     groups:
-      - name: GitOpsToolkit
+      - name: Flux
         rules:
           - alert: ReconciliationFailure
-            expr: max(gotk_reconcile_condition{status="False",type="Ready"}) by (namespace, name, kind) + on(namespace, name, kind) (max(gotk_reconcile_condition{status="Deleted"}) by (namespace, name, kind)) * 2 == 1
+            expr: max(gotk_reconcile_condition{status="False",type="Ready"}) by (exported_namespace, name, kind) + on(exported_namespace, name, kind) (max(gotk_reconcile_condition{status="Deleted"}) by (exported_namespace, name, kind)) * 2 == 1
             for: 10m
             labels:
               severity: page
             annotations:
-              summary: '{{ $labels.kind }} {{ $labels.namespace }}/{{ $labels.name }} reconciliation has been failing for more than ten minutes.'
+              summary: '{{ $labels.kind }} {{ $labels.exported_namespace }}/{{ $labels.name }} reconciliation has been failing for more than ten minutes.'
 alertmanager:
   config:
     global:
@@ -110,34 +110,34 @@ alertmanager:
           :question:
           {{- end }}
       {{- end }}
-  ingress:
-    enabled: true
-    ingressClassName: nginx
-    annotations:
-      nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/auth
-      nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/start?rd=$scheme://$host$request_uri
-    hosts:
-      - alertmanager.${CLUSTER_FQDN}
-    paths: ["/"]
-    pathType: ImplementationSpecific
-    tls:
-      - hosts:
-          - alertmanager.${CLUSTER_FQDN}
+  # ingress:
+  #   enabled: true
+  #   ingressClassName: nginx
+  #   annotations:
+  #     nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/auth
+  #     nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/start?rd=$scheme://$host$request_uri
+  #   hosts:
+  #     - alertmanager.${CLUSTER_FQDN}
+  #   paths: ["/"]
+  #   pathType: ImplementationSpecific
+  #   tls:
+  #     - hosts:
+  #         - alertmanager.${CLUSTER_FQDN}
 # https://github.com/grafana/helm-charts/blob/main/charts/grafana/values.yaml
 grafana:
-  ingress:
-    enabled: true
-    ingressClassName: nginx
-    annotations:
-      nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/auth
-      nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/start?rd=$scheme://$host$request_uri
-    hosts:
-      - grafana.${CLUSTER_FQDN}
-    paths: ["/"]
-    pathType: ImplementationSpecific
-    tls:
-      - hosts:
-          - grafana.${CLUSTER_FQDN}
+  # ingress:
+  #   enabled: true
+  #   ingressClassName: nginx
+  #   annotations:
+  #     nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/auth
+  #     nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/start?rd=$scheme://$host$request_uri
+  #   hosts:
+  #     - grafana.${CLUSTER_FQDN}
+  #   paths: ["/"]
+  #   pathType: ImplementationSpecific
+  #   tls:
+  #     - hosts:
+  #         - grafana.${CLUSTER_FQDN}
   dashboardProviders:
     dashboardproviders.yaml:
       apiVersion: 1
@@ -260,19 +260,19 @@ prometheusOperator:
   admissionWebhooks:
     enabled: false
 prometheus:
-  ingress:
-    enabled: true
-    ingressClassName: nginx
-    annotations:
-      nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/auth
-      nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/start?rd=$scheme://$host$request_uri
-    paths: ["/"]
-    pathType: ImplementationSpecific
-    hosts:
-      - prometheus.${CLUSTER_FQDN}
-    tls:
-      - hosts:
-          - prometheus.${CLUSTER_FQDN}
+  # ingress:
+  #   enabled: true
+  #   ingressClassName: nginx
+  #   annotations:
+  #     nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/auth
+  #     nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/start?rd=$scheme://$host$request_uri
+  #   paths: ["/"]
+  #   pathType: ImplementationSpecific
+  #   hosts:
+  #     - prometheus.${CLUSTER_FQDN}
+  #   tls:
+  #     - hosts:
+  #         - prometheus.${CLUSTER_FQDN}
   prometheusSpec:
     externalLabels:
       cluster: ${CLUSTER_FQDN}
@@ -280,13 +280,12 @@ prometheus:
     ruleSelectorNilUsesHelmValues: false
     serviceMonitorSelectorNilUsesHelmValues: false
     podMonitorSelectorNilUsesHelmValues: false
-    retention: 7d
     retentionSize: 1GB
     walCompression: true
     storageSpec:
       volumeClaimTemplate:
         spec:
-          storageClassName: gp3
+          storageClassName: gp2
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:
