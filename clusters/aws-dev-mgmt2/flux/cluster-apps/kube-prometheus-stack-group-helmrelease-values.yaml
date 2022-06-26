@@ -19,7 +19,6 @@ additionalPrometheusRulesMap:
 alertmanager:
   config:
     global:
-      # Slack Webhook URL - secret xxxx TODO !!!!
       slack_api_url: ${SLACK_WEBHOOK_URL}
       smtp_smarthost: "mailhog.mailhog.svc.cluster.local:1025"
       smtp_from: "alertmanager@${CLUSTER_FQDN}"
