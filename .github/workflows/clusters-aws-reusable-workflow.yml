@@ -69,7 +69,7 @@ jobs:
       # renovate: datasource=github-tags depName=helm/helm
       HELM_VERSION: "3.9.0"
       # renovate: datasource=github-tags depName=kubernetes/kubectl extractVersion=^kubernetes-(?<version>.+)$
-      KUBECTL_VERSION: "1.24.1"
+      KUBECTL_VERSION: "1.24.2"
       # renovate: datasource=github-tags depName=kubernetes-sigs/kustomize extractVersion=^kustomize\/v(?<version>.+)$
       KUSTOMIZE_VERSION: "4.5.5"
     # Allow only one execution of terraform per cluster (other executions will wait until first will complete)
