@@ -200,6 +200,7 @@ resource "aws_iam_policy" "kustomize-controller" {
 EOF
 }
 
+# Role created by this module must be in stored in git in clusters/aws-dev-mgmt2/<cluster_name>/flux/flux-system/kustomization.yaml
 module "iam_assumable_role_kustomize_controller" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
   version                       = "5.1.0"
@@ -265,15 +266,15 @@ resource "kubectl_manifest" "argo-cd_application" {
 # Flux
 # ---------------------------------------------------------------------------------------------------------------------
 
-resource "tls_private_key" "main" {
+resource "tls_private_key" "flux_private_key" {
   algorithm   = "ECDSA"
   ecdsa_curve = "P256"
 }
 
-resource "github_repository_deploy_key" "main" {
+resource "github_repository_deploy_key" "flux_github_key" {
   title      = var.cluster_fqdn
   repository = join("", regex(".*/([^.]*)", data.git_repository.current_git_repository.url))
-  key        = tls_private_key.main.public_key_openssh
+  key        = tls_private_key.flux_private_key.public_key_openssh
   read_only  = true
 }
 
@@ -284,7 +285,7 @@ resource "kubectl_manifest" "flux_namespace" {
   yaml_body  = file("templates/flux_namespace.yaml")
 }
 
-resource "kubernetes_config_map" "cluster-apps-vars-terraform-configmap" {
+resource "kubernetes_config_map" "flux_cluster_apps_vars_terraform_configmap" {
   depends_on = [kubectl_manifest.flux_namespace]
   metadata {
     name      = "cluster-apps-vars-terraform-configmap"
@@ -303,24 +304,7 @@ resource "kubernetes_config_map" "cluster-apps-vars-terraform-configmap" {
   }
 }
 
-# I'm creating service account in advance, because if I change the service
-# account annotation created by Flux installation later then existing pod kustomize-controller
-# need to be restarted - which is not easy to do...
-resource "kubernetes_service_account" "kustomize-controller" {
-  depends_on = [kubectl_manifest.flux_namespace, kubectl_manifest.flux_install]
-  metadata {
-    name      = "kustomize-controller"
-    namespace = "flux-system"
-    annotations = {
-      "eks.amazonaws.com/role-arn" = "${module.iam_assumable_role_kustomize_controller.iam_role_arn}"
-    }
-  }
-  lifecycle {
-    ignore_changes = all
-  }
-}
-
-resource "kubernetes_secret" "flux" {
+resource "kubernetes_secret" "flux_github_keys" {
   depends_on = [kubectl_manifest.flux_namespace]
 
   metadata {
@@ -329,21 +313,20 @@ resource "kubernetes_secret" "flux" {
   }
 
   data = {
-    identity       = tls_private_key.main.private_key_pem
-    "identity.pub" = tls_private_key.main.public_key_pem
+    identity       = tls_private_key.flux_private_key.private_key_pem
+    "identity.pub" = tls_private_key.flux_private_key.public_key_pem
     known_hosts    = local.known_hosts
   }
 }
 
-resource "kubectl_manifest" "flux_install" {
-  for_each = { for v in local.flux_install : lower(join("/", compact([v.data.apiVersion, v.data.kind, lookup(v.data.metadata, "namespace", ""), v.data.metadata.name]))) => v.content }
-  # depends_on = [kubernetes_secret.flux, kubernetes_service_account.kustomize-controller]
-  depends_on = [kubernetes_secret.flux]
+resource "kubectl_manifest" "flux_github_install" {
+  for_each   = { for v in local.flux_install : lower(join("/", compact([v.data.apiVersion, v.data.kind, lookup(v.data.metadata, "namespace", ""), v.data.metadata.name]))) => v.content }
+  depends_on = [kubernetes_secret.flux_github_keys, kubernetes_config_map.flux_cluster_apps_vars_terraform_configmap]
   yaml_body  = each.value
 }
 
-resource "kubectl_manifest" "flux_sync" {
-  for_each   = { for v in local.flux_sync : lower(join("/", compact([v.data.apiVersion, v.data.kind, lookup(v.data.metadata, "namespace", ""), v.data.metadata.name]))) => v.content if var.gitops == "flux" }
-  depends_on = [kubectl_manifest.flux_install]
-  yaml_body  = each.value
-}
+# resource "kubectl_manifest" "flux_sync" {
+#   for_each   = { for v in local.flux_sync : lower(join("/", compact([v.data.apiVersion, v.data.kind, lookup(v.data.metadata, "namespace", ""), v.data.metadata.name]))) => v.content if var.gitops == "flux" }
+#   depends_on = [kubectl_manifest.flux_install]
+#   yaml_body  = each.value
+# }
