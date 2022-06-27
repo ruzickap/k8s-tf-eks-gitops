@@ -100,6 +100,11 @@ variable "flux_kustomize_controller_kms_key_arn" {
   description = "KMS Key ARN used for encrypting and decrypting secrests using SOPS + Flux"
 }
 
+variable "flux_version" {
+  type        = string
+  description = "Flux version"
+}
+
 variable "github_token" {
   type        = string
   sensitive   = true

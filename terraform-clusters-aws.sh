@@ -19,7 +19,7 @@ get_variable_from_group_cluster_tfvars() {
 set -euo pipefail
 
 if [[ "$#" -eq 0 ]]; then
-  echo -e "\nUsage: $0 mgmt01.k8s.use1.dev.proj.aws.mylabs.dev\n"
+  echo -e "\nUsage: $0 mgmt02.k8s.use1.dev.proj.aws.mylabs.dev\n"
   exit 1
 fi
 

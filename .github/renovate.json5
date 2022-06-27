@@ -51,6 +51,8 @@
       "fileMatch": [
         "^\\.github/workflows/.*\\.ya?ml$",
         "^docs/src/part-.*\\.md$",
+        "\\.tfvars$",
+        "README\\.md$",
       ],
       "matchStrings": [
         "# renovate: datasource=(?<datasource>.+?) depName=(?<depName>.+?)( versioning=(?<versioning>.+?))?( extractVersion=(?<extractVersion>.+?))?( registryUrl=(?<registryUrl>.+?))?\\s.*(=|:\\s+)\"?(?<currentValue>.+?)\"?\\s",

@@ -31,10 +31,10 @@ data "kubectl_file_documents" "argo-cd_core-install" {
 # Flux
 # ---------------------------------------------------------------------------------------------------------------------
 
-data "kubectl_file_documents" "install" {
+data "kubectl_file_documents" "flux_install" {
   content = file(fileexists("../../${var.cluster_path}/flux/flux-system/gotk-components.yaml") ? "../../${var.cluster_path}/flux/flux-system/gotk-components.yaml" : "../../${var.cluster_path}/../flux/flux-system/gotk-components.yaml")
 }
 
-data "kubectl_file_documents" "sync" {
+data "kubectl_file_documents" "flux_sync" {
   content = file("../../${var.cluster_path}/flux/flux-system/gotk-sync.yaml")
 }
