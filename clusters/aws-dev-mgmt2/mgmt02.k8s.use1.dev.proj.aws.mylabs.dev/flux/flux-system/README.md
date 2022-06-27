@@ -1,7 +1,9 @@
 # Generate gotk-components.yaml - Flux update
 
 ```bash
-flux install --version v0.29.3 --export > gotk-components.yaml
+# renovate: datasource=github-tags depName=fluxcd/flux2
+FLUX_VERSION="v0.31.2"
+flux install --version "${FLUX_VERSION}" --export > gotk-components.yaml
 ```
 
 For testing new flux version, create `gotk-components.yaml` and

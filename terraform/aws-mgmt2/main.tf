@@ -11,14 +11,14 @@ terraform {
     github = {
       source = "integrations/github"
     }
+    http = {
+      source = "hashicorp/http"
+    }
     kubectl = {
       source = "gavinbunney/kubectl"
     }
     kubernetes = {
       source = "hashicorp/kubernetes"
-    }
-    http = {
-      source = "hashicorp/http"
     }
     tls = {
       source = "hashicorp/tls"
@@ -41,13 +41,13 @@ locals {
   # Environment=dev,Team=test,Owner=aaaa
   tags_inline = join(",", [for key, value in local.aws_default_tags : "${key}=${value}"])
 
-  flux_install = [for v in data.kubectl_file_documents.install.documents : {
+  flux_install = [for v in data.kubectl_file_documents.flux_install.documents : {
     data : yamldecode(v)
     content : v
     }
   ]
 
-  flux_sync = [for v in data.kubectl_file_documents.sync.documents : {
+  flux_sync = [for v in data.kubectl_file_documents.flux_sync.documents : {
     data : yamldecode(v)
     content : v
     }

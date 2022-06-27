@@ -319,14 +319,31 @@ resource "kubernetes_secret" "flux_github_keys" {
   }
 }
 
-resource "kubectl_manifest" "flux_github_install" {
-  for_each   = { for v in local.flux_install : lower(join("/", compact([v.data.apiVersion, v.data.kind, lookup(v.data.metadata, "namespace", ""), v.data.metadata.name]))) => v.content }
-  depends_on = [kubernetes_secret.flux_github_keys, kubernetes_config_map.flux_cluster_apps_vars_terraform_configmap]
+resource "kubernetes_service_account" "kustomize_controller" {
+  depends_on = [kubectl_manifest.flux_namespace]
+  metadata {
+    name      = "kustomize-controller"
+    namespace = "flux-system"
+    labels = {
+      "app.kubernetes.io/instance" = "flux-system"
+      "app.kubernetes.io/part-of"  = "flux"
+      "app.kubernetes.io/version"  = "v${var.flux_version}"
+    }
+    annotations = {
+      "eks.amazonaws.com/role-arn" = module.iam_assumable_role_kustomize_controller.iam_role_arn
+    }
+  }
+}
+
+# https://github.com/fluxcd/terraform-provider-flux/issues/120
+resource "kubectl_manifest" "flux_install" {
+  for_each   = { for v in local.flux_install : lower(join("/", compact([v.data.apiVersion, v.data.kind, lookup(v.data.metadata, "namespace", ""), v.data.metadata.name]))) => v.content if anytrue([v.data.kind != "ServiceAccount", v.data.metadata.name != "kustomize-controller"]) }
+  depends_on = [kubernetes_service_account.kustomize_controller, kubernetes_secret.flux_github_keys, kubernetes_config_map.flux_cluster_apps_vars_terraform_configmap]
   yaml_body  = each.value
 }
 
-# resource "kubectl_manifest" "flux_sync" {
-#   for_each   = { for v in local.flux_sync : lower(join("/", compact([v.data.apiVersion, v.data.kind, lookup(v.data.metadata, "namespace", ""), v.data.metadata.name]))) => v.content if var.gitops == "flux" }
-#   depends_on = [kubectl_manifest.flux_install]
-#   yaml_body  = each.value
-# }
+resource "kubectl_manifest" "flux_sync" {
+  for_each   = { for v in local.flux_sync : lower(join("/", compact([v.data.apiVersion, v.data.kind, lookup(v.data.metadata, "namespace", ""), v.data.metadata.name]))) => v.content if var.gitops == "flux" }
+  depends_on = [kubectl_manifest.flux_install]
+  yaml_body  = each.value
+}
