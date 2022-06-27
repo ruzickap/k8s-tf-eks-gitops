@@ -21,7 +21,7 @@ set -euo pipefail
 if [[ "$#" -eq 0 ]] || [[ ! -d .git ]]; then
   cat << \EOF
 Run in top of the git repository.
-Usage: ./scripts/flux-k3d-cluster.sh mgmt02.k8s.use1.dev.proj.aws.mylabs.dev | sh -x"
+Usage: ./scripts/flux-k3d-cluster.sh mgmt02.k8s.use1.dev.proj.aws.mylabs.dev | sh -x
 
 Required tools:
 
@@ -84,16 +84,28 @@ kubectl create secret generic aws-creds -n flux-system \
   --from-literal=AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY}" \
   --from-literal=AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION}"
 
-flux create source git flux-system \
-  --url="$(gh repo view --json url --jq '.url')" \
-  --branch="$(git rev-parse --abbrev-ref HEAD)"
-flux create kustomization flux-system \
-  --source=flux-system \
-  --path="${CLUSTER_PATH}/flux/"
-
-# Stop synchronizing the flux-system to allow modification of deployment/kustomize-controller
-flux suspend kustomization flux-system
 kubectl patch deployment kustomize-controller -n flux-system -p '{"spec": {"template": {"spec": {"containers": [{"name":"manager", "envFrom": [{"secretRef":{"name":"aws-creds"}}] }] }}}}'
+
+flux create source git flux-system --url="$(gh repo view --json url --jq '.url')" --branch="$(git rev-parse --abbrev-ref HEAD)"
+
+kubectl apply -f - << EOF2
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: flux-system
+  namespace: flux-system
+spec:
+  interval: 10m0s
+  path: ./${CLUSTER_PATH}/flux
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  postBuild:
+    substituteFrom:
+      - kind: ConfigMap
+        name: cluster-apps-vars-terraform-configmap
+EOF2
 
 echo "export KUBECONFIG=/tmp/kubeconfig-${CLUSTER_NAME}.conf"
 echo "http://localhost:8080/dashboard/"
