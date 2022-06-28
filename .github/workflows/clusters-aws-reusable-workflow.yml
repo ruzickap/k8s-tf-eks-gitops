@@ -96,7 +96,7 @@ jobs:
           version: v${{ env.KUBECTL_VERSION }}
 
       - name: 💡🔪 Setup helm
-        uses: azure/setup-helm@v1
+        uses: azure/setup-helm@v3
         with:
           version: v${{ env.HELM_VERSION }}
 
