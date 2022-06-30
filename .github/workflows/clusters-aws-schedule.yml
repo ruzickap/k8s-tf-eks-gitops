@@ -32,6 +32,7 @@ jobs:
           set -euxo pipefail
 
           ALL_CHANGED_FILES=" ${{ steps.changed-files.outputs.all_changed_files }}"
+          ALL_CHANGED_FILES=" terraform/aws-mgmt/test.tf terraform/aws-mgmt2/dddd.tf"
           echo "*** ALL_CHANGED_FILES: ${ALL_CHANGED_FILES}"
 
           # For each /terrafrom/<code> select one cluster which will be built
@@ -72,7 +73,7 @@ jobs:
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "*Changed Files*: ${ALL_CHANGED_FILES// /\\\n• https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/}"
+                    "text": "*Changed Files*: ${ALL_CHANGED_FILES// /\\\n• <https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}|${{ github.ref_name }}>/}"
                   }
                 }
               ]
@@ -96,91 +97,91 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
 
-  scheduled-create:
-    needs: scheduled-run-time-check
-    if: ${{ needs.scheduled-run-time-check.outputs.scheduled_clusters_matrix != '[]' }}
-    uses: ./.github/workflows/clusters-aws-reusable-workflow.yml
-    with:
-      clusters: ${{ needs.scheduled-run-time-check.outputs.scheduled_clusters }}
-      terraform_action: apply
-      env-variables: "'TF_LOG=ERROR' 'TF_DATA_DIR=.terraform'"
-    secrets:
-      CREATE_FLUX_DEPLOY_KEY_GITHUB_TOKEN: ${{ secrets.CREATE_FLUX_DEPLOY_KEY_GITHUB_TOKEN }}
+  # scheduled-create:
+  #   needs: scheduled-run-time-check
+  #   if: ${{ needs.scheduled-run-time-check.outputs.scheduled_clusters_matrix != '[]' }}
+  #   uses: ./.github/workflows/clusters-aws-reusable-workflow.yml
+  #   with:
+  #     clusters: ${{ needs.scheduled-run-time-check.outputs.scheduled_clusters }}
+  #     terraform_action: apply
+  #     env-variables: "'TF_LOG=ERROR' 'TF_DATA_DIR=.terraform'"
+  #   secrets:
+  #     CREATE_FLUX_DEPLOY_KEY_GITHUB_TOKEN: ${{ secrets.CREATE_FLUX_DEPLOY_KEY_GITHUB_TOKEN }}
 
-  scheduled-check:
-    name: "${{ matrix.stage }}"
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-    if: ${{ needs.scheduled-run-time-check.outputs.scheduled_clusters_matrix != '[""]' }}
-    needs: [scheduled-run-time-check, scheduled-create]
-    strategy:
-      # Do not cancel matrix jobs if one of them fails
-      fail-fast: false
-      matrix:
-        stage: ${{ fromJSON(needs.scheduled-run-time-check.outputs.scheduled_clusters_matrix) }}
-    steps:
-      - name: 💡 Check out repository code
-        uses: actions/checkout@v3
+  # scheduled-check:
+  #   name: "${{ matrix.stage }}"
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     id-token: write
+  #     contents: read
+  #   if: ${{ needs.scheduled-run-time-check.outputs.scheduled_clusters_matrix != '[""]' }}
+  #   needs: [scheduled-run-time-check, scheduled-create]
+  #   strategy:
+  #     # Do not cancel matrix jobs if one of them fails
+  #     fail-fast: false
+  #     matrix:
+  #       stage: ${{ fromJSON(needs.scheduled-run-time-check.outputs.scheduled_clusters_matrix) }}
+  #   steps:
+  #     - name: 💡 Check out repository code
+  #       uses: actions/checkout@v3
 
-      - name: 💡 Setup kubectl
-        uses: azure/setup-kubectl@v3.0
-        with:
-          version: v${{ env.KUBECTL_VERSION }}
+  #     - name: 💡 Setup kubectl
+  #       uses: azure/setup-kubectl@v3.0
+  #       with:
+  #         version: v${{ env.KUBECTL_VERSION }}
 
-      - name: 💡 Setup Flux
-        uses: fluxcd/flux2/action@main
+  #     - name: 💡 Setup Flux
+  #       uses: fluxcd/flux2/action@main
 
-      - name: 💡 Get and display environment variables
-        run: |
-          set -euxo pipefail
+  #     - name: 💡 Get and display environment variables
+  #       run: |
+  #         set -euxo pipefail
 
-          get_variable_from_group_cluster_tfvars () {
-            local CLUSTER_PATH="$1" TF_CODE_VARIABLE="$2" VARIABLE_HELPER
-            if grep -q "${TF_CODE_VARIABLE}" "${CLUSTER_PATH}/cluster-variables.tfvars" ; then
-              VARIABLE_HELPER=$(awk -F \" "/^${TF_CODE_VARIABLE}/ { print \$2 }" "${CLUSTER_PATH}/cluster-variables.tfvars")
-            else
-              VARIABLE_HELPER=$(awk -F \" "/^${TF_CODE_VARIABLE}/ { print \$2 }" "${CLUSTER_PATH}/../group-variables.tfvars")
-            fi
-            echo -e "\n💡 Variable: \"${TF_CODE_VARIABLE^^}\" = \"${VARIABLE_HELPER}\""
-            echo "${TF_CODE_VARIABLE^^}=${VARIABLE_HELPER}" >> "${GITHUB_ENV}"
-            export "${TF_CODE_VARIABLE^^}=${VARIABLE_HELPER}"
-            echo "::set-output name=${TF_CODE_VARIABLE^^}::${VARIABLE_HELPER}"
-          }
+  #         get_variable_from_group_cluster_tfvars () {
+  #           local CLUSTER_PATH="$1" TF_CODE_VARIABLE="$2" VARIABLE_HELPER
+  #           if grep -q "${TF_CODE_VARIABLE}" "${CLUSTER_PATH}/cluster-variables.tfvars" ; then
+  #             VARIABLE_HELPER=$(awk -F \" "/^${TF_CODE_VARIABLE}/ { print \$2 }" "${CLUSTER_PATH}/cluster-variables.tfvars")
+  #           else
+  #             VARIABLE_HELPER=$(awk -F \" "/^${TF_CODE_VARIABLE}/ { print \$2 }" "${CLUSTER_PATH}/../group-variables.tfvars")
+  #           fi
+  #           echo -e "\n💡 Variable: \"${TF_CODE_VARIABLE^^}\" = \"${VARIABLE_HELPER}\""
+  #           echo "${TF_CODE_VARIABLE^^}=${VARIABLE_HELPER}" >> "${GITHUB_ENV}"
+  #           export "${TF_CODE_VARIABLE^^}=${VARIABLE_HELPER}"
+  #           echo "::set-output name=${TF_CODE_VARIABLE^^}::${VARIABLE_HELPER}"
+  #         }
 
-          CLUSTER_PATH=$(find clusters/*/*\.*\.* -maxdepth 0 -mindepth 0 -type d -regextype "posix-extended" -regex ".*${{ matrix.stage }}.*")
+  #         CLUSTER_PATH=$(find clusters/*/*\.*\.* -maxdepth 0 -mindepth 0 -type d -regextype "posix-extended" -regex ".*${{ matrix.stage }}.*")
 
-          get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "aws_default_region"
-          get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "aws_assume_role"
-          get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "cluster_fqdn"
-          echo "CLUSTER_NAME=${CLUSTER_FQDN%%.*}" | tee -a "${GITHUB_ENV}"
+  #         get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "aws_default_region"
+  #         get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "aws_assume_role"
+  #         get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "cluster_fqdn"
+  #         echo "CLUSTER_NAME=${CLUSTER_FQDN%%.*}" | tee -a "${GITHUB_ENV}"
 
-      - name: 💡 Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          role-to-assume: ${{ env.AWS_ASSUME_ROLE }}
-          role-session-name: GitHubOidcFederatedRole
-          aws-region: ${{ env.AWS_DEFAULT_REGION }}
+  #     - name: 💡 Configure AWS credentials
+  #       uses: aws-actions/configure-aws-credentials@v1
+  #       with:
+  #         role-to-assume: ${{ env.AWS_ASSUME_ROLE }}
+  #         role-session-name: GitHubOidcFederatedRole
+  #         aws-region: ${{ env.AWS_DEFAULT_REGION }}
 
-      - name: 💡 Access Amazon EKS cluster and list nodes, Flux and ArgoCD details
-        run: |
-          set -euxo pipefail
-          export KUBECONFIG="/tmp/kubeconfig-${CLUSTER_NAME}.conf"
-          aws eks update-kubeconfig --region "${AWS_DEFAULT_REGION}" --name "${CLUSTER_NAME}" --kubeconfig "${KUBECONFIG}"
-          kubectl get nodes -o wide --show-labels
-          kubectl get namespaces
-          flux get all --all-namespaces
-          kubectl get applications,applicationsets -A || true
+  #     - name: 💡 Access Amazon EKS cluster and list nodes, Flux and ArgoCD details
+  #       run: |
+  #         set -euxo pipefail
+  #         export KUBECONFIG="/tmp/kubeconfig-${CLUSTER_NAME}.conf"
+  #         aws eks update-kubeconfig --region "${AWS_DEFAULT_REGION}" --name "${CLUSTER_NAME}" --kubeconfig "${KUBECONFIG}"
+  #         kubectl get nodes -o wide --show-labels
+  #         kubectl get namespaces
+  #         flux get all --all-namespaces
+  #         kubectl get applications,applicationsets -A || true
 
-  scheduled-delete:
-    needs: [scheduled-run-time-check, scheduled-check]
-    if: ${{ needs.scheduled-run-time-check.outputs.scheduled_clusters_matrix != '[]' }}
-    uses: ./.github/workflows/clusters-aws-reusable-workflow.yml
-    with:
-      # https://github.community/t/reusable-workflow-env-context-not-available-in-jobs-job-id-with/206111
-      clusters: ${{ needs.scheduled-run-time-check.outputs.scheduled_clusters }}
-      terraform_action: destroy
-      env-variables: "'TF_LOG=ERROR' 'TF_DATA_DIR=.terraform'"
-    secrets:
-      CREATE_FLUX_DEPLOY_KEY_GITHUB_TOKEN: ${{ secrets.CREATE_FLUX_DEPLOY_KEY_GITHUB_TOKEN }}
+  # scheduled-delete:
+  #   needs: [scheduled-run-time-check, scheduled-check]
+  #   if: ${{ needs.scheduled-run-time-check.outputs.scheduled_clusters_matrix != '[]' }}
+  #   uses: ./.github/workflows/clusters-aws-reusable-workflow.yml
+  #   with:
+  #     # https://github.community/t/reusable-workflow-env-context-not-available-in-jobs-job-id-with/206111
+  #     clusters: ${{ needs.scheduled-run-time-check.outputs.scheduled_clusters }}
+  #     terraform_action: destroy
+  #     env-variables: "'TF_LOG=ERROR' 'TF_DATA_DIR=.terraform'"
+  #   secrets:
+  #     CREATE_FLUX_DEPLOY_KEY_GITHUB_TOKEN: ${{ secrets.CREATE_FLUX_DEPLOY_KEY_GITHUB_TOKEN }}
