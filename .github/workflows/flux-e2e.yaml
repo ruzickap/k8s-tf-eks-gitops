@@ -55,8 +55,6 @@ jobs:
             --from-literal=AWS_SESSION_TOKEN="${AWS_SESSION_TOKEN}" \
             --from-literal=AWS_DEFAULT_REGION="${AWS_DEFAULT_REGION}"
 
-          kubectl patch deployment kustomize-controller -n flux-system -p '{"spec": {"template": {"spec": {"containers": [{"name":"manager", "envFrom": [{"secretRef":{"name":"aws-creds"}}] }] }}}}'
-
       - name: Set other env variables
         run: |
           set -euxo pipefail
@@ -81,9 +79,11 @@ jobs:
 
       - name: Setup cluster reconciliation
         run: |
-          set -euxo pipefail
+          set -euo pipefail
 
           kustomize build "${CLUSTER_PATH}/flux/flux-system" | kubectl apply -f -
+          sleep 10
+          kubectl patch deployment kustomize-controller -n flux-system -p '{"spec": {"template": {"spec": {"containers": [{"name":"manager", "envFrom": [{"secretRef":{"name":"aws-creds"}}] }] }}}}'
 
           # flux create source git flux-system --url="https://github.com/${GITHUB_REPOSITORY}" --branch="$(git rev-parse --abbrev-ref HEAD)"
 
@@ -129,3 +129,67 @@ jobs:
       #   uses: mxschmitt/action-tmate@v3
       #   with:
       #     limit-access-to-actor: true
+
+  flux-k3d-cluster:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Flux
+        uses: fluxcd/flux2/action@main
+        with:
+          # renovate: datasource=github-tags depName=fluxcd/flux2
+          version: 0.31.2
+
+      - name: Install k3d
+        run: |
+          set -euxo pipefail
+          curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
+
+      - name: 💡🔪 Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ env.AWS_ASSUME_ROLE }}
+          role-session-name: GitHubOidcFederatedRole
+          aws-region: ${{ env.AWS_DEFAULT_REGION }}
+
+      - name: Set other env variables
+        run: |
+          set -euxo pipefail
+          CLUSTER_FQDN=$(basename ${{ env.CLUSTER_PATH }})
+          cat << EOF | tee -a "${GITHUB_ENV}"
+          CLUSTER_FQDN=${CLUSTER_FQDN}
+          CLUSTER_NAME=${CLUSTER_FQDN%%.*}
+          EOF
+
+      - name: Execute flux-k3d-cluster.sh
+        run: |
+          set -euxo pipefail
+          ./scripts/flux-k3d-cluster.sh "${CLUSTER_FQDN}"
+
+      - name: Execute flux-k3d-cluster.sh | sh -x
+        run: |
+          set -euxo pipefail
+          ./scripts/flux-k3d-cluster.sh "${CLUSTER_FQDN}" | sh
+          echo "KUBECONFIG=/tmp/kubeconfig-${CLUSTER_NAME}.conf" | tee -a "${GITHUB_ENV}"
+
+      - name: Verify cluster reconciliation
+        run: |
+          set -euxo pipefail
+          sleep 10
+          kubectl wait kustomization --for=condition=ready --timeout=5m --all-namespaces --all
+          kubectl wait helmrelease --for=condition=ready --timeout=5m --all-namespaces --all
+
+      - name: Debug failure
+        if: failure()
+        run: |
+          set -euxo pipefail
+          kubectl -n flux-system get all
+          flux get all --all-namespaces
+          kubectl -n flux-system logs deploy/source-controller
+          kubectl -n flux-system logs deploy/kustomize-controller
+          kubectl -n flux-system logs deploy/helm-controller

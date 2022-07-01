@@ -86,7 +86,7 @@ kubectl create secret generic aws-creds -n flux-system \
 
 kubectl patch deployment kustomize-controller -n flux-system -p '{"spec": {"template": {"spec": {"containers": [{"name":"manager", "envFrom": [{"secretRef":{"name":"aws-creds"}}] }] }}}}'
 
-kustomize build ${CLUSTER_PATH}/flux
+kustomize build ${CLUSTER_PATH}/flux | kubectl apply -f -
 
 # flux create source git flux-system --url="$(gh repo view --json url --jq '.url')" --branch="$(git rev-parse --abbrev-ref HEAD)"
 
