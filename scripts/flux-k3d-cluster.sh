@@ -86,26 +86,28 @@ kubectl create secret generic aws-creds -n flux-system \
 
 kubectl patch deployment kustomize-controller -n flux-system -p '{"spec": {"template": {"spec": {"containers": [{"name":"manager", "envFrom": [{"secretRef":{"name":"aws-creds"}}] }] }}}}'
 
-flux create source git flux-system --url="$(gh repo view --json url --jq '.url')" --branch="$(git rev-parse --abbrev-ref HEAD)"
+kustomize build ${CLUSTER_PATH}/flux
 
-kubectl apply -f - << EOF2
-apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
-kind: Kustomization
-metadata:
-  name: flux-system
-  namespace: flux-system
-spec:
-  interval: 10m0s
-  path: ./${CLUSTER_PATH}/flux
-  prune: true
-  sourceRef:
-    kind: GitRepository
-    name: flux-system
-  postBuild:
-    substituteFrom:
-      - kind: ConfigMap
-        name: cluster-apps-vars-terraform-configmap
-EOF2
+# flux create source git flux-system --url="$(gh repo view --json url --jq '.url')" --branch="$(git rev-parse --abbrev-ref HEAD)"
+
+# kubectl apply -f - << EOF2
+# apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+# kind: Kustomization
+# metadata:
+#   name: flux-system
+#   namespace: flux-system
+# spec:
+#   interval: 10m0s
+#   path: ./${CLUSTER_PATH}/flux
+#   prune: true
+#   sourceRef:
+#     kind: GitRepository
+#     name: flux-system
+#   postBuild:
+#     substituteFrom:
+#       - kind: ConfigMap
+#         name: cluster-apps-vars-terraform-configmap
+# EOF2
 
 echo "export KUBECONFIG=/tmp/kubeconfig-${CLUSTER_NAME}.conf"
 echo "http://localhost:8080/dashboard/"

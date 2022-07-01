@@ -110,34 +110,34 @@ alertmanager:
           :question:
           {{- end }}
       {{- end }}
-  # ingress:
-  #   enabled: true
-  #   ingressClassName: nginx
-  #   annotations:
-  #     nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/auth
-  #     nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/start?rd=$scheme://$host$request_uri
-  #   hosts:
-  #     - alertmanager.${CLUSTER_FQDN}
-  #   paths: ["/"]
-  #   pathType: ImplementationSpecific
-  #   tls:
-  #     - hosts:
-  #         - alertmanager.${CLUSTER_FQDN}
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    annotations:
+      nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/auth
+      nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/start?rd=$scheme://$host$request_uri
+    hosts:
+      - alertmanager.${CLUSTER_FQDN}
+    paths: ["/"]
+    pathType: ImplementationSpecific
+    tls:
+      - hosts:
+          - alertmanager.${CLUSTER_FQDN}
 # https://github.com/grafana/helm-charts/blob/main/charts/grafana/values.yaml
 grafana:
-  # ingress:
-  #   enabled: true
-  #   ingressClassName: nginx
-  #   annotations:
-  #     nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/auth
-  #     nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/start?rd=$scheme://$host$request_uri
-  #   hosts:
-  #     - grafana.${CLUSTER_FQDN}
-  #   paths: ["/"]
-  #   pathType: ImplementationSpecific
-  #   tls:
-  #     - hosts:
-  #         - grafana.${CLUSTER_FQDN}
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    annotations:
+      nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/auth
+      nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/start?rd=$scheme://$host$request_uri
+    hosts:
+      - grafana.${CLUSTER_FQDN}
+    paths: ["/"]
+    pathType: ImplementationSpecific
+    tls:
+      - hosts:
+          - grafana.${CLUSTER_FQDN}
   dashboardProviders:
     dashboardproviders.yaml:
       apiVersion: 1
@@ -238,7 +238,7 @@ grafana:
   grafana.ini:
     server:
       root_url: https://grafana.${CLUSTER_FQDN}
-    # Using oauth2-proxy instead of default Grafana Oauth
+    # Use oauth2-proxy instead of default Grafana Oauth
     auth.anonymous:
       enabled: true
       org_role: Admin
@@ -260,19 +260,19 @@ prometheusOperator:
   admissionWebhooks:
     enabled: false
 prometheus:
-  # ingress:
-  #   enabled: true
-  #   ingressClassName: nginx
-  #   annotations:
-  #     nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/auth
-  #     nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/start?rd=$scheme://$host$request_uri
-  #   paths: ["/"]
-  #   pathType: ImplementationSpecific
-  #   hosts:
-  #     - prometheus.${CLUSTER_FQDN}
-  #   tls:
-  #     - hosts:
-  #         - prometheus.${CLUSTER_FQDN}
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    annotations:
+      nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/auth
+      nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/start?rd=$scheme://$host$request_uri
+    paths: ["/"]
+    pathType: ImplementationSpecific
+    hosts:
+      - prometheus.${CLUSTER_FQDN}
+    tls:
+      - hosts:
+          - prometheus.${CLUSTER_FQDN}
   prometheusSpec:
     externalLabels:
       cluster: ${CLUSTER_FQDN}
