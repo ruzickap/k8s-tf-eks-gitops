@@ -191,7 +191,7 @@ resource "aws_iam_policy" "kustomize-controller" {
 # Role created by this module must be in stored in git in clusters/aws-dev-mgmt2/<cluster_name>/flux/flux-system/kustomization.yaml
 module "iam_assumable_role_kustomize_controller" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "5.1.0"
+  version                       = "5.2.0"
   create_role                   = true
   provider_url                  = module.eks_blueprints.eks_oidc_issuer_url
   role_name                     = "${module.eks_blueprints.eks_cluster_id}-iamserviceaccount-kustomize-controller"
