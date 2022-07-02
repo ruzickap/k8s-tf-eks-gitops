@@ -76,18 +76,6 @@ module "eks_blueprints" {
   managed_node_groups = var.managed_node_groups
 }
 
-# module "eks_blueprints_kubernetes_addons" {
-#   source = "github.com/aws-ia/terraform-aws-eks-blueprints//modules/kubernetes-addons?ref=v4.0.9"
-
-#   eks_cluster_id = module.eks_blueprints.eks_cluster_id
-
-#   # EKS Addons
-#   enable_amazon_eks_vpc_cni            = true
-#   enable_amazon_eks_coredns            = true
-#   enable_amazon_eks_kube_proxy         = true
-#   enable_amazon_eks_aws_ebs_csi_driver = true
-# }
-
 # ---------------------------------------------------------------------------------------------------------------------
 # IRSA
 # ---------------------------------------------------------------------------------------------------------------------
@@ -120,7 +108,7 @@ resource "aws_iam_policy" "cert_manager" {
     }
   ]
 }
-EOF
+  EOF
 }
 
 module "iam_assumable_role_cert_manager" {
@@ -163,7 +151,7 @@ resource "aws_iam_policy" "external_dns" {
     }
   ]
 }
-EOF
+  EOF
 }
 
 module "iam_assumable_role_external_dns" {
@@ -197,7 +185,7 @@ resource "aws_iam_policy" "kustomize-controller" {
     }
   ]
 }
-EOF
+  EOF
 }
 
 # Role created by this module must be in stored in git in clusters/aws-dev-mgmt2/<cluster_name>/flux/flux-system/kustomization.yaml
@@ -325,9 +313,11 @@ resource "kubernetes_service_account" "kustomize_controller" {
     name      = "kustomize-controller"
     namespace = "flux-system"
     labels = {
-      "app.kubernetes.io/instance" = "flux-system"
-      "app.kubernetes.io/part-of"  = "flux"
-      "app.kubernetes.io/version"  = "v${var.flux_version}"
+      "app.kubernetes.io/instance"            = "flux-system"
+      "app.kubernetes.io/part-of"             = "flux"
+      "app.kubernetes.io/version"             = "v${var.flux_version}"
+      "kustomize.toolkit.fluxcd.io/name"      = "flux-system"
+      "kustomize.toolkit.fluxcd.io/namespace" = "flux-system"
     }
     annotations = {
       "eks.amazonaws.com/role-arn" = module.iam_assumable_role_kustomize_controller.iam_role_arn
