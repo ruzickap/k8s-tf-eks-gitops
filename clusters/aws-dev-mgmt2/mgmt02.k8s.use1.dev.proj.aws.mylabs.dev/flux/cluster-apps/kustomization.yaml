@@ -9,6 +9,8 @@ resources:
 
   # Cluster specific applications
   - ../../../../../flux/cluster-apps/polaris/
+  - ../../../../../flux/cluster-apps/crossplane/
+  - crossplane-provider-aws
 
 generatorOptions:
   labels:

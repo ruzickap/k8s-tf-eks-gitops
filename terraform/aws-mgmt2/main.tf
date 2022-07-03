@@ -53,6 +53,32 @@ locals {
     }
   ]
 
+  kubeconfig = yamlencode({
+    apiVersion      = "v1"
+    kind            = "Config"
+    current-context = "terraform"
+    clusters = [{
+      name = module.eks_blueprints.eks_cluster_id
+      cluster = {
+        certificate-authority-data = data.aws_eks_cluster.eks-cluster.certificate_authority.0.data
+        server                     = data.aws_eks_cluster.eks-cluster.endpoint
+      }
+    }]
+    contexts = [{
+      name = "terraform"
+      context = {
+        cluster = module.eks_blueprints.eks_cluster_id
+        user    = "terraform"
+      }
+    }]
+    users = [{
+      name = "terraform"
+      user = {
+        token = data.aws_eks_cluster_auth.eks-cluster.token
+      }
+    }]
+  })
+
   known_hosts = "github.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg="
 }
 

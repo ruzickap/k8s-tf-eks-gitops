@@ -12,5 +12,5 @@ ingress:
   tls:
     - hosts:
         - podinfo.${CLUSTER_FQDN}
-# serviceMonitor:
-#   enabled: true
+serviceMonitor:
+  enabled: true
