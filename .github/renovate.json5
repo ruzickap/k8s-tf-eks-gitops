@@ -51,7 +51,7 @@
       "fileMatch": [
         "^\\.github/workflows/.*\\.ya?ml$",
         "^docs/src/part-.*\\.md$",
-        "\\.tfvars$",
+        ".*\\.tfvars$",
         "README\\.md$",
       ],
       "matchStrings": [

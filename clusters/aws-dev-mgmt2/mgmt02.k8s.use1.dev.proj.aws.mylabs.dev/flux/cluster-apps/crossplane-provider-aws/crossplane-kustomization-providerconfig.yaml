@@ -1,0 +1,20 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: crossplane-providerconfig
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: crossplane-provider
+  interval: 5m0s
+  path: ${CLUSTER_PATH}/flux/cluster-apps/crossplane-provider-aws/crossplane-kustomization-providerconfig/
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  wait: true
+  postBuild:
+    substituteFrom:
+      - kind: ConfigMap
+        name: cluster-apps-vars-terraform-configmap

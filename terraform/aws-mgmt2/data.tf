@@ -1,3 +1,5 @@
+data "aws_caller_identity" "current" {}
+
 data "aws_eks_cluster" "eks-cluster" {
   name = module.eks_blueprints.eks_cluster_id
 }
@@ -5,6 +7,12 @@ data "aws_eks_cluster" "eks-cluster" {
 data "aws_eks_cluster_auth" "eks-cluster" {
   name = module.eks_blueprints.eks_cluster_id
 }
+
+data "aws_iam_session_context" "current" {
+  arn = data.aws_caller_identity.current.arn
+}
+
+data "aws_partition" "current" {}
 
 data "aws_route53_zone" "base_domain" {
   name = var.base_domain

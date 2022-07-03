@@ -1,0 +1,9 @@
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  name: provider-aws
+  namespace: crossplane-system
+spec:
+  package: crossplane/provider-aws:v0.28.1
+  controllerConfigRef:
+    name: aws-config

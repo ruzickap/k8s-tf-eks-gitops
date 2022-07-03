@@ -281,12 +281,14 @@ resource "kubernetes_config_map" "flux_cluster_apps_vars_terraform_configmap" {
   }
 
   data = {
-    CLUSTER_FQDN  = var.cluster_fqdn
-    CLUSTER_NAME  = local.cluster_name
-    CLUSTER_PATH  = var.cluster_path
-    EMAIL         = var.email
-    ENVIRONMENT   = var.environment
-    SLACK_CHANNEL = var.slack_channel
+    AWS_ACCOUNT_ID = data.aws_caller_identity.current.account_id
+    AWS_PARTITION  = data.aws_partition.current.id
+    CLUSTER_FQDN   = var.cluster_fqdn
+    CLUSTER_NAME   = local.cluster_name
+    CLUSTER_PATH   = var.cluster_path
+    EMAIL          = var.email
+    ENVIRONMENT    = var.environment
+    SLACK_CHANNEL  = var.slack_channel
     # Environment=dev,Team=test
     TAGS_INLINE = local.tags_inline
   }
@@ -336,4 +338,48 @@ resource "kubectl_manifest" "flux_sync" {
   for_each   = { for v in local.flux_sync : lower(join("/", compact([v.data.apiVersion, v.data.kind, lookup(v.data.metadata, "namespace", ""), v.data.metadata.name]))) => v.content if var.gitops == "flux" }
   depends_on = [kubectl_manifest.flux_install]
   yaml_body  = each.value
+}
+
+# ---------------------------------------------------------------------------------------------------------------------
+# Crossplane
+# ---------------------------------------------------------------------------------------------------------------------
+
+# Due to specific Crossplane installtion https://github.com/crossplane-contrib/provider-aws/blob/master/AUTHENTICATION.md#using-iam-roles-for-serviceaccounts
+# it is necessary to "exctract" the dynamically created ServiceAccount using
+# kubectl :-(
+# https://discuss.hashicorp.com/t/how-to-retrieve-the-null-resource-returned-value/9620/4
+
+resource "time_sleep" "wait_for_crossplane_provider" {
+  depends_on      = [kubectl_manifest.flux_sync]
+  create_duration = "5m"
+}
+
+resource "null_resource" "get_crossplane_provider_aws_serviceaccount_name" {
+  depends_on = [time_sleep.wait_for_crossplane_provider]
+  triggers   = { always_run = "${timestamp()}" }
+  provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
+    environment = {
+      KUBECONFIG = base64encode(local.kubeconfig)
+    }
+    command = <<-EOT
+      kubectl get providers.pkg.crossplane.io provider-aws -o jsonpath='{.status.currentRevision}' --kubeconfig <(echo $KUBECONFIG | base64 --decode) > /tmp/crossplane_provider_aws_serviceaccount_name.txt
+    EOT
+  }
+}
+
+data "local_file" "crossplane_provider_aws_serviceaccount_name" {
+  depends_on = [null_resource.get_crossplane_provider_aws_serviceaccount_name]
+  filename   = "/tmp/crossplane_provider_aws_serviceaccount_name.txt"
+}
+
+module "iam_assumable_role_crossplane_provider_aws" {
+  source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
+  version                       = "5.2.0"
+  create_role                   = true
+  provider_url                  = module.eks_blueprints.eks_oidc_issuer_url
+  role_name                     = "${module.eks_blueprints.eks_cluster_id}-iamserviceaccount-crossplane_provider_aws"
+  role_description              = "Allow Crossplane to create AWS objects"
+  role_policy_arns              = ["arn:${data.aws_partition.current.id}:iam::aws:policy/AdministratorAccess"]
+  oidc_fully_qualified_subjects = ["system:serviceaccount:crossplane-system:${data.local_file.crossplane_provider_aws_serviceaccount_name.content}"]
 }
