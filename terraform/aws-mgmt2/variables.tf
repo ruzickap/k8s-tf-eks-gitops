@@ -117,6 +117,12 @@ variable "gitops" {
   default     = ""
 }
 
+variable "letsencrypt_environment" {
+  description = "Let's Encrypt Environment"
+  type        = string
+  default     = "staging"
+}
+
 variable "map_roles" {
   description = "Additional IAM roles to add to the aws-auth ConfigMap"
   type = list(object({
