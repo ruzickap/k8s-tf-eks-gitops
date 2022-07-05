@@ -91,7 +91,7 @@ resource "aws_iam_policy" "cert_manager" {
     {
       "Effect": "Allow",
       "Action": "route53:GetChange",
-      "Resource": "arn:aws:route53:::change/${aws_route53_zone.cluster_fqdn.zone_id}"
+      "Resource": "arn:aws:route53:::change/*"
     },
     {
       "Effect": "Allow",
@@ -281,14 +281,17 @@ resource "kubernetes_config_map" "flux_cluster_apps_vars_terraform_configmap" {
   }
 
   data = {
-    AWS_ACCOUNT_ID = data.aws_caller_identity.current.account_id
-    AWS_PARTITION  = data.aws_partition.current.id
-    CLUSTER_FQDN   = var.cluster_fqdn
-    CLUSTER_NAME   = local.cluster_name
-    CLUSTER_PATH   = var.cluster_path
-    EMAIL          = var.email
-    ENVIRONMENT    = var.environment
-    SLACK_CHANNEL  = var.slack_channel
+    AWS_ACCOUNT_ID          = data.aws_caller_identity.current.account_id
+    AWS_ACCOUNT_ID          = data.aws_caller_identity.current.account_id
+    AWS_DEFAULT_REGION      = var.aws_default_region
+    AWS_PARTITION           = data.aws_partition.current.id
+    CLUSTER_FQDN            = var.cluster_fqdn
+    CLUSTER_NAME            = local.cluster_name
+    CLUSTER_PATH            = var.cluster_path
+    EMAIL                   = var.email
+    ENVIRONMENT             = var.environment
+    LETSENCRYPT_ENVIRONMENT = var.letsencrypt_environment
+    SLACK_CHANNEL           = var.slack_channel
     # Environment=dev,Team=test
     TAGS_INLINE = local.tags_inline
   }

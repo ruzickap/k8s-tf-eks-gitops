@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - cert-manager-kustomization-certificate.yaml
+  - cert-manager-kustomization-clusterissuer.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true
+  labels:
+    type: group-helmrelease-values
+
+configMapGenerator:
+  - name: cert-manager-group-helmrelease-values
+    namespace: cert-manager
+    files:
+      - values.yaml=cert-manager-group-helmrelease-values.yaml
+
+configurations:
+  - kustomizeconfig.yaml

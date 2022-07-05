@@ -7,25 +7,9 @@ resources:
   # Cluster group applications
   - ../../../flux/cluster-apps
 
-  # Cluster specific applications
+  # Cluster specific applications / configurations
   - ../../../../../flux/cluster-apps/polaris/
   - ../../../../../flux/cluster-apps/crossplane/
   - crossplane-provider-aws
-
-generatorOptions:
-  labels:
-    type: cluster-helmrelease-values
-
-configMapGenerator:
-  - name: podinfo-cluster-helmrelease-values
-    namespace: podinfo
-    files:
-      - values.yaml=podinfo-cluster-helmrelease-values.yaml
-
-  - name: metrics-server-cluster-helmrelease-values
-    namespace: metrics-server
-    files:
-      - values.yaml=metrics-server-cluster-helmrelease-values.yaml
-
-configurations:
-  - kustomizeconfig.yaml
+  - metrics-server
+  - podinfo

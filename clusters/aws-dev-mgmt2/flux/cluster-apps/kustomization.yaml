@@ -3,32 +3,9 @@ kind: Kustomization
 resources:
   - ../../../../flux/cluster-apps/metrics-server
   - ../../../../flux/cluster-apps/kube-prometheus-stack
-  - ../../../../flux/cluster-apps/podinfo
-
-generatorOptions:
-  labels:
-    type: group-helmrelease-values
-
-configMapGenerator:
-  - name: podinfo-group-helmrelease-values
-    namespace: podinfo
-    files:
-      - values.yaml=podinfo-group-helmrelease-values.yaml
-
-  - name: kubernetes-dashboard-group-helmrelease-values
-    namespace: kubernetes-dashboard
-    files:
-      - values.yaml=kubernetes-dashboard-group-helmrelease-values.yaml
-
-  - name: metrics-server-group-helmrelease-values
-    namespace: metrics-server
-    files:
-      - values.yaml=metrics-server-group-helmrelease-values.yaml
-
-  - name: kube-prometheus-stack-group-helmrelease-values
-    namespace: kube-prometheus-stack
-    files:
-      - values.yaml=kube-prometheus-stack-group-helmrelease-values.yaml
-
-configurations:
-  - kustomizeconfig.yaml
+  - ../../../../flux/cluster-apps/cert-manager
+  - cert-manager
+  - kube-prometheus-stack
+  - kubernetes-dashboard
+  - metrics-server
+  - podinfo
