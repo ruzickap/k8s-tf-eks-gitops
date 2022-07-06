@@ -57,7 +57,7 @@ managed_node_groups = {
 
     desired_size    = 2
     min_size        = 2
-    max_size        = 3
+    max_size        = 4
     max_unavailable = 1
 
     ami_type       = "BOTTLEROCKET_x86_64"

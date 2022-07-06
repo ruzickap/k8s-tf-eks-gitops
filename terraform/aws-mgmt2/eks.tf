@@ -165,7 +165,7 @@ module "iam_assumable_role_external_dns" {
   oidc_fully_qualified_subjects = ["system:serviceaccount:external-dns:external-dns"]
 }
 
-resource "aws_iam_policy" "kustomize-controller" {
+resource "aws_iam_policy" "kustomize_controller" {
   name        = "${module.eks_blueprints.eks_cluster_id}-kustomize-controller"
   description = "Policy allowing Flux kustomize-controller to access KMS"
   tags        = local.aws_default_tags
@@ -196,8 +196,59 @@ module "iam_assumable_role_kustomize_controller" {
   provider_url                  = module.eks_blueprints.eks_oidc_issuer_url
   role_name                     = "${module.eks_blueprints.eks_cluster_id}-iamserviceaccount-kustomize-controller"
   role_description              = "Allow Flux kustomize-controller to access KMS"
-  role_policy_arns              = [aws_iam_policy.kustomize-controller.arn]
+  role_policy_arns              = [aws_iam_policy.kustomize_controller.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:flux-system:kustomize-controller"]
+}
+
+# https://aws.github.io/aws-eks-best-practices/cluster-autoscaling/#employ-least-privileged-access-to-the-iam-role
+resource "aws_iam_policy" "cluster_autoscaler" {
+  name        = "${module.eks_blueprints.eks_cluster_id}-cluster-autoscaler"
+  description = "Policy allowing cluster-autoscaler to interact with the autoscaling groups"
+  tags        = local.aws_default_tags
+  policy      = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "autoscaling:SetDesiredCapacity",
+        "autoscaling:TerminateInstanceInAutoScalingGroup"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "autoscaling:ResourceTag/k8s.io/cluster-autoscaler/enabled": "true",
+          "aws:ResourceTag/k8s.io/cluster-autoscaler/${local.cluster_name}": "owned"
+        }
+      }
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "autoscaling:DescribeAutoScalingInstances",
+        "autoscaling:DescribeAutoScalingGroups",
+        "ec2:DescribeLaunchTemplateVersions",
+        "autoscaling:DescribeTags",
+        "autoscaling:DescribeLaunchConfigurations"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+  EOF
+}
+
+# Role created by this module must be in stored in git in clusters/aws-dev-mgmt2/<cluster_name>/flux/flux-system/kustomization.yaml
+module "iam_assumable_role_cluster_autoscaler" {
+  source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
+  version                       = "5.2.0"
+  create_role                   = true
+  provider_url                  = module.eks_blueprints.eks_oidc_issuer_url
+  role_name                     = "${module.eks_blueprints.eks_cluster_id}-iamserviceaccount-cluster-autoscaler"
+  role_description              = "Allow cluster-autoscaler to interact with the autoscaling groups"
+  role_policy_arns              = [aws_iam_policy.cluster_autoscaler.arn]
+  oidc_fully_qualified_subjects = ["system:serviceaccount:cluster-autoscaler:cluster-autoscaler"]
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -281,7 +332,6 @@ resource "kubernetes_config_map" "flux_cluster_apps_vars_terraform_configmap" {
   }
 
   data = {
-    AWS_ACCOUNT_ID          = data.aws_caller_identity.current.account_id
     AWS_ACCOUNT_ID          = data.aws_caller_identity.current.account_id
     AWS_DEFAULT_REGION      = var.aws_default_region
     AWS_PARTITION           = data.aws_partition.current.id

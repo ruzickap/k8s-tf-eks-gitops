@@ -1,0 +1,25 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: cluster-autoscaler
+  namespace: cluster-autoscaler
+spec:
+  chart:
+    spec:
+      chart: cluster-autoscaler
+      sourceRef:
+        kind: HelmRepository
+        name: autoscaler
+        namespace: flux-system
+      version: 9.19.2
+  interval: 1m
+  valuesFrom:
+    - kind: ConfigMap
+      name: cluster-autoscaler-main-helmrelease-values
+      optional: true
+    - kind: ConfigMap
+      name: cluster-autoscaler-group-helmrelease-values
+      optional: true
+    - kind: ConfigMap
+      name: cluster-autoscaler-cluster-helmrelease-values
+      optional: true
