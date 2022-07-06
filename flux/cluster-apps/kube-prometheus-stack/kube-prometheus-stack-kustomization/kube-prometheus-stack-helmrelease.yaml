@@ -12,7 +12,11 @@ spec:
         name: prometheus-community
         namespace: flux-system
       version: 36.2.1
+  install:
+    crds: Create
   interval: 1m
+  upgrade:
+    crds: CreateReplace
   valuesFrom:
     - kind: ConfigMap
       name: kube-prometheus-stack-main-helmrelease-values

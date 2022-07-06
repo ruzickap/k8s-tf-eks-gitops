@@ -1,0 +1,14 @@
+aws:
+  region: ${AWS_DEFAULT_REGION}
+domainFilters:
+  - ${CLUSTER_FQDN}
+interval: 20s
+policy: sync
+serviceAccount:
+  name: external-dns
+  annotations:
+    eks.amazonaws.com/role-arn: arn:${AWS_PARTITION}:iam::${AWS_ACCOUNT_ID}:role/${CLUSTER_NAME}-iamserviceaccount-external-dns
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
