@@ -1,0 +1,17 @@
+autoDiscovery:
+  clusterName: ${CLUSTER_NAME}
+awsRegion: ${AWS_DEFAULT_REGION}
+# Required to fix IMDSv2 issue: https://github.com/kubernetes/autoscaler/issues/3592
+extraArgs:
+  aws-use-static-instance-list: true
+rbac:
+  serviceAccount:
+    annotations:
+      eks.amazonaws.com/role-arn: arn:${AWS_PARTITION}:iam::${AWS_ACCOUNT_ID}:role/${CLUSTER_NAME}-iamserviceaccount-cluster-autoscaler
+    name: cluster-autoscaler
+serviceMonitor:
+  enabled: true
+  namespace: kube-prometheus-stack
+prometheusRule:
+  enabled: true
+  namespace: kube-prometheus-stack
