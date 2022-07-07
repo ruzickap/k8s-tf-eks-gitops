@@ -1,0 +1,25 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: ingress-nginx
+  namespace: ingress-nginx
+spec:
+  chart:
+    spec:
+      chart: ingress-nginx
+      sourceRef:
+        kind: HelmRepository
+        name: ingress-nginx
+        namespace: flux-system
+      version: 4.1.4
+  interval: 1m
+  valuesFrom:
+    - kind: ConfigMap
+      name: ingress-nginx-main-helmrelease-values
+      optional: true
+    - kind: ConfigMap
+      name: ingress-nginx-group-helmrelease-values
+      optional: true
+    - kind: ConfigMap
+      name: ingress-nginx-cluster-helmrelease-values
+      optional: true

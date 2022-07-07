@@ -5,12 +5,14 @@ resources:
   - ../../../../flux/cluster-apps/cluster-autoscaler
   - ../../../../flux/cluster-apps/dex
   - ../../../../flux/cluster-apps/external-dns
-  - ../../../../flux/cluster-apps/metrics-server
+  - ../../../../flux/cluster-apps/ingress-nginx
   - ../../../../flux/cluster-apps/kube-prometheus-stack
+  - ../../../../flux/cluster-apps/metrics-server
   - cert-manager
   - cluster-autoscaler
   - dex
   - external-dns
+  - ingress-nginx
   - kube-prometheus-stack
   - kubernetes-dashboard
   - metrics-server
