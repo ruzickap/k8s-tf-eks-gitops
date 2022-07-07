@@ -4,6 +4,7 @@ resources:
   - ../../../../flux/sources/autoscaler
   - ../../../../flux/sources/dex
   - ../../../../flux/sources/bitnami
+  - ../../../../flux/sources/ingress-nginx
   - ../../../../flux/sources/jetstack
   - ../../../../flux/sources/metrics-server
   - ../../../../flux/sources/prometheus-community
