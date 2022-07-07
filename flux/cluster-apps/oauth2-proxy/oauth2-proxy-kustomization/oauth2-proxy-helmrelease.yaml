@@ -1,0 +1,25 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: oauth2-proxy
+  namespace: oauth2-proxy
+spec:
+  chart:
+    spec:
+      chart: oauth2-proxy
+      sourceRef:
+        kind: HelmRepository
+        name: oauth2-proxy
+        namespace: flux-system
+      version: 6.2.1
+  interval: 1m
+  valuesFrom:
+    - kind: ConfigMap
+      name: oauth2-proxy-main-helmrelease-values
+      optional: true
+    - kind: ConfigMap
+      name: oauth2-proxy-group-helmrelease-values
+      optional: true
+    - kind: ConfigMap
+      name: oauth2-proxy-cluster-helmrelease-values
+      optional: true

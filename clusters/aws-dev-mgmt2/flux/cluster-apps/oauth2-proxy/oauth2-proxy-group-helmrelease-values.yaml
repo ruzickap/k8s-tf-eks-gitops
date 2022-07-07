@@ -1,0 +1,28 @@
+config:
+  clientID: oauth2-proxy.${CLUSTER_FQDN}
+  clientSecret: ${OAUTH2_PROXY_SECRET}
+  cookieSecret: ${COOKIE_SECRET}
+  configFile: |-
+    email_domains = [ "*" ]
+    upstreams = [ "file:///dev/null" ]
+    whitelist_domains = ".${CLUSTER_FQDN}"
+    cookie_domains = ".${CLUSTER_FQDN}"
+    provider = "oidc"
+    oidc_issuer_url = "https://dex.${CLUSTER_FQDN}"
+    ssl_insecure_skip_verify = "true"
+    insecure_oidc_skip_issuer_verification = "true"
+    skip_oidc_discovery = "true"
+    login_url = "https://dex.${CLUSTER_FQDN}/auth"
+    redeem_url = "https://dex.${CLUSTER_FQDN}/token"
+    oidc_jwks_url = "https://dex.${CLUSTER_FQDN}/keys"
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - oauth2-proxy.${CLUSTER_FQDN}
+  tls:
+    - hosts:
+        - oauth2-proxy.${CLUSTER_FQDN}
+metrics:
+  servicemonitor:
+    enabled: true

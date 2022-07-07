@@ -7,4 +7,5 @@ resources:
   - ../../../../flux/sources/ingress-nginx
   - ../../../../flux/sources/jetstack
   - ../../../../flux/sources/metrics-server
+  - ../../../../flux/sources/oauth2-proxy
   - ../../../../flux/sources/prometheus-community
