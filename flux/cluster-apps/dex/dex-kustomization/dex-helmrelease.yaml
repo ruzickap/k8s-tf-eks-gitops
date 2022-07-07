@@ -1,0 +1,25 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: dex
+  namespace: dex
+spec:
+  chart:
+    spec:
+      chart: dex
+      sourceRef:
+        kind: HelmRepository
+        name: dex
+        namespace: flux-system
+      version: 0.9.0
+  interval: 1m
+  valuesFrom:
+    - kind: ConfigMap
+      name: dex-main-helmrelease-values
+      optional: true
+    - kind: ConfigMap
+      name: dex-group-helmrelease-values
+      optional: true
+    - kind: ConfigMap
+      name: dex-cluster-helmrelease-values
+      optional: true

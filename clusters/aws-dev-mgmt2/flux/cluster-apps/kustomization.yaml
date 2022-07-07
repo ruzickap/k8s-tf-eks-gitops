@@ -3,11 +3,13 @@ kind: Kustomization
 resources:
   - ../../../../flux/cluster-apps/cert-manager
   - ../../../../flux/cluster-apps/cluster-autoscaler
+  - ../../../../flux/cluster-apps/dex
   - ../../../../flux/cluster-apps/external-dns
   - ../../../../flux/cluster-apps/metrics-server
   - ../../../../flux/cluster-apps/kube-prometheus-stack
   - cert-manager
   - cluster-autoscaler
+  - dex
   - external-dns
   - kube-prometheus-stack
   - kubernetes-dashboard
