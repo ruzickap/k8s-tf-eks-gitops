@@ -8,6 +8,7 @@ resources:
   - ../../../../flux/cluster-apps/ingress-nginx
   - ../../../../flux/cluster-apps/kube-prometheus-stack
   - ../../../../flux/cluster-apps/metrics-server
+  - ../../../../flux/cluster-apps/oauth2-proxy
   - cert-manager
   - cluster-autoscaler
   - dex
@@ -16,4 +17,5 @@ resources:
   - kube-prometheus-stack
   - kubernetes-dashboard
   - metrics-server
+  - oauth2-proxy
   - podinfo
