@@ -404,20 +404,19 @@ resource "kubectl_manifest" "flux_sync" {
 
 resource "time_sleep" "wait_for_crossplane_provider" {
   depends_on      = [kubectl_manifest.flux_sync]
-  create_duration = "5m"
+  create_duration = "2m"
 }
 
 resource "null_resource" "get_crossplane_provider_aws_serviceaccount_name" {
   depends_on = [time_sleep.wait_for_crossplane_provider]
-  triggers   = { always_run = "${timestamp()}" }
+  # This needs to be executed every time, otherwise you get: Error: open /tmp/crossplane_provider_aws_serviceaccount_name.txt: no such file or directory
+  triggers = { always_run = "${timestamp()}" }
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     environment = {
       KUBECONFIG = base64encode(local.kubeconfig)
     }
-    command = <<-EOT
-      kubectl get providers.pkg.crossplane.io provider-aws -o jsonpath='{.status.currentRevision}' --kubeconfig <(echo $KUBECONFIG | base64 --decode) > /tmp/crossplane_provider_aws_serviceaccount_name.txt
-    EOT
+    command = "kubectl get providers.pkg.crossplane.io provider-aws -o jsonpath='{.status.currentRevision}' --kubeconfig <(echo $KUBECONFIG | base64 --decode) > /tmp/crossplane_provider_aws_serviceaccount_name.txt"
   }
 }
 

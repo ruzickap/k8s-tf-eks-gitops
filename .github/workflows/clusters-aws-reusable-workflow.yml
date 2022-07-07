@@ -253,7 +253,7 @@ jobs:
         run: |
           set -euxo pipefail
 
-          VOLUMES=$(aws ec2 describe-volumes --filter "Name=tag:Cluster,Values=${CLUSTER_FQDN}" --query 'Volumes[].VolumeId' --output text) && \
+          VOLUMES=$(aws ec2 describe-volumes --filter "Name=tag:kubernetes.io/cluster/${CLUSTER_NAME},Values=owned" --query 'Volumes[].VolumeId' --output text) && \
           for VOLUME in ${VOLUMES}; do
             echo "Removing Volume: ${VOLUME}"
             aws ec2 delete-volume --volume-id "${VOLUME}"
