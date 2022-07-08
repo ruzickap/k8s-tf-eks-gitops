@@ -1,12 +1,23 @@
+extraArgs:
+  - --enable-skip-login
+  - --enable-insecure-login
+  - --disable-settings-authorizer
+protocolHttp: true
 ingress:
   enabled: true
+  annotations:
+    nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/auth
+    nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/start?rd=$scheme://$host$request_uri
   className: "nginx"
   hosts:
     - kubernetes-dashboard.${CLUSTER_FQDN}
   tls:
     - hosts:
         - kubernetes-dashboard.${CLUSTER_FQDN}
-# metricsScraper:
-#   enabled: true
+settings:
+  clusterName: ${CLUSTER_FQDN}
+  itemsPerPage: 50
+metricsScraper:
+  enabled: true
 serviceAccount:
   name: kubernetes-dashboard-admin

@@ -8,7 +8,6 @@ resources:
   - ../../../flux/cluster-apps
 
   # Cluster specific applications / configurations
-  - ../../../../../flux/cluster-apps/polaris/
   - ../../../../../flux/cluster-apps/crossplane/
   - crossplane-provider-aws
   - metrics-server

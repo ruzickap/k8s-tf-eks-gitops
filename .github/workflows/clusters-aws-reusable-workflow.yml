@@ -66,12 +66,6 @@ jobs:
       TF_CLI_ARGS_destroy: "-auto-approve"
       TF_IN_AUTOMATION: "true"
       TF_VAR_github_token: ${{ secrets.CREATE_FLUX_DEPLOY_KEY_GITHUB_TOKEN }}
-      # renovate: datasource=github-tags depName=helm/helm
-      HELM_VERSION: "3.9.0"
-      # renovate: datasource=github-tags depName=kubernetes/kubectl extractVersion=^kubernetes-(?<version>.+)$
-      KUBECTL_VERSION: "1.24.2"
-      # renovate: datasource=github-tags depName=kubernetes-sigs/kustomize extractVersion=^kustomize\/v(?<version>.+)$
-      KUSTOMIZE_VERSION: "4.5.5"
     # Allow only one execution of terraform per cluster (other executions will wait until first will complete)
     concurrency:
       group: cluster-aws-pipeline-${{ matrix.stage }}
@@ -84,21 +78,6 @@ jobs:
     steps:
       - name: 💡🔪 Check out repository code
         uses: actions/checkout@v3
-
-      - name: 💡🔪 Setup kustomize
-        uses: imranismail/setup-kustomize@v1
-        with:
-          kustomize-version: ${{ env.KUSTOMIZE_VERSION }}
-
-      - name: 💡🔪 Setup kubectl
-        uses: azure/setup-kubectl@v3.0
-        with:
-          version: v${{ env.KUBECTL_VERSION }}
-
-      - name: 💡🔪 Setup helm
-        uses: azure/setup-helm@v3
-        with:
-          version: v${{ env.HELM_VERSION }}
 
       - name: 💡🔪 Get and display environment variables
         run: |
@@ -203,15 +182,14 @@ jobs:
         run: |
           set -euxo pipefail
 
-          # if [[ "$(aws eks list-clusters)" =~ \"${CLUSTER_NAME}\" ]] ; then
-          #   export KUBECONFIG="/tmp/kubeconfig-${CLUSTER_NAME}.conf"
-          #   aws eks update-kubeconfig --name "${CLUSTER_NAME}" --kubeconfig "${KUBECONFIG}"
+          if [[ "$(aws eks list-clusters)" =~ \"${CLUSTER_NAME}\" ]] ; then
+            export KUBECONFIG="/tmp/kubeconfig-${CLUSTER_NAME}.conf"
+            aws eks update-kubeconfig --name "${CLUSTER_NAME}" --kubeconfig "${KUBECONFIG}"
 
-          #   # !!! TODO - stop argo sync, delete all services which are type=Loadbalancers + uninstall external-dns
-          #   kubectl get nodes
-          #   kubectl delete deployments -A -l app.kubernetes.io/name=external-dns
-          #   rm "/tmp/kubeconfig-${CLUSTER_NAME}.conf"
-          # fi
+            # !!! TODO - stop argo sync, delete all services which are type=Loadbalancers + uninstall external-dns
+            kubectl delete deployments -A -l app.kubernetes.io/name=external-dns
+            rm "/tmp/kubeconfig-${CLUSTER_NAME}.conf"
+          fi
 
           # Remove Network ELBs
           for NETWORK_ELB_ARN in $(aws elbv2 describe-load-balancers --query "LoadBalancers[].LoadBalancerArn" --output=text) ; do
