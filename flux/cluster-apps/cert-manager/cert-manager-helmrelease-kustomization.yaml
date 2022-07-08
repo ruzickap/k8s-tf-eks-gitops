@@ -1,13 +1,14 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
-  name: podinfo
+  name: cert-manager
   namespace: flux-system
 spec:
   dependsOn:
+    - name: cert-manager-crds
     - name: kube-prometheus-stack
   interval: 5m
-  path: flux/cluster-apps/podinfo/podinfo-kustomization
+  path: flux/cluster-apps/cert-manager/cert-manager-helmrelease-kustomization
   prune: true
   wait: true
   sourceRef:

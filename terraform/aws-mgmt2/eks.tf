@@ -321,27 +321,33 @@ resource "github_repository_deploy_key" "flux_github_key" {
 resource "kubectl_manifest" "flux_namespace" {
   wait       = true
   apply_only = true
-  yaml_body  = file("templates/flux_namespace.yaml")
+  yaml_body  = <<EOF
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: flux-system
+  EOF
 }
 
-resource "kubernetes_config_map" "flux_cluster_apps_vars_terraform_configmap" {
+resource "kubernetes_secret" "flux_cluster_apps_terraform_secret" {
   depends_on = [kubectl_manifest.flux_namespace]
   metadata {
-    name      = "cluster-apps-vars-terraform-configmap"
+    name      = "cluster-apps-vars-terraform-secret"
     namespace = "flux-system"
   }
 
   data = {
-    AWS_ACCOUNT_ID          = data.aws_caller_identity.current.account_id
-    AWS_DEFAULT_REGION      = var.aws_default_region
-    AWS_PARTITION           = data.aws_partition.current.id
-    CLUSTER_FQDN            = var.cluster_fqdn
-    CLUSTER_NAME            = local.cluster_name
-    CLUSTER_PATH            = var.cluster_path
-    EMAIL                   = var.email
-    ENVIRONMENT             = var.environment
-    LETSENCRYPT_ENVIRONMENT = var.letsencrypt_environment
-    SLACK_CHANNEL           = var.slack_channel
+    AWS_ACCOUNT_ID              = data.aws_caller_identity.current.account_id
+    AWS_DEFAULT_REGION          = var.aws_default_region
+    AWS_PARTITION               = data.aws_partition.current.id
+    CLUSTER_FQDN                = var.cluster_fqdn
+    CLUSTER_NAME                = local.cluster_name
+    CLUSTER_PATH                = var.cluster_path
+    EMAIL                       = var.email
+    ENVIRONMENT                 = var.environment
+    GITHUB_WEBHOOK_TOKEN_BASE64 = base64encode(random_id.github_webhook_flux_secret.hex)
+    LETSENCRYPT_ENVIRONMENT     = var.letsencrypt_environment
+    SLACK_CHANNEL               = var.slack_channel
     # Environment=dev,Team=test
     TAGS_INLINE = local.tags_inline
   }
@@ -383,7 +389,7 @@ resource "kubernetes_service_account" "kustomize_controller" {
 # https://github.com/fluxcd/terraform-provider-flux/issues/120
 resource "kubectl_manifest" "flux_install" {
   for_each   = { for v in local.flux_install : lower(join("/", compact([v.data.apiVersion, v.data.kind, lookup(v.data.metadata, "namespace", ""), v.data.metadata.name]))) => v.content if anytrue([v.data.kind != "ServiceAccount", v.data.metadata.name != "kustomize-controller"]) }
-  depends_on = [kubernetes_service_account.kustomize_controller, kubernetes_secret.flux_github_keys, kubernetes_config_map.flux_cluster_apps_vars_terraform_configmap]
+  depends_on = [kubernetes_service_account.kustomize_controller, kubernetes_secret.flux_github_keys, kubernetes_secret.flux_cluster_apps_terraform_secret]
   yaml_body  = each.value
 }
 
@@ -391,6 +397,26 @@ resource "kubectl_manifest" "flux_sync" {
   for_each   = { for v in local.flux_sync : lower(join("/", compact([v.data.apiVersion, v.data.kind, lookup(v.data.metadata, "namespace", ""), v.data.metadata.name]))) => v.content if var.gitops == "flux" }
   depends_on = [kubectl_manifest.flux_install]
   yaml_body  = each.value
+}
+
+resource "random_id" "github_webhook_flux_secret" {
+  byte_length = 20
+}
+
+resource "github_repository_webhook" "flux" {
+  repository = join("", regex(".*/([^.]*)", data.git_repository.current_git_repository.url))
+
+  configuration {
+    # Allow providing custom URL to the Receiver to allow IaC for webhooks - https://github.com/fluxcd/flux2/issues/2672
+    url          = format("https://flux-receiver.%s/hook/%s", var.cluster_fqdn, sha256("${random_id.github_webhook_flux_secret.hex}github-receiverflux-system"))
+    content_type = "form"
+    # checkov:skip=CKV_GIT_2:Ensure Repository Webhook uses secure Ssl
+    insecure_ssl = var.letsencrypt_environment == "staging" ? "1" : "0"
+    secret       = random_id.github_webhook_flux_secret.hex
+  }
+
+  active = true
+  events = ["push"]
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -402,15 +428,16 @@ resource "kubectl_manifest" "flux_sync" {
 # kubectl :-(
 # https://discuss.hashicorp.com/t/how-to-retrieve-the-null-resource-returned-value/9620/4
 
-resource "time_sleep" "wait_for_crossplane_provider" {
+resource "time_sleep" "wait" {
   depends_on      = [kubectl_manifest.flux_sync]
   create_duration = "2m"
 }
 
 resource "null_resource" "get_crossplane_provider_aws_serviceaccount_name" {
-  depends_on = [time_sleep.wait_for_crossplane_provider]
-  # This needs to be executed every time, otherwise you get: Error: open /tmp/crossplane_provider_aws_serviceaccount_name.txt: no such file or directory
-  triggers = { always_run = "${timestamp()}" }
+  depends_on = [time_sleep.wait]
+  triggers = {
+    kubeconfig = base64encode(local.kubeconfig)
+  }
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     environment = {

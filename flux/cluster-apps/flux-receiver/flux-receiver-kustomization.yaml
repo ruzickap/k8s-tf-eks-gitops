@@ -1,13 +1,17 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
-  name: cert-manager-crds
+  name: flux-receiver
   namespace: flux-system
 spec:
   interval: 5m
-  path: flux/cluster-apps/cert-manager/cert-manager-crds-kustomization
+  path: flux/cluster-apps/flux-receiver/flux-receiver-kustomization
   prune: true
   sourceRef:
     kind: GitRepository
     name: flux-system
   wait: true
+  postBuild:
+    substituteFrom:
+      - kind: Secret
+        name: cluster-apps-vars-terraform-secret

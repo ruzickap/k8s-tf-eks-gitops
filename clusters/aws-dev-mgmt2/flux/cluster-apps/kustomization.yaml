@@ -5,6 +5,9 @@ resources:
   - ../../../../flux/cluster-apps/cluster-autoscaler
   - ../../../../flux/cluster-apps/dex
   - ../../../../flux/cluster-apps/external-dns
+  - ../../../../flux/cluster-apps/flux-alert-provider
+  - ../../../../flux/cluster-apps/flux-podmonitor
+  - ../../../../flux/cluster-apps/flux-receiver
   - ../../../../flux/cluster-apps/ingress-nginx
   - ../../../../flux/cluster-apps/kube-prometheus-stack
   - ../../../../flux/cluster-apps/mailhog

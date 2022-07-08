@@ -1,17 +1,15 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
-  name: cert-manager
+  name: external-dns
   namespace: flux-system
 spec:
   dependsOn:
-    - name: cert-manager-crds
     - name: kube-prometheus-stack
   interval: 5m
-  path: flux/cluster-apps/cert-manager/cert-manager-kustomization
+  path: flux/cluster-apps/external-dns/external-dns-helmrelease-kustomization
   prune: true
-  wait: true
   sourceRef:
     kind: GitRepository
     name: flux-system
-    namespace: flux-system
+  wait: true

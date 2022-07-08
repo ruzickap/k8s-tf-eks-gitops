@@ -1,14 +1,13 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
-  name: kube-prometheus-stack
+  name: crossplane
   namespace: flux-system
 spec:
   interval: 5m
-  path: flux/cluster-apps/kube-prometheus-stack/kube-prometheus-stack-kustomization
+  path: flux/cluster-apps/crossplane/crossplane-helmrelease-kustomization
   prune: true
-  wait: true
   sourceRef:
     kind: GitRepository
     name: flux-system
-    namespace: flux-system
+  wait: true

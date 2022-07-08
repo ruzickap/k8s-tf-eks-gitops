@@ -3,4 +3,4 @@ kind: Kustomization
 resources:
   - cert-manager-crds-kustomization.yaml
   - cert-manager-namespace.yaml
-  - cert-manager-kustomization.yaml
+  - cert-manager-helmrelease-kustomization.yaml

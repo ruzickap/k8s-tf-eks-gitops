@@ -16,5 +16,5 @@ spec:
   wait: true
   postBuild:
     substituteFrom:
-      - kind: ConfigMap
-        name: cluster-apps-vars-terraform-configmap
+      - kind: Secret
+        name: cluster-apps-vars-terraform-secret

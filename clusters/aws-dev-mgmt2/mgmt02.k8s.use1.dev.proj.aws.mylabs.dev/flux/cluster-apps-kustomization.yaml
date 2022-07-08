@@ -9,7 +9,7 @@ spec:
     - name: cluster-apps-secrets
   # detect drift and undo kubectl edits every minute
   interval: 1m
-  # Variables are taken from `flux-system/gotk-sync.yaml` stored in ConfigMap `cluster-apps-vars-terraform-configmap`
+  # Variables are taken from `flux-system/gotk-sync.yaml` stored in Secret `cluster-apps-vars-terraform-secret`
   path: ${CLUSTER_PATH}/flux/cluster-apps
   prune: true
   sourceRef:
@@ -20,8 +20,8 @@ spec:
   timeout: 10m
   postBuild:
     substituteFrom:
-      - kind: ConfigMap
-        name: cluster-apps-vars-terraform-configmap
+      - kind: Secret
+        name: cluster-apps-vars-terraform-secret
       - kind: Secret
         name: cluster-apps-secrets
       - kind: Secret

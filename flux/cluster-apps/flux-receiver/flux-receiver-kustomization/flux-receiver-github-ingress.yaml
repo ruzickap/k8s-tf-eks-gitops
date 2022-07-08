@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: flux-github-receiver
+  namespace: flux-system
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: flux-receiver.${CLUSTER_FQDN}
+      http:
+        paths:
+          - backend:
+              service:
+                name: webhook-receiver
+                port:
+                  name: http
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - flux-receiver.${CLUSTER_FQDN}

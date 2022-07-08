@@ -9,7 +9,7 @@ metadata:
   namespace: flux-system
 spec:
   interval: 5m0s
-  # Variables are taken from `flux-system/gotk-sync.yaml` stored in ConfigMap `cluster-apps-vars-terraform-configmap`
+  # Variables are taken from `flux-system/gotk-sync.yaml` stored in Secret `cluster-apps-vars-terraform-secret`
   path: ${CLUSTER_PATH}/flux/sources
   prune: true
   sourceRef:
