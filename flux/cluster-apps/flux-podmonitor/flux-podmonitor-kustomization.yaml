@@ -1,11 +1,13 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
-  name: cert-manager-crds
+  name: flux-podmonitor
   namespace: flux-system
 spec:
+  dependsOn:
+    - name: kube-prometheus-stack
   interval: 5m
-  path: flux/cluster-apps/cert-manager/cert-manager-crds-kustomization
+  path: flux/cluster-apps/flux-podmonitor/flux-podmonitor-kustomization
   prune: true
   sourceRef:
     kind: GitRepository

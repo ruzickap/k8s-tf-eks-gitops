@@ -7,10 +7,9 @@ spec:
   dependsOn:
     - name: kube-prometheus-stack
   interval: 5m
-  path: flux/cluster-apps/oauth2-proxy/oauth2-proxy-kustomization
+  path: flux/cluster-apps/oauth2-proxy/oauth2-proxy-helmrelease-kustomization
   prune: true
-  wait: true
   sourceRef:
     kind: GitRepository
     name: flux-system
-    namespace: flux-system
+  wait: true
