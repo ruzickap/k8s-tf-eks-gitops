@@ -1,4 +1,6 @@
 controller:
+  ingressClassResource:
+    default: true
   extraArgs:
     default-ssl-certificate: "cert-manager/ingress-cert-${LETSENCRYPT_ENVIRONMENT}"
   resources:
