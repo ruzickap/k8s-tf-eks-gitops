@@ -8,5 +8,4 @@ resources:
   - ../../../flux/sources
 
   # Cluster specific sources
-  - ../../../../../flux/sources/fairwinds-stable
   - ../../../../../flux/sources/crossplane
