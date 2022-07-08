@@ -1,0 +1,25 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: mailhog
+  namespace: mailhog
+spec:
+  chart:
+    spec:
+      chart: mailhog
+      sourceRef:
+        kind: HelmRepository
+        name: codecentric
+        namespace: flux-system
+      version: 5.0.7
+  interval: 1m
+  valuesFrom:
+    - kind: ConfigMap
+      name: mailhog-main-helmrelease-values
+      optional: true
+    - kind: ConfigMap
+      name: mailhog-group-helmrelease-values
+      optional: true
+    - kind: ConfigMap
+      name: mailhog-cluster-helmrelease-values
+      optional: true

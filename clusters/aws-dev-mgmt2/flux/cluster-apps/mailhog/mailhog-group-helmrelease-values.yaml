@@ -1,0 +1,15 @@
+# https://github.com/codecentric/helm-charts/blob/master/charts/mailhog/values.yaml
+ingress:
+  enabled: true
+  annotations:
+    nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/auth
+    nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/start?rd=$scheme://$host$request_uri
+  ingressClassName: nginx
+  hosts:
+    - host: mailhog.${CLUSTER_FQDN}
+      paths:
+        - path: "/"
+          pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - mailhog.${CLUSTER_FQDN}

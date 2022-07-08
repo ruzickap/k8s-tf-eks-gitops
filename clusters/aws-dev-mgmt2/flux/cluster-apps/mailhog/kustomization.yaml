@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+generatorOptions:
+  disableNameSuffixHash: true
+  labels:
+    type: group-helmrelease-values
+
+configMapGenerator:
+  - name: mailhog-group-helmrelease-values
+    namespace: mailhog
+    files:
+      - values.yaml=mailhog-group-helmrelease-values.yaml
+
+configurations:
+  - kustomizeconfig.yaml

@@ -7,6 +7,7 @@ resources:
   - ../../../../flux/cluster-apps/external-dns
   - ../../../../flux/cluster-apps/ingress-nginx
   - ../../../../flux/cluster-apps/kube-prometheus-stack
+  - ../../../../flux/cluster-apps/mailhog
   - ../../../../flux/cluster-apps/metrics-server
   - ../../../../flux/cluster-apps/oauth2-proxy
   - cert-manager
@@ -17,5 +18,6 @@ resources:
   - kube-prometheus-stack
   - kubernetes-dashboard
   - metrics-server
+  - mailhog
   - oauth2-proxy
   - podinfo
