@@ -91,7 +91,7 @@ resource "aws_iam_policy" "cert_manager" {
     {
       "Effect": "Allow",
       "Action": "route53:GetChange",
-      "Resource": "arn:aws:route53:::change/*"
+      "Resource": "arn:${data.aws_partition.current.id}:route53:::change/*"
     },
     {
       "Effect": "Allow",
@@ -99,7 +99,7 @@ resource "aws_iam_policy" "cert_manager" {
         "route53:ChangeResourceRecordSets",
         "route53:ListResourceRecordSets"
       ],
-      "Resource": "arn:aws:route53:::hostedzone/${aws_route53_zone.cluster_fqdn.zone_id}"
+      "Resource": "arn:${data.aws_partition.current.id}:route53:::hostedzone/${aws_route53_zone.cluster_fqdn.zone_id}"
     },
     {
       "Effect": "Allow",
@@ -136,7 +136,7 @@ resource "aws_iam_policy" "external_dns" {
         "route53:ChangeResourceRecordSets"
       ],
       "Resource": [
-        "arn:aws:route53:::hostedzone/${aws_route53_zone.cluster_fqdn.zone_id}"
+        "arn:${data.aws_partition.current.id}:route53:::hostedzone/${aws_route53_zone.cluster_fqdn.zone_id}"
       ]
     },
     {
@@ -249,6 +249,66 @@ module "iam_assumable_role_cluster_autoscaler" {
   role_description              = "Allow cluster-autoscaler to interact with the autoscaling groups"
   role_policy_arns              = [aws_iam_policy.cluster_autoscaler.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:cluster-autoscaler:cluster-autoscaler"]
+}
+
+
+resource "aws_iam_policy" "velero_server" {
+  name        = "${module.eks_blueprints.eks_cluster_id}-velero-server"
+  description = "Policy allowing Velero to access S3"
+  tags        = local.aws_default_tags
+  policy      = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "sts:AssumeRole",
+        "ec2:DescribeSnapshots",
+        "ec2:DescribeVolumes",
+        "ec2:CreateTags",
+        "ec2:CreateVolume",
+        "ec2:CreateSnapshot",
+        "ec2:DeleteSnapshot"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:${data.aws_partition.current.id}:s3:::${var.cluster_fqdn}"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:DeleteObject",
+        "s3:ListMultipartUploadParts",
+        "s3:AbortMultipartUpload"
+      ],
+      "Resource": [
+        "arn:${data.aws_partition.current.id}:s3:::${var.cluster_fqdn}/*"
+      ]
+    }
+  ]
+}
+  EOF
+}
+
+module "iam_assumable_role_velero_server" {
+  source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
+  version                       = "5.2.0"
+  create_role                   = true
+  provider_url                  = module.eks_blueprints.eks_oidc_issuer_url
+  role_name                     = "${module.eks_blueprints.eks_cluster_id}-iamserviceaccount-velero-server"
+  role_description              = "Allow velero to access S3 bucket"
+  role_policy_arns              = [aws_iam_policy.velero_server.arn]
+  oidc_fully_qualified_subjects = ["system:serviceaccount:velero:velero-server"]
 }
 
 # ---------------------------------------------------------------------------------------------------------------------

@@ -7,6 +7,10 @@ resources:
   - ../../../../flux/sources/bitnami
   - ../../../../flux/sources/ingress-nginx
   - ../../../../flux/sources/jetstack
+  - ../../../../flux/sources/kyverno
   - ../../../../flux/sources/metrics-server
   - ../../../../flux/sources/oauth2-proxy
   - ../../../../flux/sources/prometheus-community
+  - ../../../../flux/sources/policy-reporter
+  - ../../../../flux/sources/secrets-store-csi-driver
+  - ../../../../flux/sources/vmware-tanzu

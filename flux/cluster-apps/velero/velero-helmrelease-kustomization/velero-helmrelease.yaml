@@ -1,0 +1,25 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: velero
+  namespace: velero
+spec:
+  chart:
+    spec:
+      chart: velero
+      sourceRef:
+        kind: HelmRepository
+        name: vmware-tanzu
+        namespace: flux-system
+      version: 2.30.1
+  interval: 1m
+  valuesFrom:
+    - kind: ConfigMap
+      name: velero-main-helmrelease-values
+      optional: true
+    - kind: ConfigMap
+      name: velero-group-helmrelease-values
+      optional: true
+    - kind: ConfigMap
+      name: velero-cluster-helmrelease-values
+      optional: true
