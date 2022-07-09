@@ -61,3 +61,4 @@ Kustomization/flux-system/flux-system
 ## Notes
 
 * Describe the directory structure
+* Check emails form [policy-reporter](https://github.com/kyverno/policy-reporter/blob/03bbebed79a69e9f3dc123b01e9e332145713e1e/charts/policy-reporter/values.yaml#L157-L199)

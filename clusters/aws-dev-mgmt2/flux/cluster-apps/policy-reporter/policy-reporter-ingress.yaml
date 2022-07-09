@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/start?rd=$scheme://$host$request_uri
+    nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/auth
+  name: policy-reporter
+  namespace: policy-reporter
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: policy-reporter.${CLUSTER_FQDN}
+      http:
+        paths:
+          - backend:
+              service:
+                name: policy-reporter-ui
+                port:
+                  number: 8080
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - policy-reporter.${CLUSTER_FQDN}

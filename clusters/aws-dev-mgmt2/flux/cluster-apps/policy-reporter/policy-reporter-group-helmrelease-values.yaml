@@ -1,0 +1,29 @@
+metrics:
+  enabled: true
+ui:
+  enabled: true
+kyvernoPlugin:
+  enabled: true
+monitoring:
+  enabled: true
+global:
+  plugins:
+    keyverno: true
+emailReports:
+  clusterName: "${CLUSTER_FQDN}"
+  smtp:
+    host: "mailhog.mailhog.svc.cluster.local"
+    port: 1025
+    from: "policy-reporter-kyverno@${CLUSTER_FQDN}"
+  summary:
+    enabled: true
+    schedule: "3 3 * * *"
+    to: "notification@${CLUSTER_FQDN}"
+  violations:
+    enabled: true
+    schedule: "3 3 * * *"
+    to: "notification@${CLUSTER_FQDN}"
+target:
+  slack:
+    webhook: "${SLACK_WEBHOOK_URL}"
+    minimumPriority: "critical"

@@ -4,5 +4,5 @@ metadata:
   name: codecentric
   namespace: flux-system
 spec:
-  interval: 1h0m0s
+  interval: 1h
   url: https://codecentric.github.io/helm-charts

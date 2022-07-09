@@ -1,0 +1,43 @@
+initContainers:
+  - name: velero-plugin-for-csi
+    image: velero/velero-plugin-for-csi:v0.3.0
+    volumeMounts:
+      - mountPath: /target
+        name: plugins
+  - name: velero-plugin-for-aws
+    image: velero/velero-plugin-for-aws:v1.5.0
+    volumeMounts:
+      - mountPath: /target
+        name: plugins
+metrics:
+  serviceMonitor:
+    enabled: true
+configuration:
+  provider: aws
+  backupStorageLocation:
+    bucket: ${CLUSTER_FQDN}
+    prefix: velero
+    config:
+      region: ${AWS_DEFAULT_REGION}
+      # kmsKeyId: TODO !!!! xxxxx
+  volumeSnapshotLocation:
+    name: aws
+    config:
+      region: ${AWS_DEFAULT_REGION}
+  # features: EnableCSI
+  defaultResticPruneFrequency: 71h
+serviceAccount:
+  server:
+    name: velero-server
+    annotations:
+      eks.amazonaws.com/role-arn: arn:${AWS_PARTITION}:iam::${AWS_ACCOUNT_ID}:role/${CLUSTER_NAME}-iamserviceaccount-velero-server
+credentials:
+  useSecret: false
+schedules:
+  # https://doc.crds.dev/github.com/vmware-tanzu/velero/velero.io/Backup/v1@v1.5.1
+  my-backup-all:
+    disabled: false
+    schedule: "0 */8 * * *"
+    useOwnerReferencesInBackup: true
+    template:
+      ttl: 48h

@@ -1,0 +1,25 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: kyverno
+  namespace: kyverno
+spec:
+  chart:
+    spec:
+      chart: kyverno
+      sourceRef:
+        kind: HelmRepository
+        name: kyverno
+        namespace: flux-system
+      version: v2.5.1
+  interval: 1m
+  valuesFrom:
+    - kind: ConfigMap
+      name: kyverno-main-helmrelease-values
+      optional: true
+    - kind: ConfigMap
+      name: kyverno-group-helmrelease-values
+      optional: true
+    - kind: ConfigMap
+      name: kyverno-cluster-helmrelease-values
+      optional: true
