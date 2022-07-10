@@ -5,7 +5,6 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: sources
     - name: cluster-apps-secrets
   # detect drift and undo kubectl edits every minute
   interval: 1m
