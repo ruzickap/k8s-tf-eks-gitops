@@ -11,7 +11,7 @@ spec:
         kind: HelmRepository
         name: prometheus-community
         namespace: flux-system
-      version: 36.5.0
+      version: 36.6.1
   install:
     crds: Create
   interval: 1m
