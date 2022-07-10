@@ -1,6 +1,20 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+  - ../../../../flux/sources/autoscaler
+  - ../../../../flux/sources/codecentric
+  - ../../../../flux/sources/dex
+  - ../../../../flux/sources/bitnami
+  - ../../../../flux/sources/ingress-nginx
+  - ../../../../flux/sources/jetstack
+  - ../../../../flux/sources/kyverno
+  - ../../../../flux/sources/metrics-server
+  - ../../../../flux/sources/oauth2-proxy
+  - ../../../../flux/sources/prometheus-community
+  - ../../../../flux/sources/policy-reporter
+  - ../../../../flux/sources/secrets-store-csi-driver
+  - ../../../../flux/sources/vmware-tanzu
+
   - ../../../../flux/cluster-apps/cert-manager
   - ../../../../flux/cluster-apps/cluster-autoscaler
   - ../../../../flux/cluster-apps/dex
@@ -19,6 +33,7 @@ resources:
   - ../../../../flux/cluster-apps/secrets-store-csi-driver
   - ../../../../flux/cluster-apps/secrets-store-csi-driver-provider-aws
   - ../../../../flux/cluster-apps/velero
+
   - cert-manager
   - cluster-autoscaler
   - dex

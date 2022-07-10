@@ -158,7 +158,7 @@ grafana:
         datasource: Prometheus
       node-exporter-full:
         gnetId: 1860
-        revision: 24
+        revision: 27
         datasource: Prometheus
       prometheus-2-0-overview:
         gnetId: 3662
@@ -182,7 +182,7 @@ grafana:
         datasource: Prometheus
       istio-mesh:
         gnetId: 7639
-        revision: 101
+        revision: 124
         datasource: Prometheus
       istio-performance:
         gnetId: 11829
@@ -190,15 +190,15 @@ grafana:
         datasource: Prometheus
       istio-service:
         gnetId: 7636
-        revision: 101
+        revision: 124
         datasource: Prometheus
       istio-workload:
         gnetId: 7630
-        revision: 101
+        revision: 124
         datasource: Prometheus
       istio-control-plane:
         gnetId: 7645
-        revision: 101
+        revision: 124
         datasource: Prometheus
       jaeger:
         gnetId: 10001
@@ -225,7 +225,7 @@ grafana:
         datasource: Prometheus
       kubernetes-monitor:
         gnetId: 15398
-        revision: 5
+        revision: 6
         datasource: Prometheus
       cluster-autoscaler-stats:
         gnetId: 12623
@@ -233,6 +233,14 @@ grafana:
         datasource: Prometheus
       kubernetes-addons-velero-stats:
         gnetId: 11055
+        revision: 2
+        datasource: Prometheus
+      kubernetes-nginx-ingress-prometheus-nextgen:
+        gnetId: 14314
+        revision: 2
+        datasource: Prometheus
+      portefaix-kubernetes-cluster-overview:
+        gnetId: 13473
         revision: 2
         datasource: Prometheus
       # https://grafana.com/orgs/imrtfm/dashboards - https://github.com/dotdc/grafana-dashboards-kubernetes
