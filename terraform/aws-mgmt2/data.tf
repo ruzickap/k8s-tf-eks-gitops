@@ -12,6 +12,10 @@ data "aws_iam_session_context" "current" {
   arn = data.aws_caller_identity.current.arn
 }
 
+data "aws_kms_alias" "kms_secretmanager" {
+  name = "alias/aws/secretsmanager"
+}
+
 data "aws_partition" "current" {}
 
 data "aws_route53_zone" "base_domain" {

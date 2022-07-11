@@ -58,6 +58,15 @@ Kustomization/flux-system/flux-system
 └── GitRepository/flux-system/flux-system
 ```
 
+## Secrets
+
+There are severals secrets:
+
+* `cluster-apps-vars-terraform-secret` - used for providing Terraform variables
+  to Flux/Kustomizations: [eks.tf](https://github.com/ruzickap/k8s-tf-eks-gitops/blob/1f00e1dbcb82422e0ec291b85a4d48786e93b7f4/terraform/aws-mgmt2/eks.tf#L399-L412)
+* `cluster-apps-secrets` - secrets specific to cluster: [cluster-apps-secrets.yaml](https://github.com/ruzickap/k8s-tf-eks-gitops/blob/main/clusters/aws-dev-mgmt2/mgmt02.k8s.use1.dev.proj.aws.mylabs.dev/flux/cluster-apps-secrets/cluster-apps-secrets.yaml)
+* `cluster-apps-group-secrets` - secrets specific to cluster group: [cluster-apps-secrets.yaml](https://github.com/ruzickap/k8s-tf-eks-gitops/blob/main/clusters/aws-dev-mgmt2/flux/cluster-apps-secrets/cluster-apps-secrets.yaml)
+
 ## Notes
 
 * Describe the directory structure
