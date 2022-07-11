@@ -47,4 +47,5 @@ resources:
   - oauth2-proxy
   - policy-reporter
   - podinfo
+  - secrets-store-csi-driver
   - velero

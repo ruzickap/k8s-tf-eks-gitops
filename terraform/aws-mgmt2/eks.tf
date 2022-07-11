@@ -165,6 +165,55 @@ module "iam_assumable_role_external_dns" {
   oidc_fully_qualified_subjects = ["system:serviceaccount:external-dns:external-dns"]
 }
 
+resource "aws_iam_policy" "kuard" {
+  name        = "${module.eks_blueprints.eks_cluster_id}-kuard"
+  description = "Policy allowing kuard to access secrtes in SecretManager"
+  tags        = local.aws_default_tags
+  policy      = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "secretsmanager:GetSecretValue"
+      ],
+      "Resource": [
+        "arn:${data.aws_partition.current.id}:secretsmanager:*:${data.aws_caller_identity.current.account_id}:secret:*"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "kms:Decrypt"
+      ],
+      "Resource": [
+        "${data.aws_kms_alias.kms_secretmanager.arn}"
+      ],
+      "Condition": {
+        "StringLike": {
+          "kms:ViaService": [
+            "secretsmanager.*.amazonaws.com"
+          ]
+        }
+      }
+    }
+  ]
+}
+  EOF
+}
+
+module "iam_assumable_role_kuard" {
+  source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
+  version                       = "5.2.0"
+  create_role                   = true
+  provider_url                  = module.eks_blueprints.eks_oidc_issuer_url
+  role_name                     = "${module.eks_blueprints.eks_cluster_id}-iamserviceaccount-kuard"
+  role_description              = "Allow kuard to access secrtes in SecretManager"
+  role_policy_arns              = [aws_iam_policy.kuard.arn]
+  oidc_fully_qualified_subjects = ["system:serviceaccount:kuard:kuard"]
+}
+
 resource "aws_iam_policy" "kustomize_controller" {
   name        = "${module.eks_blueprints.eks_cluster_id}-kustomize-controller"
   description = "Policy allowing Flux kustomize-controller to access KMS"
@@ -503,7 +552,7 @@ resource "null_resource" "get_crossplane_provider_aws_serviceaccount_name" {
     environment = {
       KUBECONFIG = base64encode(local.kubeconfig)
     }
-    command = "kubectl get providers.pkg.crossplane.io provider-aws -o jsonpath='{.status.currentRevision}' --kubeconfig <(echo $KUBECONFIG | base64 --decode) > /tmp/crossplane_provider_aws_serviceaccount_name.txt"
+    command = "kubectl get providers.pkg.crossplane.io pkg-aws-provider -o jsonpath='{.status.currentRevision}' --kubeconfig <(echo $KUBECONFIG | base64 --decode) > /tmp/crossplane_provider_aws_serviceaccount_name.txt"
   }
 }
 

@@ -8,7 +8,7 @@ monitoring:
   enabled: true
 global:
   plugins:
-    keyverno: true
+    kyverno: true
 emailReports:
   clusterName: "${CLUSTER_FQDN}"
   smtp:

@@ -2,6 +2,10 @@ skip-check:
   # Skip ArgoCD checks
   - CKV_ARGO_1
   - CKV_ARGO_2
+  # Ensure that the seccomp profile is set to docker/default or runtime/default
+  - CKV_K8S_31
+  # Image should use digest
+  - CKV_K8S_43
 
 skip-path:
   # Skip all flux manifests

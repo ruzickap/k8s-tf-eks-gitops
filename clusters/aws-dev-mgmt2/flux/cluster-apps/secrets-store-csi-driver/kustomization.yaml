@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+generatorOptions:
+  disableNameSuffixHash: true
+  labels:
+    type: group-helmrelease-values
+
+configMapGenerator:
+  - name: secrets-store-csi-driver-group-helmrelease-values
+    namespace: secrets-store-csi-driver
+    files:
+      - values.yaml=secrets-store-csi-driver-group-helmrelease-values.yaml
+
+configurations:
+  - kustomizeconfig.yaml

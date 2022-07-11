@@ -40,7 +40,7 @@ jobs:
 
           echo "*** Export list of clusters"
           # shellcheck disable=SC2001
-          echo "${CLUSTERS}" | sed 's@\(.*\)@🔎 \1@'
+          echo "*** ${CLUSTERS}" | sed 's@\(.*\)@🔎 \1@'
           if [[ -z "${CLUSTERS}" ]] ; then
             echo "🔥 No clusters found / selected / ... !!!"
             exit 1
@@ -185,15 +185,16 @@ jobs:
           if [[ "$(aws eks list-clusters)" =~ \"${CLUSTER_NAME}\" ]] ; then
             export KUBECONFIG="/tmp/kubeconfig-${CLUSTER_NAME}.conf"
             aws eks update-kubeconfig --name "${CLUSTER_NAME}" --kubeconfig "${KUBECONFIG}"
-            kubectl delete deployments -n external-dns -l app.kubernetes.io/name=external-dns
-            kubectl delete service -n ingress-nginx -l app.kubernetes.io/component=controller
+            kubectl delete deployments -n external-dns -l app.kubernetes.io/name=external-dns || true
+            kubectl delete service -n ingress-nginx -l app.kubernetes.io/component=controller || true
+            kubectl delete secrets.secretsmanager.aws.crossplane.io -n kuard -l app=kuard || true
             rm "/tmp/kubeconfig-${CLUSTER_NAME}.conf"
           fi
 
           # Remove Network ELBs
           for NETWORK_ELB_ARN in $(aws elbv2 describe-load-balancers --query "LoadBalancers[].LoadBalancerArn" --output=text) ; do
             if [[ "$(aws elbv2 describe-tags --resource-arns "${NETWORK_ELB_ARN}" --query "TagDescriptions[].Tags[?Key == \`kubernetes.io/cluster/${CLUSTER_NAME}\`]" --output text)" =~ ${CLUSTER_NAME} ]]; then
-              echo "💊 Deleting Network ELB: ${NETWORK_ELB_ARN}"
+              echo "*** Deleting Network ELB: ${NETWORK_ELB_ARN}"
               aws elbv2 delete-load-balancer --load-balancer-arn "${NETWORK_ELB_ARN}"
             fi
           done
@@ -201,7 +202,7 @@ jobs:
           # Remove Classic ELBs
           for CLASSIC_ELB_NAME in $(aws elb describe-load-balancers --query "LoadBalancerDescriptions[].LoadBalancerName" --output=text) ; do
             if [[ "$(aws elb describe-tags --load-balancer-names "${CLASSIC_ELB_NAME}" --query "TagDescriptions[].Tags[?Key == \`kubernetes.io/cluster/${CLUSTER_NAME}\`]" --output text)" =~ ${CLUSTER_NAME} ]]; then
-              echo "💊 Deleting Classic ELB: ${CLASSIC_ELB_NAME}"
+              echo "*** Deleting Classic ELB: ${CLASSIC_ELB_NAME}"
               aws elb delete-load-balancer --load-balancer-name "${CLASSIC_ELB_NAME}"
             fi
           done
@@ -230,17 +231,21 @@ jobs:
         run: |
           set -euxo pipefail
 
+          echo "*** Remove Volumes and Snapshots related to the cluster"
           VOLUMES=$(aws ec2 describe-volumes --filter "Name=tag:kubernetes.io/cluster/${CLUSTER_NAME},Values=owned" --query 'Volumes[].VolumeId' --output text) && \
           for VOLUME in ${VOLUMES}; do
-            echo "Removing Volume: ${VOLUME}"
+            echo "*** Removing Volume: ${VOLUME}"
             aws ec2 delete-volume --volume-id "${VOLUME}"
           done
 
           SNAPSHOTS=$(aws ec2 describe-snapshots --filter "Name=tag:Cluster,Values=${CLUSTER_FQDN}" --query 'Snapshots[].SnapshotId' --output text) && \
           for SNAPSHOT in ${SNAPSHOTS}; do
-            echo "Removing Snapshot: ${SNAPSHOT}"
+            echo "*** Removing Snapshot: ${SNAPSHOT}"
             aws ec2 delete-snapshot --snapshot-id "${SNAPSHOT}"
           done
+
+          echo "*** Delete entries in Amazon Secret Manager if not done correctly before"
+          aws secretsmanager delete-secret --secret-id "secretsmanager-kuard-secret" --force-delete-without-recovery
 
       - name: 🔪 Delete S3 bucket + DynamoDB used by Terraform
         if: ${{ startsWith(inputs.terraform_action, 'destroy') }}
