@@ -1,0 +1,4 @@
+# exclude all
+/*
+# include deploy dir
+!**/flux/

@@ -176,7 +176,8 @@ resource "aws_iam_policy" "kuard" {
     {
       "Effect": "Allow",
       "Action": [
-        "secretsmanager:GetSecretValue"
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:DescribeSecret"
       ],
       "Resource": [
         "arn:${data.aws_partition.current.id}:secretsmanager:*:${data.aws_caller_identity.current.account_id}:secret:*"
