@@ -67,13 +67,6 @@ jobs:
                     "type": "mrkdwn",
                     "text": "*Scheduled Clusters*: ${SCHEDULED_CLUSTERS//|/\\\n• }"
                   }
-                },
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "*Changed Files*: ${ALL_CHANGED_FILES// /\\\n• https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/}"
-                  }
                 }
               ]
             }
