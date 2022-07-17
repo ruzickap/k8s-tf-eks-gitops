@@ -7,7 +7,7 @@ extraArgs:
 rbac:
   serviceAccount:
     annotations:
-      eks.amazonaws.com/role-arn: arn:${AWS_PARTITION}:iam::${AWS_ACCOUNT_ID}:role/${CLUSTER_NAME}-iamserviceaccount-cluster-autoscaler
+      eks.amazonaws.com/role-arn: arn:${AWS_PARTITION}:iam::${AWS_ACCOUNT_ID}:role/${CLUSTER_NAME}-irsa-cluster-autoscaler
     name: cluster-autoscaler
 serviceMonitor:
   enabled: true

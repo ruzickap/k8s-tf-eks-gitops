@@ -24,7 +24,6 @@ jobs:
         id: ml
         uses: megalinter/megalinter@v6.0.5
         env:
-          # check TERRAFORM_KICS and TERRAFORM_TERRASCAN
           BASH_SHFMT_ARGUMENTS: --indent 2 --space-redirects
           BASH_SHFMT_FILTER_REGEX_EXCLUDE: scripts/flux-validate.sh
           DISABLE_LINTERS: COPYPASTE_JSCPD,CSS_STYLELINT,REPOSITORY_DEVSKIM,REPOSITORY_SEMGREP,REPOSITORY_TRIVY,SPELL_CSPELL,TERRAFORM_KICS,TERRAFORM_TERRASCAN,YAML_PRETTIER

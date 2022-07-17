@@ -4,7 +4,7 @@ metadata:
   name: pkg-aws-controllerconfig
   namespace: crossplane-system
   annotations:
-    eks.amazonaws.com/role-arn: arn:${AWS_PARTITION}:iam::${AWS_ACCOUNT_ID}:role/${CLUSTER_NAME}-iamserviceaccount-crossplane_provider_aws
+    eks.amazonaws.com/role-arn: arn:${AWS_PARTITION}:iam::${AWS_ACCOUNT_ID}:role/${CLUSTER_NAME}-irsa-crossplane-provider-aws
 spec:
   podSecurityContext:
     fsGroup: 2000
