@@ -4,6 +4,9 @@ metadata:
   name: flux-receiver
   namespace: flux-system
 spec:
+  dependsOn:
+    - name: cert-manager-certificate
+    - name: ingress-nginx
   interval: 5m
   path: flux/cluster-apps/flux-receiver/flux-receiver-kustomization
   prune: true

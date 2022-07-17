@@ -31,6 +31,7 @@ resources:
   - ../../../../flux/cluster-apps/metrics-server
   - ../../../../flux/cluster-apps/oauth2-proxy
   - ../../../../flux/cluster-apps/policy-reporter
+  - ../../../../flux/cluster-apps/rancher
   - ../../../../flux/cluster-apps/secrets-store-csi-driver
   - ../../../../flux/cluster-apps/secrets-store-csi-driver-provider-aws
   - ../../../../flux/cluster-apps/velero

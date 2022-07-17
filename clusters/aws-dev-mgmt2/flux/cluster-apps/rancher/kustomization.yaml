@@ -8,7 +8,7 @@ generatorOptions:
 
 configMapGenerator:
   - name: rancher-group-helmrelease-values
-    namespace: rancher
+    namespace: cattle-system
     files:
       - values.yaml=rancher-group-helmrelease-values.yaml
 

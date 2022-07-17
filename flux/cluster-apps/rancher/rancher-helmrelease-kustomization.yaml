@@ -5,7 +5,8 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
-    - name: cert-manager-certificate
+    - name: cert-manager
+    - name: ingress-nginx
   interval: 5m
   path: flux/cluster-apps/rancher/rancher-helmrelease-kustomization
   prune: true
