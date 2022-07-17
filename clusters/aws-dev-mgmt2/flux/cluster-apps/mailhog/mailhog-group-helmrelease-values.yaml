@@ -8,7 +8,7 @@ ingress:
   hosts:
     - host: mailhog.${CLUSTER_FQDN}
       paths:
-        - path: "/"
+        - path: /
           pathType: ImplementationSpecific
   tls:
     - hosts:

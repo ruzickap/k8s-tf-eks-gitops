@@ -34,11 +34,11 @@ alertmanager:
             severity: warning
           receiver: email-notifications
     receivers:
-      - name: "email-notifications"
+      - name: email-notifications
         email_configs:
           - to: "notification@${CLUSTER_FQDN}"
             require_tls: false
-      - name: "slack-notifications"
+      - name: slack-notifications
         slack_configs:
           - channel: "#${SLACK_CHANNEL}"
             send_resolved: True

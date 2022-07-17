@@ -2,8 +2,10 @@ Ansible
 ArgoCD
 CloudFlare
 Kubernetes
+Kustomizations
 OpenID
 awscli
+eks.tf
 gotk-components
 kubectl
 kustomize

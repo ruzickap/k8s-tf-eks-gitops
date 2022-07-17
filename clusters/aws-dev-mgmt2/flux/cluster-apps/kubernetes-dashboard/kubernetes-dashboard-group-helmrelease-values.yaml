@@ -8,7 +8,7 @@ ingress:
   annotations:
     nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/auth
     nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/start?rd=$scheme://$host$request_uri
-  className: "nginx"
+  className: nginx
   hosts:
     - kubernetes-dashboard.${CLUSTER_FQDN}
   tls:

@@ -10,20 +10,20 @@ global:
   plugins:
     kyverno: true
 emailReports:
-  clusterName: "${CLUSTER_FQDN}"
+  clusterName: ${CLUSTER_FQDN}
   smtp:
-    host: "mailhog.mailhog.svc.cluster.local"
+    host: mailhog.mailhog.svc.cluster.local
     port: 1025
-    from: "policy-reporter-kyverno@${CLUSTER_FQDN}"
+    from: policy-reporter-kyverno@${CLUSTER_FQDN}
   summary:
     enabled: true
     schedule: "3 3 * * *"
-    to: "notification@${CLUSTER_FQDN}"
+    to: notification@${CLUSTER_FQDN}
   violations:
     enabled: true
     schedule: "3 3 * * *"
-    to: "notification@${CLUSTER_FQDN}"
+    to: notification@${CLUSTER_FQDN}
 target:
   slack:
     webhook: "${SLACK_WEBHOOK_URL}"
-    minimumPriority: "critical"
+    minimumPriority: critical
