@@ -1,0 +1,15 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: rancher
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: cert-manager-certificate
+  interval: 5m
+  path: flux/cluster-apps/rancher/rancher-helmrelease-kustomization
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  wait: true

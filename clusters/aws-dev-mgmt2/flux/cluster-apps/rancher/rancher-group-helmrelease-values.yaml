@@ -1,0 +1,8 @@
+hostname: rancher.${CLUSTER_FQDN}
+ingress:
+  ingressClassName: nginx
+  tls:
+    source: secret
+    secretName: ingress-cert-${LETSENCRYPT_ENVIRONMENT}
+replicas: 1
+bootstrapPassword: ${MY_PASSWORD}

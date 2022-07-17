@@ -1,0 +1,25 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: rancher
+  namespace: cattle-system
+spec:
+  chart:
+    spec:
+      chart: rancher
+      sourceRef:
+        kind: HelmRepository
+        name: rancher-stable
+        namespace: flux-system
+      version: 2.6.6
+  interval: 1m
+  valuesFrom:
+    - kind: ConfigMap
+      name: rancher-main-helmrelease-values
+      optional: true
+    - kind: ConfigMap
+      name: rancher-group-helmrelease-values
+      optional: true
+    - kind: ConfigMap
+      name: rancher-cluster-helmrelease-values
+      optional: true
