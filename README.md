@@ -1,9 +1,49 @@
-# Amazon EKS installation using Terraform, GitHub Actions and ArgoCD
+# :sailboat: Build Amazon EKS using Terraform, GitHub Actions and GitOps
+
+<img src="https://camo.githubusercontent.com/5b298bf6b0596795602bd771c5bddbb963e83e0f/68747470733a2f2f692e696d6775722e636f6d2f7031527a586a512e706e67"
+align="left" width="144px" height="144px"/>
+
+_... managed by Flux/ArgoCD and serviced with Renovate ..._
+
+<br />
+
+[![Amazon EKS](https://img.shields.io/badge/Amazon%20EKS-grey?style=for-the-badge&logo=amazoneks)](https://aws.amazon.com/eks/)
+[![Cilium](https://img.shields.io/badge/Cilium-grey?style=for-the-badge&logo=cilium)](https://github.com/argoproj/argo-cd)
+[![Rancher](https://img.shields.io/badge/Rancher-grey?style=for-the-badge&logo=rancher)](https://rancher.com/)
+[![Prometheus](https://img.shields.io/badge/Prometheus-grey?style=for-the-badge&logo=prometheus)](https://prometheus.io/)
+[![Argo CD](https://img.shields.io/badge/Argo%20CD-grey?style=for-the-badge&logo=argo)](https://github.com/argoproj/argo-cd)
+[![Renovate](https://img.shields.io/badge/Renovate-grey?style=for-the-badge&logo=renovatebot)](https://github.com/renovatebot/renovate)
 
 [![Build Status](https://github.com/ruzickap/k8s-tf-eks-gitops/actions/workflows/mdbook-build-check-deploy.yml/badge.svg)](https://github.com/ruzickap/k8s-tf-eks-gitops/actions/workflows/mdbook-build-check-deploy.yml)
 
 * GitHub repository: [https://github.com/ruzickap/k8s-tf-eks-gitops](https://github.com/ruzickap/k8s-tf-eks-gitops)
 * Web Pages: [https://ruzickap.github.io/k8s-tf-eks-gitops](https://ruzickap.github.io/k8s-tf-eks-gitops)
+
+---
+
+## :book:&nbsp; Overview
+
+---
+
+## :sparkles:&nbsp; Cluster setup
+
+---
+
+## :art:&nbsp; Cluster components
+
+* [cilium](https://docs.cilium.io/en/stable/): For cluster networking.
+* [ingress-nginx](https://kubernetes.github.io/ingress-nginx/): Provides ingress
+  cluster services.
+* [SOPS](https://toolkit.fluxcd.io/guides/mozilla-sops/): Encrypts secrets which
+  is safe to store - even to a public repository.
+* [external-dns](https://github.com/kubernetes-sigs/external-dns): Creates DNS
+  entries in Cloud Provider's DNS service.
+* [cert-manager](https://cert-manager.io/docs/): Configured to create TLS certs
+  for all ingress services automatically using LetsEncrypt.
+
+---
+
+## :open_file_folder:&nbsp; Repository structure
 
 ```bash
 flux tree kustomization flux-system --compact
@@ -58,7 +98,18 @@ Kustomization/flux-system/flux-system
 └── GitRepository/flux-system/flux-system
 ```
 
-## Secrets
+---
+
+## :robot:&nbsp; Automate all the things
+
+* [GitHub Actions](https://github.com/features/actions) for checking code
+  formatting
+* [Renovate](https://github.com/renovatebot/renovate) Renovate GitHub action
+  keeps my application charts and container images up-to-date
+
+---
+
+## :spider_web:&nbsp; Secrets
 
 There are several secrets:
 
@@ -67,7 +118,17 @@ There are several secrets:
 * `cluster-apps-secrets` - secrets specific to cluster: [cluster-apps-secrets.yaml](https://github.com/ruzickap/k8s-tf-eks-gitops/blob/main/clusters/aws-dev-mgmt2/mgmt02.k8s.use1.dev.proj.aws.mylabs.dev/flux/cluster-apps-secrets/cluster-apps-secrets.yaml)
 * `cluster-apps-group-secrets` - secrets specific to cluster group: [cluster-apps-secrets.yaml](https://github.com/ruzickap/k8s-tf-eks-gitops/blob/main/clusters/aws-dev-mgmt2/flux/cluster-apps-secrets/cluster-apps-secrets.yaml)
 
-## Notes
+---
+
+## :man_shrugging:&nbsp; Notes
 
 * Describe the directory structure
 * Check emails form [policy-reporter](https://github.com/kyverno/policy-reporter/blob/03bbebed79a69e9f3dc123b01e9e332145713e1e/charts/policy-reporter/values.yaml#L157-L199)
+
+---
+
+## :handshake:&nbsp; Thanks
+
+A lot of inspiration for my cluster came from the people that have shared their
+clusters over at [awesome-home-kubernetes](https://github.com/k8s-at-home/awesome-home-kubernetes)
+and many other "GitHub" repositories...
