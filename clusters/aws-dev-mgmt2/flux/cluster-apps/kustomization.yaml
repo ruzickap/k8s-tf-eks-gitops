@@ -12,6 +12,7 @@ resources:
   - ../../../../flux/sources/oauth2-proxy
   - ../../../../flux/sources/prometheus-community
   - ../../../../flux/sources/policy-reporter
+  - ../../../../flux/sources/rancher
   - ../../../../flux/sources/secrets-store-csi-driver
   - ../../../../flux/sources/vmware-tanzu
 
@@ -30,6 +31,7 @@ resources:
   - ../../../../flux/cluster-apps/metrics-server
   - ../../../../flux/cluster-apps/oauth2-proxy
   - ../../../../flux/cluster-apps/policy-reporter
+  - ../../../../flux/cluster-apps/rancher
   - ../../../../flux/cluster-apps/secrets-store-csi-driver
   - ../../../../flux/cluster-apps/secrets-store-csi-driver-provider-aws
   - ../../../../flux/cluster-apps/velero
@@ -47,5 +49,6 @@ resources:
   - oauth2-proxy
   - policy-reporter
   - podinfo
+  - rancher
   - secrets-store-csi-driver
   - velero
