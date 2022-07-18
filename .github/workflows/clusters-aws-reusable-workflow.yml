@@ -191,7 +191,7 @@ jobs:
             rm "/tmp/kubeconfig-${CLUSTER_NAME}.conf"
           fi
 
-          # Remove Network ELBs
+          echo "*** Remove Network ELBs"
           for NETWORK_ELB_ARN in $(aws elbv2 describe-load-balancers --query "LoadBalancers[].LoadBalancerArn" --output=text) ; do
             if [[ "$(aws elbv2 describe-tags --resource-arns "${NETWORK_ELB_ARN}" --query "TagDescriptions[].Tags[?Key == \`kubernetes.io/cluster/${CLUSTER_NAME}\`]" --output text)" =~ ${CLUSTER_NAME} ]]; then
               echo "*** Deleting Network ELB: ${NETWORK_ELB_ARN}"
@@ -199,7 +199,7 @@ jobs:
             fi
           done
 
-          # Remove Classic ELBs
+          echo "*** Remove Classic ELBs"
           for CLASSIC_ELB_NAME in $(aws elb describe-load-balancers --query "LoadBalancerDescriptions[].LoadBalancerName" --output=text) ; do
             if [[ "$(aws elb describe-tags --load-balancer-names "${CLASSIC_ELB_NAME}" --query "TagDescriptions[].Tags[?Key == \`kubernetes.io/cluster/${CLUSTER_NAME}\`]" --output text)" =~ ${CLUSTER_NAME} ]]; then
               echo "*** Deleting Classic ELB: ${CLASSIC_ELB_NAME}"
@@ -207,6 +207,15 @@ jobs:
             fi
           done
 
+          echo "*** Remove orphan Target Groups"
+          for TARGET_GROUP_ARN in $(aws elbv2 describe-target-groups --region=eu-central-1 --query "TargetGroups[].TargetGroupArn" --output=text) ; do
+            if [[ "$(aws elbv2 describe-tags --resource-arns "${TARGET_GROUP_ARN}" --query "TagDescriptions[].Tags[?Key == \`kubernetes.io/cluster/${CLUSTER_NAME}\`]" --output text)" =~ ${CLUSTER_NAME} ]]; then
+              echo "*** Deleting Target Group: ${TARGET_GROUP_ARN}"
+              aws elbv2 delete-target-group --target-group-arn "${TARGET_GROUP_ARN}"
+            fi
+          done
+
+          echo "*** Remove entries froum Route53"
           CLUSTER_FQDN_ZONE_ID=$(aws route53 list-hosted-zones --query "HostedZones[?Name==\`${CLUSTER_FQDN}.\`].Id" --output text)
           if [[ -n "${CLUSTER_FQDN_ZONE_ID}" ]]; then
             aws route53 list-resource-record-sets --hosted-zone-id "${CLUSTER_FQDN_ZONE_ID}" | jq -c '.ResourceRecordSets[] | select (.Type != "SOA" and .Type != "NS")' |

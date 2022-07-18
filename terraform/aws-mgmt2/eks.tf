@@ -76,6 +76,43 @@ module "eks_blueprints" {
   managed_node_groups = var.managed_node_groups
 }
 
+module "eks_blueprints_kubernetes_addons" {
+  source = "github.com/aws-ia/terraform-aws-eks-blueprints//modules/kubernetes-addons?ref=v4.4.0"
+
+  eks_cluster_id       = module.eks_blueprints.eks_cluster_id
+  eks_cluster_endpoint = module.eks_blueprints.eks_cluster_endpoint
+  eks_oidc_provider    = module.eks_blueprints.oidc_provider
+  eks_cluster_version  = module.eks_blueprints.eks_cluster_version
+
+  # EKS Managed Add-ons
+  enable_amazon_eks_vpc_cni = true
+  amazon_eks_vpc_cni_config = {
+    addon_name        = "vpc-cni"
+    addon_version     = "v1.11.2-eksbuild.1"
+    resolve_conflicts = "OVERWRITE"
+  }
+  enable_amazon_eks_coredns = true
+  amazon_eks_coredns_config = {
+    addon_name        = "coredns"
+    addon_version     = "v1.8.7-eksbuild.1"
+    resolve_conflicts = "OVERWRITE"
+  }
+  enable_amazon_eks_kube_proxy = true
+  amazon_eks_kube_proxy_config = {
+    addon_name        = "kube-proxy"
+    addon_version     = "v1.22.6-eksbuild.1"
+    resolve_conflicts = "OVERWRITE"
+  }
+  enable_amazon_eks_aws_ebs_csi_driver = true
+  amazon_eks_aws_ebs_csi_driver_config = {
+    addon_name        = "aws-ebs-csi-driver"
+    addon_version     = "v1.8.0-eksbuild.0"
+    resolve_conflicts = "OVERWRITE"
+  }
+
+  tags = local.aws_default_tags
+}
+
 # ---------------------------------------------------------------------------------------------------------------------
 # IRSA
 # ---------------------------------------------------------------------------------------------------------------------
@@ -116,7 +153,7 @@ module "iam_assumable_role_cert_manager" {
   version                       = "5.2.0"
   create_role                   = true
   provider_url                  = module.eks_blueprints.eks_oidc_issuer_url
-  role_name                     = "${module.eks_blueprints.eks_cluster_id}-iamserviceaccount-cert-manager"
+  role_name                     = "${module.eks_blueprints.eks_cluster_id}-irsa-cert-manager"
   role_description              = "Allow cert-manager to change Route53 entries"
   role_policy_arns              = [aws_iam_policy.cert_manager.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:cert-manager:cert-manager"]
@@ -159,7 +196,7 @@ module "iam_assumable_role_external_dns" {
   version                       = "5.2.0"
   create_role                   = true
   provider_url                  = module.eks_blueprints.eks_oidc_issuer_url
-  role_name                     = "${module.eks_blueprints.eks_cluster_id}-iamserviceaccount-external-dns"
+  role_name                     = "${module.eks_blueprints.eks_cluster_id}-irsa-external-dns"
   role_description              = "Allow external-dns to change Route53 entries"
   role_policy_arns              = [aws_iam_policy.external_dns.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:external-dns:external-dns"]
@@ -209,7 +246,7 @@ module "iam_assumable_role_kuard" {
   version                       = "5.2.0"
   create_role                   = true
   provider_url                  = module.eks_blueprints.eks_oidc_issuer_url
-  role_name                     = "${module.eks_blueprints.eks_cluster_id}-iamserviceaccount-kuard"
+  role_name                     = "${module.eks_blueprints.eks_cluster_id}-irsa-kuard"
   role_description              = "Allow kuard to access secrtes in SecretManager"
   role_policy_arns              = [aws_iam_policy.kuard.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:kuard:kuard"]
@@ -244,7 +281,7 @@ module "iam_assumable_role_kustomize_controller" {
   version                       = "5.2.0"
   create_role                   = true
   provider_url                  = module.eks_blueprints.eks_oidc_issuer_url
-  role_name                     = "${module.eks_blueprints.eks_cluster_id}-iamserviceaccount-kustomize-controller"
+  role_name                     = "${module.eks_blueprints.eks_cluster_id}-irsa-kustomize-controller"
   role_description              = "Allow Flux kustomize-controller to access KMS"
   role_policy_arns              = [aws_iam_policy.kustomize_controller.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:flux-system:kustomize-controller"]
@@ -295,7 +332,7 @@ module "iam_assumable_role_cluster_autoscaler" {
   version                       = "5.2.0"
   create_role                   = true
   provider_url                  = module.eks_blueprints.eks_oidc_issuer_url
-  role_name                     = "${module.eks_blueprints.eks_cluster_id}-iamserviceaccount-cluster-autoscaler"
+  role_name                     = "${module.eks_blueprints.eks_cluster_id}-irsa-cluster-autoscaler"
   role_description              = "Allow cluster-autoscaler to interact with the autoscaling groups"
   role_policy_arns              = [aws_iam_policy.cluster_autoscaler.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:cluster-autoscaler:cluster-autoscaler"]
@@ -355,7 +392,7 @@ module "iam_assumable_role_velero_server" {
   version                       = "5.2.0"
   create_role                   = true
   provider_url                  = module.eks_blueprints.eks_oidc_issuer_url
-  role_name                     = "${module.eks_blueprints.eks_cluster_id}-iamserviceaccount-velero-server"
+  role_name                     = "${module.eks_blueprints.eks_cluster_id}-irsa-velero-server"
   role_description              = "Allow velero to access S3 bucket"
   role_policy_arns              = [aws_iam_policy.velero_server.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:velero:velero-server"]
@@ -368,7 +405,12 @@ module "iam_assumable_role_velero_server" {
 resource "kubectl_manifest" "argo-cd_namespace" {
   wait       = true
   apply_only = true
-  yaml_body  = file("templates/argo-cd_namespace.yaml")
+  yaml_body  = <<EOF
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: argocd
+  EOF
 }
 
 resource "kubectl_manifest" "argo-cd_core-install" {
@@ -429,6 +471,7 @@ resource "github_repository_deploy_key" "flux_github_key" {
 
 # Problems with terraform destroy: https://github.com/fluxcd/terraform-provider-flux/issues/67
 resource "kubectl_manifest" "flux_namespace" {
+  depends_on = [kubectl_manifest.flux_namespace]
   wait       = true
   apply_only = true
   yaml_body  = <<EOF
@@ -498,9 +541,13 @@ resource "kubernetes_service_account" "kustomize_controller" {
 
 # https://github.com/fluxcd/terraform-provider-flux/issues/120
 resource "kubectl_manifest" "flux_install" {
-  for_each   = { for v in local.flux_install : lower(join("/", compact([v.data.apiVersion, v.data.kind, lookup(v.data.metadata, "namespace", ""), v.data.metadata.name]))) => v.content if anytrue([v.data.kind != "ServiceAccount", v.data.metadata.name != "kustomize-controller"]) }
-  depends_on = [kubernetes_service_account.kustomize_controller, kubernetes_secret.flux_github_keys, kubernetes_secret.flux_cluster_apps_terraform_secret]
-  yaml_body  = each.value
+  for_each = { for v in local.flux_install : lower(join("/", compact([v.data.apiVersion, v.data.kind, lookup(v.data.metadata, "namespace", ""), v.data.metadata.name]))) => v.content if anytrue([v.data.kind != "ServiceAccount", v.data.metadata.name != "kustomize-controller"]) }
+  depends_on = [
+    kubernetes_service_account.kustomize_controller,
+    kubernetes_secret.flux_github_keys,
+    kubernetes_secret.flux_cluster_apps_terraform_secret,
+  ]
+  yaml_body = each.value
 }
 
 resource "kubectl_manifest" "flux_sync" {
@@ -567,7 +614,7 @@ module "iam_assumable_role_crossplane_provider_aws" {
   version                       = "5.2.0"
   create_role                   = true
   provider_url                  = module.eks_blueprints.eks_oidc_issuer_url
-  role_name                     = "${module.eks_blueprints.eks_cluster_id}-iamserviceaccount-crossplane_provider_aws"
+  role_name                     = "${module.eks_blueprints.eks_cluster_id}-irsa-crossplane-provider-aws"
   role_description              = "Allow Crossplane to create AWS objects"
   role_policy_arns              = ["arn:${data.aws_partition.current.id}:iam::aws:policy/AdministratorAccess"]
   oidc_fully_qualified_subjects = ["system:serviceaccount:crossplane-system:${data.local_file.crossplane_provider_aws_serviceaccount_name.content}"]

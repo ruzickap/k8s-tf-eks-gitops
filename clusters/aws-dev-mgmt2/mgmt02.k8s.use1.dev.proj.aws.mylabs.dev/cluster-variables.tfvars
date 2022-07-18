@@ -55,9 +55,9 @@ managed_node_groups = {
   mgmt02-ng01 = {
     node_group_name = "mgmt02-ng01"
 
-    desired_size    = 3
+    desired_size    = 4
     min_size        = 2
-    max_size        = 4
+    max_size        = 5
     max_unavailable = 1
 
     ami_type       = "BOTTLEROCKET_x86_64"

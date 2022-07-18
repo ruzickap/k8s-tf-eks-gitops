@@ -2,7 +2,7 @@ serviceAccount:
   create: true
   name: cert-manager
   annotations:
-    eks.amazonaws.com/role-arn: arn:${AWS_PARTITION}:iam::${AWS_ACCOUNT_ID}:role/${CLUSTER_NAME}-iamserviceaccount-cert-manager
+    eks.amazonaws.com/role-arn: arn:${AWS_PARTITION}:iam::${AWS_ACCOUNT_ID}:role/${CLUSTER_NAME}-irsa-cert-manager
 extraArgs:
   - --cluster-resource-namespace=cert-manager
   - --enable-certificate-owner-ref=true

@@ -155,7 +155,7 @@ module "iam_assumable_role_external_dns" {
   version                       = "5.2.0"
   create_role                   = true
   provider_url                  = "module.eks.oidc_provider"
-  role_name                     = "${module.eks.cluster_id}-iamserviceaccount-external-dns"
+  role_name                     = "${module.eks.cluster_id}-irsa-external-dns"
   role_description              = "Allow external-dns to change Route53 entries"
   role_policy_arns              = [aws_iam_policy.external_dns.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:external-dns:external-dns"]
@@ -196,7 +196,7 @@ module "iam_assumable_role_cert_manager" {
   version                       = "5.2.0"
   create_role                   = true
   provider_url                  = "module.eks.oidc_provider"
-  role_name                     = "${module.eks.cluster_id}-iamserviceaccount-cert-manager"
+  role_name                     = "${module.eks.cluster_id}-irsa-cert-manager"
   role_description              = "Allow cert-manager to change Route53 entries"
   role_policy_arns              = [aws_iam_policy.cert_manager.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:cert-manager:cert-manager"]

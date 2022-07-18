@@ -1,0 +1,33 @@
+cni:
+  chainingMode: aws-cni
+hubble:
+  metrics:
+    enabled:
+      - dns:query;ignoreAAAA
+      - drop
+      - tcp
+      - flow
+      - icmp
+      - http
+    serviceMonitor:
+      enabled: true
+  relay:
+    enabled: true
+  ui:
+    enabled: true
+    ingress:
+      enabled: true
+      annotations:
+        nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/auth
+        nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/start?rd=$scheme://$host$request_uri
+      hosts:
+        - hubble.${CLUSTER_FQDN}
+      tls:
+        - hosts:
+            - hubble.${CLUSTER_FQDN}
+enableIPv4Masquerade: false
+prometheus:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+tunnel: disabled

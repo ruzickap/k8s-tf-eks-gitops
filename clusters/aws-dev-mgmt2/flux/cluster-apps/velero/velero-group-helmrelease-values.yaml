@@ -30,7 +30,7 @@ serviceAccount:
   server:
     name: velero-server
     annotations:
-      eks.amazonaws.com/role-arn: arn:${AWS_PARTITION}:iam::${AWS_ACCOUNT_ID}:role/${CLUSTER_NAME}-iamserviceaccount-velero-server
+      eks.amazonaws.com/role-arn: arn:${AWS_PARTITION}:iam::${AWS_ACCOUNT_ID}:role/${CLUSTER_NAME}-irsa-velero-server
 credentials:
   useSecret: false
 schedules:

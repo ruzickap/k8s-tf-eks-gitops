@@ -1,0 +1,25 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: cilium
+  namespace: cilium
+spec:
+  chart:
+    spec:
+      chart: cilium
+      sourceRef:
+        kind: HelmRepository
+        name: cilium
+        namespace: flux-system
+      version: 1.11.6
+  interval: 1m
+  valuesFrom:
+    - kind: ConfigMap
+      name: cilium-main-helmrelease-values
+      optional: true
+    - kind: ConfigMap
+      name: cilium-group-helmrelease-values
+      optional: true
+    - kind: ConfigMap
+      name: cilium-cluster-helmrelease-values
+      optional: true

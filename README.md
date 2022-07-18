@@ -5,8 +5,6 @@ align="left" width="144px" height="144px"/>
 
 _... managed by Flux/ArgoCD and serviced with Renovate ..._
 
-<br />
-
 [![Amazon EKS](https://img.shields.io/badge/Amazon%20EKS-grey?style=for-the-badge&logo=amazoneks)](https://aws.amazon.com/eks/)
 [![Cilium](https://img.shields.io/badge/Cilium-grey?style=for-the-badge&logo=cilium)](https://github.com/argoproj/argo-cd)
 [![Rancher](https://img.shields.io/badge/Rancher-grey?style=for-the-badge&logo=rancher)](https://rancher.com/)
@@ -15,6 +13,8 @@ _... managed by Flux/ArgoCD and serviced with Renovate ..._
 [![Renovate](https://img.shields.io/badge/Renovate-grey?style=for-the-badge&logo=renovatebot)](https://github.com/renovatebot/renovate)
 
 [![Build Status](https://github.com/ruzickap/k8s-tf-eks-gitops/actions/workflows/mdbook-build-check-deploy.yml/badge.svg)](https://github.com/ruzickap/k8s-tf-eks-gitops/actions/workflows/mdbook-build-check-deploy.yml)
+
+<br/>
 
 * GitHub repository: [https://github.com/ruzickap/k8s-tf-eks-gitops](https://github.com/ruzickap/k8s-tf-eks-gitops)
 * Web Pages: [https://ruzickap.github.io/k8s-tf-eks-gitops](https://ruzickap.github.io/k8s-tf-eks-gitops)
@@ -124,6 +124,8 @@ There are several secrets:
 
 * Describe the directory structure
 * Check emails form [policy-reporter](https://github.com/kyverno/policy-reporter/blob/03bbebed79a69e9f3dc123b01e9e332145713e1e/charts/policy-reporter/values.yaml#L157-L199)
+* Put all `HelmRepository` objects to `flux-system` instead of "namespaces"
+  to be able to share them
 
 ---
 
