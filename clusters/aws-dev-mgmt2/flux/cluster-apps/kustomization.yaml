@@ -2,10 +2,11 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - ../../../../flux/sources/autoscaler
+  - ../../../../flux/sources/bitnami
   - ../../../../flux/sources/cilium
   - ../../../../flux/sources/codecentric
   - ../../../../flux/sources/dex
-  - ../../../../flux/sources/bitnami
+  - ../../../../flux/sources/forecastle
   - ../../../../flux/sources/ingress-nginx
   - ../../../../flux/sources/jetstack
   - ../../../../flux/sources/kyverno
@@ -25,6 +26,7 @@ resources:
   - ../../../../flux/cluster-apps/flux-alert-provider
   - ../../../../flux/cluster-apps/flux-podmonitor
   - ../../../../flux/cluster-apps/flux-receiver
+  - ../../../../flux/cluster-apps/forecastle
   - ../../../../flux/cluster-apps/ingress-nginx
   - ../../../../flux/cluster-apps/kube-prometheus-stack
   - ../../../../flux/cluster-apps/kyverno
@@ -43,6 +45,7 @@ resources:
   - cluster-autoscaler
   - dex
   - external-dns
+  - forecastle
   - ingress-nginx
   - kube-prometheus-stack
   - kubernetes-dashboard

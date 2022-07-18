@@ -114,6 +114,9 @@ alertmanager:
     enabled: true
     ingressClassName: nginx
     annotations:
+      forecastle.stakater.com/expose: "true"
+      forecastle.stakater.com/icon: https://raw.githubusercontent.com/stakater/ForecastleIcons/master/alert-manager.png
+      forecastle.stakater.com/appName: Alert Manager
       nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/auth
       nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/start?rd=$scheme://$host$request_uri
     hosts:
@@ -129,6 +132,9 @@ grafana:
     enabled: true
     ingressClassName: nginx
     annotations:
+      forecastle.stakater.com/expose: "true"
+      forecastle.stakater.com/icon: https://raw.githubusercontent.com/stakater/ForecastleIcons/master/grafana.png
+      forecastle.stakater.com/appName: Grafana
       nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/auth
       nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/start?rd=$scheme://$host$request_uri
     hosts:
@@ -306,6 +312,9 @@ prometheus:
     enabled: true
     ingressClassName: nginx
     annotations:
+      forecastle.stakater.com/expose: "true"
+      forecastle.stakater.com/icon: https://raw.githubusercontent.com/cncf/artwork/master/projects/prometheus/icon/color/prometheus-icon-color.svg
+      forecastle.stakater.com/appName: Prometheus
       nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/auth
       nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/start?rd=$scheme://$host$request_uri
     paths: ["/"]

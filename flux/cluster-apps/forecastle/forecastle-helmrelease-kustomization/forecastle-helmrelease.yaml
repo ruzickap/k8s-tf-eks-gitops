@@ -1,0 +1,25 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: forecastle
+  namespace: forecastle
+spec:
+  chart:
+    spec:
+      chart: deployments/kubernetes/chart/forecastle
+      sourceRef:
+        kind: GitRepository
+        name: forecastle
+        namespace: flux-system
+      version: v1.0.91
+  interval: 1m
+  valuesFrom:
+    - kind: ConfigMap
+      name: forecastle-main-helmrelease-values
+      optional: true
+    - kind: ConfigMap
+      name: forecastle-group-helmrelease-values
+      optional: true
+    - kind: ConfigMap
+      name: forecastle-cluster-helmrelease-values
+      optional: true

@@ -1,0 +1,19 @@
+forecastle:
+  config:
+    namespaceSelector:
+      any: true
+    title: Launch Pad
+  ingress:
+    enabled: true
+    annotations:
+      nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/start?rd=$scheme://$host$request_uri
+      nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/auth
+    className: nginx
+    hosts:
+      - host: ${CLUSTER_FQDN}
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    tls:
+      - hosts:
+          - ${CLUSTER_FQDN}

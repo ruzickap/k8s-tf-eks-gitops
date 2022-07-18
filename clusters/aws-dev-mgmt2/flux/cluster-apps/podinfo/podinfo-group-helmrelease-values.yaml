@@ -3,6 +3,10 @@ ui:
   message: "group-helmrelease-values"
 ingress:
   enabled: true
+  annotations:
+    forecastle.stakater.com/expose: "true"
+    forecastle.stakater.com/icon: https://raw.githubusercontent.com/stefanprodan/podinfo/gh-pages/cuddle_clap.gif
+    forecastle.stakater.com/appName: Podinfo
   className: nginx
   hosts:
     - host: podinfo.${CLUSTER_FQDN}

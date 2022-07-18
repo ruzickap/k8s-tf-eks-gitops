@@ -2,6 +2,10 @@
 hostname: rancher.${CLUSTER_FQDN}
 ingress:
   ingressClassName: nginx
+  extraAnnotations:
+    forecastle.stakater.com/expose: "true"
+    forecastle.stakater.com/icon: "https://rancher.com/assets/img/logos/rancher-logo-horiz-color.svg"
+    forecastle.stakater.com/appName: Rancher
   tls:
     source: letsEncrypt
 letsEncrypt:

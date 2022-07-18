@@ -182,13 +182,12 @@ jobs:
         run: |
           set -euxo pipefail
 
-          if [[ "$(aws eks list-clusters)" =~ \"${CLUSTER_NAME}\" ]] ; then
-            export KUBECONFIG="/tmp/kubeconfig-${CLUSTER_NAME}.conf"
-            aws eks update-kubeconfig --name "${CLUSTER_NAME}" --kubeconfig "${KUBECONFIG}"
+          export KUBECONFIG="/tmp/kubeconfig-${CLUSTER_NAME}.conf"
+          if aws eks update-kubeconfig --name "${CLUSTER_NAME}" --kubeconfig "${KUBECONFIG}" ; then
             kubectl delete deployments -n external-dns -l app.kubernetes.io/name=external-dns || true
             kubectl delete service -n ingress-nginx -l app.kubernetes.io/component=controller || true
             kubectl delete secrets.secretsmanager.aws.crossplane.io -n kuard -l app=kuard || true
-            rm "/tmp/kubeconfig-${CLUSTER_NAME}.conf"
+            rm "${KUBECONFIG}"
           fi
 
           echo "*** Remove Network ELBs"
