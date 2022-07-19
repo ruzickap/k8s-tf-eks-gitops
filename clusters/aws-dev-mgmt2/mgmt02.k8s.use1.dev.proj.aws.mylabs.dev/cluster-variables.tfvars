@@ -62,7 +62,7 @@ managed_node_groups = {
 
     ami_type       = "BOTTLEROCKET_x86_64"
     capacity_type  = "ON_DEMAND"
-    instance_types = ["t2.medium"]
+    instance_types = ["t2.large"]
     disk_size      = 20
   }
 }
