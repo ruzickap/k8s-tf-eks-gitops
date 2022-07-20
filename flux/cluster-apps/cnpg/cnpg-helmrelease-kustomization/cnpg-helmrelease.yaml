@@ -1,0 +1,25 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: cnpg
+  namespace: cnpg-system
+spec:
+  chart:
+    spec:
+      chart: cloudnative-pg
+      sourceRef:
+        kind: HelmRepository
+        name: cnpg
+        namespace: flux-system
+      version: 0.14.0
+  interval: 1m
+  valuesFrom:
+    - kind: ConfigMap
+      name: cnpg-main-helmrelease-values
+      optional: true
+    - kind: ConfigMap
+      name: cnpg-group-helmrelease-values
+      optional: true
+    - kind: ConfigMap
+      name: cnpg-cluster-helmrelease-values
+      optional: true

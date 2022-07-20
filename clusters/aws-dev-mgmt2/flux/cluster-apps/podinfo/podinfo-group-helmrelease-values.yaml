@@ -5,7 +5,7 @@ ingress:
   enabled: true
   annotations:
     forecastle.stakater.com/expose: "true"
-    forecastle.stakater.com/icon: https://raw.githubusercontent.com/stefanprodan/podinfo/gh-pages/cuddle_clap.gif
+    forecastle.stakater.com/icon: https://raw.githubusercontent.com/stefanprodan/podinfo/c59466012f2bf19fa790c600b35f8a48ac61b497/cuddle_clap.gif
     forecastle.stakater.com/appName: Podinfo
   className: nginx
   hosts:

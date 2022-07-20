@@ -4,6 +4,7 @@ resources:
   - ../../../../flux/sources/autoscaler
   - ../../../../flux/sources/bitnami
   - ../../../../flux/sources/cilium
+  - ../../../../flux/sources/cnpg
   - ../../../../flux/sources/codecentric
   - ../../../../flux/sources/dex
   - ../../../../flux/sources/forecastle
@@ -12,6 +13,7 @@ resources:
   - ../../../../flux/sources/kyverno
   - ../../../../flux/sources/metrics-server
   - ../../../../flux/sources/oauth2-proxy
+  - ../../../../flux/sources/runix
   - ../../../../flux/sources/prometheus-community
   - ../../../../flux/sources/policy-reporter
   - ../../../../flux/sources/rancher
@@ -20,6 +22,7 @@ resources:
 
   - ../../../../flux/cluster-apps/cert-manager
   - ../../../../flux/cluster-apps/cilium
+  - ../../../../flux/cluster-apps/cnpg
   - ../../../../flux/cluster-apps/cluster-autoscaler
   - ../../../../flux/cluster-apps/dex
   - ../../../../flux/cluster-apps/external-dns
@@ -34,6 +37,7 @@ resources:
   - ../../../../flux/cluster-apps/mailhog
   - ../../../../flux/cluster-apps/metrics-server
   - ../../../../flux/cluster-apps/oauth2-proxy
+  - ../../../../flux/cluster-apps/pgadmin4
   - ../../../../flux/cluster-apps/policy-reporter
   - ../../../../flux/cluster-apps/rancher
   - ../../../../flux/cluster-apps/secrets-store-csi-driver
@@ -43,6 +47,7 @@ resources:
   - cert-manager
   - cilium
   - cluster-autoscaler
+  - cnpg-db01
   - dex
   - external-dns
   - forecastle
@@ -55,6 +60,7 @@ resources:
   - oauth2-proxy
   - policy-reporter
   - podinfo
+  - pgadmin4
   - rancher
   - secrets-store-csi-driver
   - velero

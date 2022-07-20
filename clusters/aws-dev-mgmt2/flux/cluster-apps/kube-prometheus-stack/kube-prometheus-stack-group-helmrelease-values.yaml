@@ -283,6 +283,9 @@ grafana:
         gnetId: 15515
         revision: 1
         datasource: Prometheus
+      cloud-native-postgresql:
+        url: https://github.com/cloudnative-pg/charts/blob/dcc94fe1fe1c19a1fcccdf963b1e3c4b6a6c89a1/charts/cnpg-sandbox/dashboard.json
+        datasource: Prometheus
   grafana.ini:
     server:
       root_url: https://grafana.${CLUSTER_FQDN}

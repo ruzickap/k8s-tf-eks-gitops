@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   annotations:
     forecastle.stakater.com/expose: "true"
-    forecastle.stakater.com/icon: https://raw.githubusercontent.com/kyverno/website/main/assets/icons/logo.svg
+    forecastle.stakater.com/icon: https://raw.githubusercontent.com/kyverno/website/bc139249bf4e45fc5e9bb65b1b5e096afa64e013/assets/icons/logo.svg
     forecastle.stakater.com/appName: Policy Reporter
     nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/start?rd=$scheme://$host$request_uri
     nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/auth

@@ -1,0 +1,26 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: cnpg-db01
+  namespace: cnpg-db01
+spec:
+  description: "cnpg-db01 cluster"
+  # imageName: quay.io/enterprisedb/postgresql:14.4
+  instances: 3
+  bootstrap:
+    initdb:
+      database: keycloak
+      owner: ${CNPG_DB01_KEYCLOAK_USERNAME}
+      secret:
+        name: cnpg-db01-keycloak-keycloak
+
+  superuserSecret:
+    name: cnpg-db01-superuser
+
+  storage:
+    storageClass: gp2
+    size: 1Gi
+
+  # affinity:
+  #   enablePodAntiAffinity: true
+  #   topologyKey: failure-domain.beta.kubernetes.io/zone

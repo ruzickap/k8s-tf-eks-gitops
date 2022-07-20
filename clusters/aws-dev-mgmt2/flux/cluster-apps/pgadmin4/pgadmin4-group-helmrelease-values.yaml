@@ -1,0 +1,39 @@
+# https://github.com/rowanruseler/helm-charts/blob/master/charts/pgadmin4/values.yaml
+serviceAccount:
+  create: true
+serverDefinitions:
+  enabled: true
+  servers:
+    firstServer:
+      Name: "cnpg-db01 PostrgeSQL DB"
+      Group: "Servers"
+      Port: 5432
+      Username: "postgres"
+      Host: "cnpg-db01-rw.cnpg-db01.svc.cluster.local"
+      SSLMode: "prefer"
+      MaintenanceDB: "postgres"
+ingress:
+  enabled: true
+  annotations:
+    forecastle.stakater.com/expose: "true"
+    forecastle.stakater.com/icon: https://raw.githubusercontent.com/vinceliuice/Tela-icon-theme/77863b1492d7f489b3f2409fe27c520e26212a8f/src/scalable/apps/pgadmin.svg
+    forecastle.stakater.com/appName: pgAdmin
+    nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/start?rd=$scheme://$host$request_uri
+    nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/auth
+  ingressClassName: nginx
+  hosts:
+    - host: pgadmin.${CLUSTER_FQDN}
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - hosts:
+        - pgadmin.${CLUSTER_FQDN}
+env:
+  variables:
+    - name: PGADMIN_CONFIG_SERVER_MODE
+      value: "False"
+    - name: PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED
+      value: "False"
+persistentVolume:
+  enabled: false
