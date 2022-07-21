@@ -1,6 +1,6 @@
 ui:
   color: "#34577c"
-  message: "group-helmrelease-values"
+  message: "| group-helmrelease-values |"
 ingress:
   enabled: true
   annotations:

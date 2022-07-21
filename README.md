@@ -126,6 +126,7 @@ There are several secrets:
 * Check emails form [policy-reporter](https://github.com/kyverno/policy-reporter/blob/03bbebed79a69e9f3dc123b01e9e332145713e1e/charts/policy-reporter/values.yaml#L157-L199)
 * Put all `HelmRepository` objects to `flux-system` instead of "namespaces"
   to be able to share them
+* Check snapshots (cnpg/velero) + KMS keys (if they are being deleted)
 
 ---
 

@@ -5,8 +5,11 @@ metadata:
   namespace: cnpg-db01
 spec:
   description: "cnpg-db01 cluster"
-  # imageName: quay.io/enterprisedb/postgresql:14.4
   instances: 3
+  inheritedMetadata:
+    annotations:
+      eks.amazonaws.com/role-arn: arn:${AWS_PARTITION}:iam::${AWS_ACCOUNT_ID}:role/${CLUSTER_NAME}-irsa-cnpg-db01
+
   bootstrap:
     initdb:
       database: keycloak
@@ -21,6 +24,16 @@ spec:
     storageClass: gp2
     size: 1Gi
 
-  # affinity:
-  #   enablePodAntiAffinity: true
-  #   topologyKey: failure-domain.beta.kubernetes.io/zone
+  backup:
+    barmanObjectStore:
+      destinationPath: s3://${CLUSTER_FQDN}/cnpg/cnpg-db01
+      s3Credentials:
+        inheritFromIAMRole: true
+      wal:
+        compression: bzip2
+      data:
+        compression: bzip2
+    retentionPolicy: "7d"
+
+  monitoring:
+    enablePodMonitor: true

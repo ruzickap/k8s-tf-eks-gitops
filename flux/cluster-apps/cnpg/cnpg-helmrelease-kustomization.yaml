@@ -4,6 +4,8 @@ metadata:
   name: cnpg
   namespace: flux-system
 spec:
+  dependsOn:
+    - name: kube-prometheus-stack
   interval: 5m
   path: flux/cluster-apps/cnpg/cnpg-helmrelease-kustomization
   prune: true

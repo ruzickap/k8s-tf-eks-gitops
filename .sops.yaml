@@ -1,5 +1,5 @@
 creation_rules:
-  - path_regex: clusters/.*.ya?ml
+  - path_regex: clusters/.*\.ya?ml$
     encrypted_regex: '^(data|stringData)$'
     kms: arn:aws:kms:eu-central-1:729560437327:alias/sops
     pgp: 431A7F3379B5B00519077B732BD87EC4BA898363
