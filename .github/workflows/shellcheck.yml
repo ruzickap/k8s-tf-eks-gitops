@@ -31,8 +31,7 @@ jobs:
           chmod a+x README.sh
 
       - name: Run the sh-checker
-        # uses: luizm/action-sh-checker@master
-        uses: ruzickap/action-sh-checker@bump-versions
+        uses: luizm/action-sh-checker@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SHFMT_OPTS: --indent 2 --space-redirects

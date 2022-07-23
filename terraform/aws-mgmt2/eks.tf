@@ -77,7 +77,7 @@ module "eks_blueprints" {
 }
 
 module "eks_blueprints_kubernetes_addons" {
-  source = "github.com/aws-ia/terraform-aws-eks-blueprints//modules/kubernetes-addons?ref=v4.4.0"
+  source = "github.com/aws-ia/terraform-aws-eks-blueprints//modules/kubernetes-addons?ref=v4.5.0"
 
   eks_cluster_id       = module.eks_blueprints.eks_cluster_id
   eks_cluster_endpoint = module.eks_blueprints.eks_cluster_endpoint
@@ -159,6 +159,45 @@ module "iam_assumable_role_cert_manager" {
   oidc_fully_qualified_subjects = ["system:serviceaccount:cert-manager:cert-manager"]
 }
 
+resource "aws_iam_policy" "cnpg_db01" {
+  name        = "${module.eks_blueprints.eks_cluster_id}-cnpg-db01"
+  description = "Policy allowing cnpg-db01 to access S3"
+  tags        = local.aws_default_tags
+  policy      = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:AbortMultipartUpload",
+        "s3:DeleteObject",
+        "s3:GetObject",
+        "s3:ListBucket",
+        "s3:PutObject",
+        "s3:PutObjectTagging"
+      ],
+      "Resource": [
+        "arn:${data.aws_partition.current.id}:s3:::${var.cluster_fqdn}",
+        "arn:${data.aws_partition.current.id}:s3:::${var.cluster_fqdn}/*"
+      ]
+    }
+  ]
+}
+  EOF
+}
+
+module "iam_assumable_role_cnpg_db01" {
+  source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
+  version                       = "5.2.0"
+  create_role                   = true
+  provider_url                  = module.eks_blueprints.eks_oidc_issuer_url
+  role_name                     = "${module.eks_blueprints.eks_cluster_id}-irsa-cnpg-db01"
+  role_description              = "Allow cnpg-db01 to access S3 bucket"
+  role_policy_arns              = [aws_iam_policy.velero_server.arn]
+  oidc_fully_qualified_subjects = ["system:serviceaccount:cnpg-db01:cnpg-db01"]
+}
+
 resource "aws_iam_policy" "external_dns" {
   name        = "${module.eks_blueprints.eks_cluster_id}-external-dns"
   description = "Policy allowing external-dns to change Route53 entries"
@@ -213,8 +252,8 @@ resource "aws_iam_policy" "kuard" {
     {
       "Effect": "Allow",
       "Action": [
-        "secretsmanager:GetSecretValue",
-        "secretsmanager:DescribeSecret"
+        "secretsmanager:DescribeSecret",
+        "secretsmanager:GetSecretValue"
       ],
       "Resource": [
         "arn:${data.aws_partition.current.id}:secretsmanager:*:${data.aws_caller_identity.current.account_id}:secret:*"
@@ -313,11 +352,11 @@ resource "aws_iam_policy" "cluster_autoscaler" {
     {
       "Effect": "Allow",
       "Action": [
-        "autoscaling:DescribeAutoScalingInstances",
         "autoscaling:DescribeAutoScalingGroups",
-        "ec2:DescribeLaunchTemplateVersions",
+        "autoscaling:DescribeAutoScalingInstances",
+        "autoscaling:DescribeLaunchConfigurations",
         "autoscaling:DescribeTags",
-        "autoscaling:DescribeLaunchConfigurations"
+        "ec2:DescribeLaunchTemplateVersions"
       ],
       "Resource": "*"
     }
@@ -351,12 +390,12 @@ resource "aws_iam_policy" "velero_server" {
       "Effect": "Allow",
       "Action": [
         "sts:AssumeRole",
-        "ec2:DescribeSnapshots",
         "ec2:DescribeVolumes",
-        "ec2:CreateTags",
+        "ec2:DescribeSnapshots",
+        "ec2:DeleteSnapshot",
         "ec2:CreateVolume",
-        "ec2:CreateSnapshot",
-        "ec2:DeleteSnapshot"
+        "ec2:CreateTags",
+        "ec2:CreateSnapshot"
       ],
       "Resource": "*"
     },

@@ -1,0 +1,39 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: cnpg-db01
+  namespace: cnpg-db01
+spec:
+  description: "cnpg-db01 cluster"
+  instances: 3
+  inheritedMetadata:
+    annotations:
+      eks.amazonaws.com/role-arn: arn:${AWS_PARTITION}:iam::${AWS_ACCOUNT_ID}:role/${CLUSTER_NAME}-irsa-cnpg-db01
+
+  bootstrap:
+    initdb:
+      database: keycloak
+      owner: ${CNPG_DB01_KEYCLOAK_USERNAME}
+      secret:
+        name: cnpg-db01-keycloak-keycloak
+
+  superuserSecret:
+    name: cnpg-db01-superuser
+
+  storage:
+    storageClass: gp2
+    size: 1Gi
+
+  backup:
+    barmanObjectStore:
+      destinationPath: s3://${CLUSTER_FQDN}/cnpg/cnpg-db01
+      s3Credentials:
+        inheritFromIAMRole: true
+      wal:
+        compression: bzip2
+      data:
+        compression: bzip2
+    retentionPolicy: "7d"
+
+  monitoring:
+    enablePodMonitor: true

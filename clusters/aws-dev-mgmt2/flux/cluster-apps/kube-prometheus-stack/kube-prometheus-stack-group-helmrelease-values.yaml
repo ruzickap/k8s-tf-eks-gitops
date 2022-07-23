@@ -3,19 +3,6 @@ defaultRules:
     etcd: false
     kubernetesSystem: false
     kubeScheduler: false
-additionalPrometheusRulesMap:
-  # Flux rule: https://toolkit.fluxcd.io/guides/monitoring/
-  rule-name:
-    groups:
-      - name: Flux
-        rules:
-          - alert: ReconciliationFailure
-            expr: max(gotk_reconcile_condition{status="False",type="Ready"}) by (exported_namespace, name, kind) + on(exported_namespace, name, kind) (max(gotk_reconcile_condition{status="Deleted"}) by (exported_namespace, name, kind)) * 2 == 1
-            for: 10m
-            labels:
-              severity: page
-            annotations:
-              summary: '{{ $labels.kind }} {{ $labels.exported_namespace }}/{{ $labels.name }} reconciliation has been failing for more than ten minutes.'
 alertmanager:
   config:
     global:
@@ -282,6 +269,9 @@ grafana:
       cilium-v1-11-hubble-metrics:
         gnetId: 15515
         revision: 1
+        datasource: Prometheus
+      cloud-native-postgresql:
+        url: https://raw.githubusercontent.com/cloudnative-pg/charts/dcc94fe1fe1c19a1fcccdf963b1e3c4b6a6c89a1/charts/cnpg-sandbox/dashboard.json
         datasource: Prometheus
   grafana.ini:
     server:
