@@ -31,6 +31,7 @@ resources:
   - ../../../../flux/cluster-apps/flux-receiver
   - ../../../../flux/cluster-apps/forecastle
   - ../../../../flux/cluster-apps/ingress-nginx
+  - ../../../../flux/cluster-apps/keycloak
   - ../../../../flux/cluster-apps/kube-prometheus-stack
   - ../../../../flux/cluster-apps/kyverno
   - ../../../../flux/cluster-apps/kyverno-policies
@@ -52,6 +53,7 @@ resources:
   - external-dns
   - forecastle
   - ingress-nginx
+  - keycloak
   - kube-prometheus-stack
   - kubernetes-dashboard
   - kyverno
