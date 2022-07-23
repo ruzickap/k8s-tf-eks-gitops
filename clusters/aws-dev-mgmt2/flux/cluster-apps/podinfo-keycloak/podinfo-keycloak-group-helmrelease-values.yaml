@@ -1,0 +1,19 @@
+ingress:
+  enabled: true
+  annotations:
+    forecastle.stakater.com/expose: "true"
+    forecastle.stakater.com/icon: https://raw.githubusercontent.com/stefanprodan/podinfo/c59466012f2bf19fa790c600b35f8a48ac61b497/cuddle_clap.gif
+    forecastle.stakater.com/appName: Podinfo - Keycloak
+    nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy-keycloak.${CLUSTER_FQDN}/oauth2/auth
+    nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy-keycloak.${CLUSTER_FQDN}/oauth2/start?rd=$scheme://$host$request_uri
+  className: nginx
+  hosts:
+    - host: podinfo-keycloak.${CLUSTER_FQDN}
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - podinfo-keycloak.${CLUSTER_FQDN}
+serviceMonitor:
+  enabled: true

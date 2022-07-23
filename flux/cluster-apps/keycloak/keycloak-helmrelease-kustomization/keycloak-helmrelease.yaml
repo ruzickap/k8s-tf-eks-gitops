@@ -1,25 +1,25 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: external-dns
-  namespace: external-dns
+  name: keycloak
+  namespace: keycloak
 spec:
   chart:
     spec:
-      chart: external-dns
+      chart: keycloak
       sourceRef:
         kind: HelmRepository
         name: bitnami
         namespace: flux-system
-      version: 6.7.1
+      version: 9.6.0
   interval: 1m
   valuesFrom:
     - kind: ConfigMap
-      name: external-dns-main-helmrelease-values
+      name: keycloak-main-helmrelease-values
       optional: true
     - kind: ConfigMap
-      name: external-dns-group-helmrelease-values
+      name: keycloak-group-helmrelease-values
       optional: true
     - kind: ConfigMap
-      name: external-dns-cluster-helmrelease-values
+      name: keycloak-cluster-helmrelease-values
       optional: true

@@ -6,6 +6,8 @@ serviceAccount:
 extraArgs:
   - --cluster-resource-namespace=cert-manager
   - --enable-certificate-owner-ref=true
+securityContext:
+  fsGroup: 1001
 prometheus:
   servicemonitor:
     enabled: true

@@ -1,13 +1,8 @@
----
 name: MegaLinter
 
 on:
   workflow_dispatch:
   push:
-
-concurrency:
-  group: ${{ github.ref }}-${{ github.workflow }}
-  cancel-in-progress: true
 
 jobs:
   build:

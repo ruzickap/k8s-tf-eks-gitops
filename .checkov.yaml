@@ -13,3 +13,5 @@ skip-path:
   - flux-system/gotk-sync.yaml
   - flux-system/kustomization.yaml
   - flux/kustomization.yaml
+  # Skip https://raw.githubusercontent.com/aws/secrets-store-csi-driver-provider-aws/main/deployment/aws-provider-installer.yaml
+  - flux/cluster-apps/secrets-store-csi-driver-provider-aws/secrets-store-csi-driver-provider-aws-kustomization/kustomization.yaml

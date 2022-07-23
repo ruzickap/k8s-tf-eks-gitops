@@ -163,7 +163,7 @@ module "iam_assumable_role_external_dns" {
 
 resource "aws_iam_policy" "cert_manager" {
   name        = "${module.eks.cluster_id}-cert-manager"
-  description = "Policy allowing external-dns to change Route53 entries"
+  description = "Policy allowing cert-manager to change Route53 entries"
   policy      = <<EOF
 {
   "Version": "2012-10-17",
