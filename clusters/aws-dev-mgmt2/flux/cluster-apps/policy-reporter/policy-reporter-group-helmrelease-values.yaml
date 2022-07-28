@@ -1,3 +1,6 @@
+# https://github.com/kyverno/policy-reporter/blob/main/charts/policy-reporter/values.yaml
+networkPolicy:
+  enabled: false
 metrics:
   enabled: true
 ui:
