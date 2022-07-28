@@ -26,6 +26,8 @@ jobs:
           FORMATTERS_DISABLE_ERRORS: false
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PRINT_ALPACA: false
+          # Skip "existant" in docs/theme/css/chrome.css
+          SPELL_MISSPELL_ARGUMENTS: -i existant
           VALIDATE_ALL_CODEBASE: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
           YAML_PRETTIER_FILTER_REGEX_EXCLUDE: argocd/cluster-addons/templates/.*
           YAML_YAMLLINT_FILTER_REGEX_EXCLUDE: '(argocd/cluster-addons/templates/|/flux-system/gotk-components\.yaml)'
