@@ -9,7 +9,7 @@ module "vpc" {
   name = local.vpc_name
   cidr = var.aws_vpc_cidr
 
-  azs             = ["${var.aws_default_region}a", "${var.aws_default_region}b", "${var.aws_default_region}c"]
+  azs             = slice(data.aws_availability_zones.available.names, 0, 3)
   private_subnets = var.aws_private_subnets
   public_subnets  = var.aws_public_subnets
 
@@ -76,42 +76,42 @@ module "eks_blueprints" {
   managed_node_groups = var.managed_node_groups
 }
 
-module "eks_blueprints_kubernetes_addons" {
-  source = "github.com/aws-ia/terraform-aws-eks-blueprints//modules/kubernetes-addons?ref=v4.6.0"
+# module "eks_blueprints_kubernetes_addons" {
+#   source = "github.com/aws-ia/terraform-aws-eks-blueprints//modules/kubernetes-addons?ref=v4.6.0"
 
-  eks_cluster_id       = module.eks_blueprints.eks_cluster_id
-  eks_cluster_endpoint = module.eks_blueprints.eks_cluster_endpoint
-  eks_oidc_provider    = module.eks_blueprints.oidc_provider
-  eks_cluster_version  = module.eks_blueprints.eks_cluster_version
+#   eks_cluster_id       = module.eks_blueprints.eks_cluster_id
+#   eks_cluster_endpoint = module.eks_blueprints.eks_cluster_endpoint
+#   eks_oidc_provider    = module.eks_blueprints.oidc_provider
+#   eks_cluster_version  = module.eks_blueprints.eks_cluster_version
 
-  # EKS Managed Add-ons
-  enable_amazon_eks_vpc_cni = true
-  amazon_eks_vpc_cni_config = {
-    addon_name        = "vpc-cni"
-    addon_version     = "v1.11.2-eksbuild.1"
-    resolve_conflicts = "OVERWRITE"
-  }
-  enable_amazon_eks_coredns = true
-  amazon_eks_coredns_config = {
-    addon_name        = "coredns"
-    addon_version     = "v1.8.7-eksbuild.1"
-    resolve_conflicts = "OVERWRITE"
-  }
-  enable_amazon_eks_kube_proxy = true
-  amazon_eks_kube_proxy_config = {
-    addon_name        = "kube-proxy"
-    addon_version     = "v1.22.6-eksbuild.1"
-    resolve_conflicts = "OVERWRITE"
-  }
-  enable_amazon_eks_aws_ebs_csi_driver = true
-  amazon_eks_aws_ebs_csi_driver_config = {
-    addon_name        = "aws-ebs-csi-driver"
-    addon_version     = "v1.8.0-eksbuild.0"
-    resolve_conflicts = "OVERWRITE"
-  }
+#   # EKS Managed Add-ons
+#   enable_amazon_eks_vpc_cni = true
+#   amazon_eks_vpc_cni_config = {
+#     addon_name        = "vpc-cni"
+#     addon_version     = "v1.11.2-eksbuild.1"
+#     resolve_conflicts = "OVERWRITE"
+#   }
+#   enable_amazon_eks_coredns = true
+#   amazon_eks_coredns_config = {
+#     addon_name        = "coredns"
+#     addon_version     = "v1.8.7-eksbuild.1"
+#     resolve_conflicts = "OVERWRITE"
+#   }
+#   enable_amazon_eks_kube_proxy = true
+#   amazon_eks_kube_proxy_config = {
+#     addon_name        = "kube-proxy"
+#     addon_version     = "v1.22.6-eksbuild.1"
+#     resolve_conflicts = "OVERWRITE"
+#   }
+#   enable_amazon_eks_aws_ebs_csi_driver = true
+#   amazon_eks_aws_ebs_csi_driver_config = {
+#     addon_name        = "aws-ebs-csi-driver"
+#     addon_version     = "v1.8.0-eksbuild.0"
+#     resolve_conflicts = "OVERWRITE"
+#   }
 
-  tags = local.aws_default_tags
-}
+#   tags = local.aws_default_tags
+# }
 
 # ---------------------------------------------------------------------------------------------------------------------
 # IRSA

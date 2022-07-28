@@ -21,7 +21,7 @@ config:
       redirectURIs:
         - https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/callback
       name: OAuth2 Proxy
-      secret: ${OAUTH2_PROXY_SECRET}
+      secret: oauth2-proxy-${OAUTH2_PROXY_SECRET}
   enablePasswordDB: false
 ingress:
   enabled: true

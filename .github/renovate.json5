@@ -21,6 +21,8 @@
     {
       "matchUpdateTypes": ["patch"],
       "automergeType": "branch",
+      // Do not wait for tests - this will speed up the whole process - updating many branches + running many tests
+      "ignoreTests": true,
       "automerge": true,
     },
 
@@ -55,9 +57,12 @@
         "^docs/src/part-.*\\.md$",
         ".*\\.tfvars$",
         "README\\.md$",
+        "kustomization\\.yaml$",
       ],
       "matchStrings": [
         "# renovate: datasource=(?<datasource>.+?) depName=(?<depName>.+?)( versioning=(?<versioning>.+?))?( extractVersion=(?<extractVersion>.+?))?( registryUrl=(?<registryUrl>.+?))?\\s.*[=:]\\s*\"?(?<currentValue>.+?)\"?\\s",
+        // Renovate for GH releases like: https://github.com/cert-manager/cert-manager/releases/download/v1.9.0/cert-manager.crds.yaml located in kustomization.yaml
+        "# renovate: datasource=(?<datasource>.+?) depName=(?<depName>.+?)( versioning=(?<versioning>.+?))?( extractVersion=(?<extractVersion>.+?))?\\s.*\\/releases\\/download\\/(?<currentValue>.+?)\\/.*",
       ],
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}",
       "extractVersionTemplate": "{{#if extractVersion}}{{{extractVersion}}}{{else}}^v?(?<version>.+)${{/if}}",

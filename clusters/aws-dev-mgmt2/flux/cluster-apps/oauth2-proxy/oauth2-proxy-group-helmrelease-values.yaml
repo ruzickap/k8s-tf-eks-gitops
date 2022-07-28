@@ -1,6 +1,6 @@
 config:
   clientID: oauth2-proxy.${CLUSTER_FQDN}
-  clientSecret: ${OAUTH2_PROXY_SECRET}
+  clientSecret: oauth2-proxy-${OAUTH2_PROXY_SECRET}
   cookieSecret: ${COOKIE_SECRET}
   configFile: |-
     email_domains = [ "*" ]

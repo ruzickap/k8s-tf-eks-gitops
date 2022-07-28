@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+generatorOptions:
+  disableNameSuffixHash: true
+  labels:
+    type: group-helmrelease-values
+
+configMapGenerator:
+  - name: podinfo-keycloak-group-helmrelease-values
+    namespace: podinfo-keycloak
+    files:
+      - values.yaml=podinfo-keycloak-group-helmrelease-values.yaml
+
+configurations:
+  - kustomizeconfig.yaml
