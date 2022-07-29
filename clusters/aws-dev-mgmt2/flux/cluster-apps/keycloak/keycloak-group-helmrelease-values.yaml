@@ -58,7 +58,10 @@ keycloakConfigCli:
                 userinfo.token.claim: "true"
             - name: audience
               protocol: openid-connect
-              protocolMapper: oidc-audience-resolve-mapper
+              protocolMapper: oidc-audience-mapper
+              config:
+                included.client.audience: oauth2-proxy-keycloak.${CLUSTER_FQDN}
+                included.custom.audience: oauth2-proxy-keycloak.${CLUSTER_FQDN}
       displayName: My Realm
       enabled: true
       groups:
@@ -76,6 +79,7 @@ keycloakConfigCli:
       users:
         - username: myuser1
           email: myuser1@${CLUSTER_FQDN}
+          emailVerified: true
           enabled: true
           firstName: My Firstname 1
           lastName: My Lastname 1
@@ -86,6 +90,7 @@ keycloakConfigCli:
               value: ${KEYCLOAK_ADMIN_PASSWORD}
         - username: myuser2
           email: myuser2@${CLUSTER_FQDN}
+          emailVerified: true
           enabled: true
           firstName: My Firstname 2
           lastName: My Lastname 2
@@ -96,6 +101,7 @@ keycloakConfigCli:
               value: ${KEYCLOAK_ADMIN_PASSWORD}
         - username: myuser3
           email: myuser3@${CLUSTER_FQDN}
+          emailVerified: true
           enabled: true
           firstName: My Firstname 3
           lastName: My Lastname 3
@@ -106,6 +112,7 @@ keycloakConfigCli:
               value: ${KEYCLOAK_ADMIN_PASSWORD}
         - username: myuser4
           email: myuser4@${CLUSTER_FQDN}
+          emailVerified: true
           enabled: true
           firstName: My Firstname 4
           lastName: My Lastname 4

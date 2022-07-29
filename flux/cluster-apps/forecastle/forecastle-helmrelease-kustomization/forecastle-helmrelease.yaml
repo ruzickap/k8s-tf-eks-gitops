@@ -6,12 +6,12 @@ metadata:
 spec:
   chart:
     spec:
-      chart: deployments/kubernetes/chart/forecastle
+      chart: forecastle
       sourceRef:
-        kind: GitRepository
-        name: forecastle
+        kind: HelmRepository
+        name: stakater
         namespace: flux-system
-      version: v1.0.91
+      version: v1.0.97
   interval: 1m
   valuesFrom:
     - kind: ConfigMap
