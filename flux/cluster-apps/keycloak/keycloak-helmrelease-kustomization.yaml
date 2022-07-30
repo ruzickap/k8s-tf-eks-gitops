@@ -8,7 +8,7 @@ spec:
     # ingress + cert-manager-certificate dependency is needed for other apps like oauth2-proxy which tries to connect to keycloak when they are starting
     - name: cert-manager-certificate
     - name: cnpg-db01
-    - name: ingress
+    - name: ingress-nginx
     - name: kube-prometheus-stack
   interval: 5m
   path: flux/cluster-apps/keycloak/keycloak-helmrelease-kustomization

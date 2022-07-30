@@ -622,6 +622,7 @@ resource "github_repository_webhook" "flux" {
 # Due to specific Crossplane installtion https://github.com/crossplane-contrib/provider-aws/blob/master/AUTHENTICATION.md#using-iam-roles-for-serviceaccounts
 # it is necessary to "exctract" the dynamically created ServiceAccount using
 # kubectl :-(
+# This is breaking idempotency :-(
 # https://discuss.hashicorp.com/t/how-to-retrieve-the-null-resource-returned-value/9620/4
 
 resource "time_sleep" "wait" {

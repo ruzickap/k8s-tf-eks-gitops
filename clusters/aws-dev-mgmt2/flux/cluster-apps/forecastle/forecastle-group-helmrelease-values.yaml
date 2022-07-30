@@ -1,3 +1,4 @@
+# https://github.com/stakater/Forecastle/blob/master/deployments/kubernetes/chart/forecastle/values.yaml
 forecastle:
   config:
     namespaceSelector:
@@ -13,7 +14,7 @@ forecastle:
       - host: ${CLUSTER_FQDN}
         paths:
           - path: /
-            pathType: ImplementationSpecific
+            pathType: Prefix
     tls:
       - hosts:
           - ${CLUSTER_FQDN}

@@ -5,6 +5,7 @@ metadata:
   namespace: flux-system
 spec:
   dependsOn:
+    - name: crossplane
     - name: crossplane-provider
   interval: 5m0s
   path: ${CLUSTER_PATH}/flux/cluster-apps/crossplane-aws-provider/crossplane-kustomization-providerconfig/
