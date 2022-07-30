@@ -15,9 +15,6 @@ spec:
   interval: 1m
   valuesFrom:
     - kind: ConfigMap
-      name: cnpg-main-helmrelease-values
-      optional: true
-    - kind: ConfigMap
       name: cnpg-group-helmrelease-values
       optional: true
     - kind: ConfigMap

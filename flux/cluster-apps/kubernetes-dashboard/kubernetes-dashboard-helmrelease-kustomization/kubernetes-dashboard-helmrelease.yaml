@@ -15,9 +15,6 @@ spec:
   interval: 1m
   valuesFrom:
     - kind: ConfigMap
-      name: kubernetes-dashboard-main-helmrelease-values
-      optional: true
-    - kind: ConfigMap
       name: kubernetes-dashboard-group-helmrelease-values
       optional: true
     - kind: ConfigMap

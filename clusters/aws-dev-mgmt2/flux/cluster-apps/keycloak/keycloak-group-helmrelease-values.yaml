@@ -46,22 +46,45 @@ keycloakConfigCli:
           secret: oauth2-proxy-keycloak-${OAUTH2_PROXY_SECRET}
           redirectUris:
             - "https://oauth2-proxy-keycloak.${CLUSTER_FQDN}/oauth2/callback"
+          defaultClientScopes:
+            - acr
+            - email
+            - myclientscope
+            - profile
+            - roles
+            - web-origins
+          # protocolMappers:
+          #   - name: groupMapper
+          #     protocol: openid-connect
+          #     protocolMapper: oidc-group-membership-mapper
+          #     config:
+          #       access.token.claim: "true"
+          #       claim.name: groups
+          #       full.path: "true"
+          #       id.token.claim: "true"
+          #       userinfo.token.claim: "true"
+          #   - name: audience
+          #     protocol: openid-connect
+          #     protocolMapper: oidc-audience-mapper
+          #     config:
+          #       included.client.audience: oauth2-proxy-keycloak.${CLUSTER_FQDN}
+          #       included.custom.audience: oauth2-proxy-keycloak.${CLUSTER_FQDN}
+          #       access.token.claim: "true"
+      clientScopes:
+        - name: myclientscope
+          description: My Client Scope
+          protocol: openid-connect
+          attributes:
+            include.in.token.scope: "true"
+            display.on.consent.screen: "true"
           protocolMappers:
-            - name: groupMapper
-              protocol: openid-connect
-              protocolMapper: oidc-group-membership-mapper
-              config:
-                access.token.claim: "true"
-                claim.name: groups
-                full.path: "true"
-                id.token.claim: "true"
-                userinfo.token.claim: "true"
-            - name: audience
+            - name: oauth2-proxy-keycloak.${CLUSTER_FQDN}-audience
               protocol: openid-connect
               protocolMapper: oidc-audience-mapper
               config:
                 included.client.audience: oauth2-proxy-keycloak.${CLUSTER_FQDN}
                 included.custom.audience: oauth2-proxy-keycloak.${CLUSTER_FQDN}
+                access.token.claim: "true"
       displayName: My Realm
       enabled: true
       groups:

@@ -11,7 +11,7 @@ config:
     cookie_domains = ".${CLUSTER_FQDN}"
     provider = "keycloak-oidc"
     redirect_url = "https://oauth2-proxy-keycloak.${CLUSTER_FQDN}/oauth2/callback"
-    oidc_issuer_url = "https://keycloak.${CLUSTER_FQDN}/realms/myrealm/"
+    oidc_issuer_url = "https://keycloak.${CLUSTER_FQDN}/realms/myrealm"
     scope = "openid email profile"
     ssl_insecure_skip_verify = "true"
     insecure_oidc_allow_unverified_email = "true"

@@ -15,9 +15,6 @@ spec:
   interval: 1m
   valuesFrom:
     - kind: ConfigMap
-      name: mailhog-main-helmrelease-values
-      optional: true
-    - kind: ConfigMap
       name: mailhog-group-helmrelease-values
       optional: true
     - kind: ConfigMap

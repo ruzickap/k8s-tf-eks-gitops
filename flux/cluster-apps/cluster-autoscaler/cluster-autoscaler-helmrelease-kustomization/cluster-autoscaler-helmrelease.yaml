@@ -15,9 +15,6 @@ spec:
   interval: 1m
   valuesFrom:
     - kind: ConfigMap
-      name: cluster-autoscaler-main-helmrelease-values
-      optional: true
-    - kind: ConfigMap
       name: cluster-autoscaler-group-helmrelease-values
       optional: true
     - kind: ConfigMap

@@ -184,6 +184,8 @@ jobs:
 
           export KUBECONFIG="/tmp/kubeconfig-${CLUSTER_NAME}.conf"
           if aws eks update-kubeconfig --name "${CLUSTER_NAME}" --kubeconfig "${KUBECONFIG}" ; then
+            kubectl patch kustomization -n flux-system external-dns ingress-nginx cert-manager-certificate --type='json' -p='[{"op": "add", "path": "/spec/suspend", "value":true}]'
+            kubectl delete certificate -n cert-manager --all || true
             kubectl delete deployments -n external-dns -l app.kubernetes.io/name=external-dns || true
             kubectl delete service -n ingress-nginx -l app.kubernetes.io/component=controller || true
             kubectl delete secrets.secretsmanager.aws.crossplane.io -n kuard -l app=kuard || true
@@ -230,7 +232,6 @@ jobs:
         run: |
           set -euxo pipefail
           terraform -chdir="${TERRAFORM_CODE_DIR}" ${{ inputs.terraform_action }} \
-            -var-file="${PWD}/${CLUSTER_PATH}/../../main-variables.tfvars" \
             -var-file="${PWD}/${CLUSTER_PATH}/../group-variables.tfvars" \
             -var-file="${PWD}/${CLUSTER_PATH}/cluster-variables.tfvars"
 

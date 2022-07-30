@@ -15,9 +15,6 @@ spec:
   interval: 1m
   valuesFrom:
     - kind: ConfigMap
-      name: cert-manager-main-helmrelease-values
-      optional: true
-    - kind: ConfigMap
       name: cert-manager-group-helmrelease-values
       optional: true
     - kind: ConfigMap

@@ -64,7 +64,6 @@ terraform -chdir="${TERRAFORM_CODE_DIR}" init \
   -backend-config="dynamodb_table=${CLUSTER_FQDN}"
 
 terraform -chdir="${TERRAFORM_CODE_DIR}" apply \
-  -var-file="${PWD}/${CLUSTER_PATH}/../../main-variables.tfvars" \
   -var-file="${PWD}/${CLUSTER_PATH}/../group-variables.tfvars" \
   -var-file="${PWD}/${CLUSTER_PATH}/cluster-variables.tfvars"
 EOF

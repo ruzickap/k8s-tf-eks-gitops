@@ -15,9 +15,6 @@ spec:
   interval: 1m
   valuesFrom:
     - kind: ConfigMap
-      name: kyverno-main-helmrelease-values
-      optional: true
-    - kind: ConfigMap
       name: kyverno-group-helmrelease-values
       optional: true
     - kind: ConfigMap

@@ -15,9 +15,6 @@ spec:
   interval: 1m
   valuesFrom:
     - kind: ConfigMap
-      name: ingress-nginx-main-helmrelease-values
-      optional: true
-    - kind: ConfigMap
       name: ingress-nginx-group-helmrelease-values
       optional: true
     - kind: ConfigMap
