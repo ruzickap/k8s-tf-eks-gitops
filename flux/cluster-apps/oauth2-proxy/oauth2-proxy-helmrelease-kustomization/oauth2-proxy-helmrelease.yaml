@@ -15,9 +15,6 @@ spec:
   interval: 1m
   valuesFrom:
     - kind: ConfigMap
-      name: oauth2-proxy-main-helmrelease-values
-      optional: true
-    - kind: ConfigMap
       name: oauth2-proxy-group-helmrelease-values
       optional: true
     - kind: ConfigMap

@@ -15,9 +15,6 @@ spec:
   interval: 1m
   valuesFrom:
     - kind: ConfigMap
-      name: cilium-main-helmrelease-values
-      optional: true
-    - kind: ConfigMap
       name: cilium-group-helmrelease-values
       optional: true
     - kind: ConfigMap

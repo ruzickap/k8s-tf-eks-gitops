@@ -15,9 +15,6 @@ spec:
   interval: 1m
   valuesFrom:
     - kind: ConfigMap
-      name: metrics-server-main-helmrelease-values
-      optional: true
-    - kind: ConfigMap
       name: metrics-server-group-helmrelease-values
       optional: true
     - kind: ConfigMap

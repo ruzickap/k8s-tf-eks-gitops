@@ -15,9 +15,6 @@ spec:
   interval: 1m
   valuesFrom:
     - kind: ConfigMap
-      name: keycloak-main-helmrelease-values
-      optional: true
-    - kind: ConfigMap
       name: keycloak-group-helmrelease-values
       optional: true
     - kind: ConfigMap

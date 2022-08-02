@@ -19,9 +19,6 @@ spec:
     crds: CreateReplace
   valuesFrom:
     - kind: ConfigMap
-      name: kube-prometheus-stack-main-helmrelease-values
-      optional: true
-    - kind: ConfigMap
       name: kube-prometheus-stack-group-helmrelease-values
       optional: true
     - kind: ConfigMap
