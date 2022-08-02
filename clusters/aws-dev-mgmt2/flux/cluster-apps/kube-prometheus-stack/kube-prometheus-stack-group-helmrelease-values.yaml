@@ -199,10 +199,10 @@ grafana:
         datasource: Prometheus
       # https://github.com/fluxcd/flux2/blob/main/manifests/monitoring/grafana/dashboards/cluster.json
       gitops-toolkit-control-plane:
-        url: https://raw.githubusercontent.com/fluxcd/flux2/c98cd106218b0fdead155bd9a0b0a5666e5c3e15/manifests/monitoring/grafana/dashboards/control-plane.json
+        url: https://raw.githubusercontent.com/fluxcd/flux2/4acef9d508bb50cc5647237f39e1a25b69cad451/manifests/monitoring/monitoring-config/dashboards/control-plane.json
         datasource: Prometheus
       gitops-toolkit-cluster:
-        url: https://raw.githubusercontent.com/fluxcd/flux2/80cf5fa7291242f87458a426fccb57abfd8c66ee/manifests/monitoring/grafana/dashboards/cluster.json
+        url: https://raw.githubusercontent.com/fluxcd/flux2/4acef9d508bb50cc5647237f39e1a25b69cad451/manifests/monitoring/monitoring-config/dashboards/cluster.json
         datasource: Prometheus
       kyverno-policy-report:
         gnetId: 13995

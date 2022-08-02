@@ -18,7 +18,6 @@ config:
     pass_access_token = "true"
     pass_user_headers = "true"
     pass_authorization_header = "true"
-
 ingress:
   enabled: true
   annotations:

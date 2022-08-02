@@ -2,6 +2,8 @@ skip-check:
   # Skip ArgoCD checks
   - CKV_ARGO_1
   - CKV_ARGO_2
+  # The build output cannot be affected by user parameters other than the build entry point and the top-level source location. GitHub Actions workflow_dispatch inputs MUST be empty
+  - CKV_GHA_7
   # Ensure that the seccomp profile is set to docker/default or runtime/default
   - CKV_K8S_31
   # Image should use digest

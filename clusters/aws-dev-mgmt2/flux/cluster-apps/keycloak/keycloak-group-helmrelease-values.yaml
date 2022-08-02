@@ -29,11 +29,6 @@ metrics:
     enabled: true
 keycloakConfigCli:
   enabled: true
-  # Bug: https://github.com/bitnami/charts/issues/10796
-  command:
-    - java
-    - -jar
-    - /opt/bitnami/keycloak-config-cli/keycloak-config-cli-18.0.1.jar
   configuration:
     # https://github.com/adorsys/keycloak-config-cli/blob/main/src/test/resources/import-files/exported-realm/18.0.2/master-realm.json
     myrealm.yaml: |
