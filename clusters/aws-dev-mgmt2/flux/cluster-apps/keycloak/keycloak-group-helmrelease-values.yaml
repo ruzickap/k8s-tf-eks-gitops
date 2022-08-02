@@ -53,23 +53,6 @@ keycloakConfigCli:
             - profile
             - roles
             - web-origins
-          # protocolMappers:
-          #   - name: groupMapper
-          #     protocol: openid-connect
-          #     protocolMapper: oidc-group-membership-mapper
-          #     config:
-          #       access.token.claim: "true"
-          #       claim.name: groups
-          #       full.path: "true"
-          #       id.token.claim: "true"
-          #       userinfo.token.claim: "true"
-          #   - name: audience
-          #     protocol: openid-connect
-          #     protocolMapper: oidc-audience-mapper
-          #     config:
-          #       included.client.audience: oauth2-proxy-keycloak.${CLUSTER_FQDN}
-          #       included.custom.audience: oauth2-proxy-keycloak.${CLUSTER_FQDN}
-          #       access.token.claim: "true"
       clientScopes:
         - name: myclientscope
           description: My Client Scope
