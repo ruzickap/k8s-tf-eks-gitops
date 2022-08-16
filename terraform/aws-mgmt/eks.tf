@@ -152,7 +152,7 @@ EOF
 
 module "iam_assumable_role_external_dns" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "5.2.0"
+  version                       = "5.3.0"
   create_role                   = true
   provider_url                  = "module.eks.oidc_provider"
   role_name                     = "${module.eks.cluster_id}-irsa-external-dns"
@@ -193,7 +193,7 @@ EOF
 
 module "iam_assumable_role_cert_manager" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "5.2.0"
+  version                       = "5.3.0"
   create_role                   = true
   provider_url                  = "module.eks.oidc_provider"
   role_name                     = "${module.eks.cluster_id}-irsa-cert-manager"
