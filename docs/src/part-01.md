@@ -67,7 +67,7 @@ Install [kustomize](https://kustomize.io/):
 ```bash
 if ! command -v kustomize &> /dev/null; then
   # renovate: datasource=github-tags depName=kubernetes-sigs/kustomize extractVersion=^kustomize\/v(?<version>.+)$
-  KUSTOMIZE_VERSION="4.5.6"
+  KUSTOMIZE_VERSION="4.5.7"
   curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | sudo bash -s "${KUSTOMIZE_VERSION}" /usr/local/bin/
 fi
 ```
