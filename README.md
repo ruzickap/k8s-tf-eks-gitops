@@ -127,7 +127,7 @@ There are several secrets:
 * Put all `HelmRepository` objects to `flux-system` instead of "namespaces"
   to be able to share them
 * Check snapshots (cnpg/velero) + KMS keys (if they are being deleted)
-* kubernetes-dashboard - auto login not working
+* `kubernetes-dashboard` - auto login not working
 
 ---
 
