@@ -29,28 +29,11 @@ ingress:
   tls:
     - hosts:
         - pgadmin.${CLUSTER_FQDN}
-extraSecretMounts:
-  - name: pgpassfile
-    secret: pgpassfile
-    subPath: pgpassfile
-    mountPath: "/var/lib/pgadmin/storage/pgadmin/file.pgpass"
-    readOnly: true
 env:
-  pgpassfile: /var/lib/pgadmin/storage/pgadmin/file.pgpass
   variables:
     - name: PGADMIN_CONFIG_SERVER_MODE
       value: "False"
     - name: PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED
       value: "False"
-# This doesn't work due to bug: https://github.com/rowanruseler/helm-charts/issues/72
-extraInitContainers: |
-  - name: add-folder-for-pgpass
-    image: "dpage/pgadmin4:latest"
-    command: ["/bin/mkdir", "-p", "/var/lib/pgadmin/storage/pgadmin"]
-    volumeMounts:
-      - name: pgadmin-data
-        mountPath: /var/lib/pgadmin
-    securityContext:
-      runAsUser: 5050
 persistentVolume:
   enabled: false

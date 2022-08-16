@@ -15,6 +15,7 @@ config:
     login_url = "https://dex.${CLUSTER_FQDN}/auth"
     redeem_url = "https://dex.${CLUSTER_FQDN}/token"
     oidc_jwks_url = "https://dex.${CLUSTER_FQDN}/keys"
+    set_authorization_header = "true"
 ingress:
   enabled: true
   className: nginx
