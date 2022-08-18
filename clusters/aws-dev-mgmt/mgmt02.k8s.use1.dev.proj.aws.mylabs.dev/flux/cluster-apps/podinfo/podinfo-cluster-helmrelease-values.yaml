@@ -1,0 +1,3 @@
+ui:
+  color: "#7c346e"
+  message: "| cluster-helmrelease-values |"

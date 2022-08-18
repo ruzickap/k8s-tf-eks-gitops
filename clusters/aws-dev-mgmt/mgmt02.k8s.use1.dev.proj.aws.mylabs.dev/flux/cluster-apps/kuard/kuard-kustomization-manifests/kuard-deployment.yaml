@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kuard-deployment
+  namespace: kuard
+  labels:
+    app: kuard
+  annotations:
+    checkov.io/skip1: CKV_K8S_35=Prefer using secrets as files over secrets as environment variables
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kuard
+  template:
+    metadata:
+      labels:
+        app: kuard
+    spec:
+      serviceAccountName: kuard
+      automountServiceAccountToken: false
+      securityContext:
+        runAsUser: 10000
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: "kubernetes.io/hostname"
+              labelSelector:
+                matchLabels:
+                  app: kuard
+      volumes:
+        - name: secrets-store-inline
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              # checkov:skip=CKV_SECRET_6 "Base64 High Entropy String"
+              secretProviderClass: aws-kuard-secretproviderclass
+      containers:
+        - name: kuard-deployment
+          image: gcr.io/kuar-demo/kuard-amd64:v0.10.0-green
+          imagePullPolicy: Always
+          env:
+            - name: USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: secretsmanager-kuard-secret
+                  key: USERNAME
+            - name: PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: secretsmanager-kuard-secret
+                  key: PASSWORD
+            - name: USERNAME_2
+              valueFrom:
+                secretKeyRef:
+                  name: secretsmanager-kuard-secret
+                  key: USERNAME_2
+            - name: PASSWORD_2
+              valueFrom:
+                secretKeyRef:
+                  name: secretsmanager-kuard-secret
+                  key: PASSWORD_2
+          livenessProbe:
+            httpGet:
+              path: /healthy
+              port: 8080
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+            periodSeconds: 10
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: "64Mi"
+            limits:
+              cpu: 100m
+              memory: "64Mi"
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+            initialDelaySeconds: 30
+            timeoutSeconds: 1
+            periodSeconds: 10
+            failureThreshold: 3
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+          volumeMounts:
+            - name: secrets-store-inline
+              mountPath: "/mnt/secrets-store"
+              readOnly: true
