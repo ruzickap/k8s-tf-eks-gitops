@@ -258,7 +258,7 @@ flux logs
 Encrypt `^(data|stringData)$` field in file:
 
 ```bash
-sops --encrypt --in-place clusters/aws-dev-mgmt2/mgmt02.k8s.use1.dev.proj.aws.mylabs.dev/flux/cluster-apps-secrets.yaml
+sops --encrypt --in-place clusters/aws-dev-mgmt/mgmt01.k8s.use1.dev.proj.aws.mylabs.dev/flux/cluster-apps-secrets.yaml
 ```
 
 Edit encrypted file:

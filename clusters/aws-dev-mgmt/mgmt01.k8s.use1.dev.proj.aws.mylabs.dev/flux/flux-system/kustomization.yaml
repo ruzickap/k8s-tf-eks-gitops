@@ -13,8 +13,8 @@ patches:
       metadata:
         name: kustomize-controller
         annotations:
-          # IAM Role (IRSA) is created in terraform/aws-mgmt2/eks.tf using module "iam_assumable_role_kustomize_controller"
-          eks.amazonaws.com/role-arn: arn:aws:iam::729560437327:role/mgmt02-irsa-kustomize-controller
+          # IAM Role (IRSA) is created in terraform/aws-mgmt/eks.tf using module "iam_assumable_role_kustomize_controller"
+          eks.amazonaws.com/role-arn: arn:aws:iam::729560437327:role/mgmt01-irsa-kustomize-controller
     target:
       kind: ServiceAccount
       name: kustomize-controller
