@@ -66,7 +66,7 @@ resource "aws_route53_record" "base_domain" {
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "18.27.1"
+  version = "18.28.0"
 
   cluster_name                    = local.cluster_name
   cluster_version                 = var.cluster_version
