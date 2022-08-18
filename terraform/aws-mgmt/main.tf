@@ -5,14 +5,36 @@ terraform {
     aws = {
       source = "hashicorp/aws"
     }
+    git = {
+      source  = "innovationnorway/git"
+      version = "0.1.3"
+    }
+    github = {
+      source  = "integrations/github"
+      version = "4.29.0"
+    }
+    http = {
+      source  = "hashicorp/http"
+      version = "3.0.1"
+    }
+    kubectl = {
+      source  = "gavinbunney/kubectl"
+      version = "1.14.0"
+    }
     kubernetes = {
-      source = "hashicorp/kubernetes"
+      source  = "hashicorp/kubernetes"
+      version = "2.12.1"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "3.3.2"
     }
     tls = {
-      source = "hashicorp/tls"
+      source  = "hashicorp/tls"
+      version = "3.4.0"
     }
   }
-  required_version = ">= 1.0.1"
+  required_version = ">= 1.2.5"
 }
 
 locals {
@@ -25,26 +47,73 @@ locals {
     var.aws_tags_group_level,
     var.aws_tags_cluster_level,
   )
+
+  # Environment=dev,Team=test,Owner=aaaa
+  tags_inline = join(",", [for key, value in local.aws_default_tags : "${key}=${value}"])
+
+  flux_install = [for v in data.kubectl_file_documents.flux_install.documents : {
+    data : yamldecode(v)
+    content : v
+    }
+  ]
+
+  flux_sync = [for v in data.kubectl_file_documents.flux_sync.documents : {
+    data : yamldecode(v)
+    content : v
+    }
+  ]
+
+  kubeconfig = yamlencode({
+    apiVersion      = "v1"
+    kind            = "Config"
+    current-context = "terraform"
+    clusters = [{
+      name = module.eks_blueprints.eks_cluster_id
+      cluster = {
+        certificate-authority-data = data.aws_eks_cluster.eks-cluster.certificate_authority.0.data
+        server                     = data.aws_eks_cluster.eks-cluster.endpoint
+      }
+    }]
+    contexts = [{
+      name = "terraform"
+      context = {
+        cluster = module.eks_blueprints.eks_cluster_id
+        user    = "terraform"
+      }
+    }]
+    users = [{
+      name = "terraform"
+      user = {
+        token = data.aws_eks_cluster_auth.eks-cluster.token
+      }
+    }]
+  })
+
+  known_hosts = "github.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg="
 }
 
 provider "aws" {
   # Default tags that will be applied to ALL resources: https://www.hashicorp.com/blog/default-tags-in-the-terraform-aws-provider
-  default_tags {
-    tags = local.aws_default_tags
-  }
+  # Not working: Provider produced inconsistent final plan
+  # default_tags {
+  #   tags = local.aws_default_tags
+  # }
   region = var.aws_default_region
-  assume_role {
-    role_arn = var.aws_assume_role
-  }
+}
+
+provider "github" {
+  token = var.github_token
 }
 
 provider "kubernetes" {
-  host                   = module.eks.cluster_endpoint
-  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+  host                   = data.aws_eks_cluster.eks-cluster.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.eks-cluster.certificate_authority.0.data)
+  token                  = data.aws_eks_cluster_auth.eks-cluster.token
+}
 
-  exec {
-    api_version = "client.authentication.k8s.io/v1alpha1"
-    command     = "aws"
-    args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_id]
-  }
+provider "kubectl" {
+  host                   = data.aws_eks_cluster.eks-cluster.endpoint
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.eks-cluster.certificate_authority.0.data)
+  token                  = data.aws_eks_cluster_auth.eks-cluster.token
+  load_config_file       = false
 }

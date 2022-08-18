@@ -19,7 +19,7 @@ get_variable_from_group_cluster_tfvars() {
 set -euo pipefail
 
 if [[ "$#" -eq 0 ]] || [[ ! -d .git ]]; then
-  echo -e "\nRun in top of the git repository.\nUsage: ./scripts/template-flux-cluster.sh mgmt02.k8s.use1.dev.proj.aws.mylabs.dev\n"
+  echo -e "\nRun in top of the git repository.\nUsage: ./scripts/template-flux-cluster.sh mgmt01.k8s.use1.dev.proj.aws.mylabs.dev\n"
   exit 1
 fi
 
