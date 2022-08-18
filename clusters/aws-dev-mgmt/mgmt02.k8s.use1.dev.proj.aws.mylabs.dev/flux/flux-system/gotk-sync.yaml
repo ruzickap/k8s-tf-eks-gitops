@@ -18,7 +18,7 @@ metadata:
   namespace: flux-system
 spec:
   interval: 10m0s
-  path: ./clusters/aws-dev-mgmt/mgmt01.k8s.use1.dev.proj.aws.mylabs.dev/flux
+  path: ./clusters/aws-dev-mgmt/mgmt02.k8s.use1.dev.proj.aws.mylabs.dev/flux
   prune: true
   sourceRef:
     kind: GitRepository

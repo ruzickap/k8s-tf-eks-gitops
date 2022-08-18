@@ -1,0 +1,20 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: kuard-manifests
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: kuard-secretproviderclass
+  interval: 5m
+  path: ${CLUSTER_PATH}/flux/cluster-apps/kuard/kuard-kustomization-manifests
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  wait: true
+  postBuild:
+    substituteFrom:
+      - kind: Secret
+        name: cluster-apps-vars-terraform-secret

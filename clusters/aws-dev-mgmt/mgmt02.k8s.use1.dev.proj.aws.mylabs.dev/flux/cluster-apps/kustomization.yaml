@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  # Cluster group applications
+  - ../../../flux/cluster-apps
+
+  # Cluster specific applications / configurations
+  - ../../../../../flux/cluster-apps/crossplane/
+
+  - crossplane-aws-secretmanager-secret
+  - crossplane-aws-provider
+  - kuard
+  - metrics-server
+  - podinfo

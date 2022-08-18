@@ -123,7 +123,7 @@ jobs:
         if: ${{ inputs.terraform_action == 'apply' }}
         run: |
           cat << EOF | tee -a "${GITHUB_STEP_SUMMARY}"
-          * :low_brightness: ${CLUSTER_FQDN}
+          * :low_brightness: [${CLUSTER_FQDN}](${CLUSTER_FQDN})
             \`\`\`
             export KUBECONFIG="/tmp/kubeconfig-${CLUSTER_NAME}.conf"
             eval "\$(aws sts assume-role --role-arn "${AWS_ASSUME_ROLE}" --role-session-name "$USER@\$(hostname -f)-k8s-tf-eks-gitops-\$(date +%s)" --duration-seconds 36000 | jq -r '.Credentials | "export AWS_ACCESS_KEY_ID=\(.AccessKeyId)\nexport AWS_SECRET_ACCESS_KEY=\(.SecretAccessKey)\nexport AWS_SESSION_TOKEN=\(.SessionToken)\n"')"
