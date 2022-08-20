@@ -63,6 +63,14 @@ keycloakConfigCli:
                 included.client.audience: oauth2-proxy-keycloak.${CLUSTER_FQDN}
                 included.custom.audience: oauth2-proxy-keycloak.${CLUSTER_FQDN}
                 access.token.claim: "true"
+      identityProviders:
+        - providerId: google
+          alias: google
+          enabled: false
+          config:
+            syncMode: IMPORT
+            clientId: ${GOOGLE_CLIENT_ID}
+            clientSecret: ${GOOGLE_CLIENT_SECRET}
       displayName: My Realm
       enabled: true
       groups:

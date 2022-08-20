@@ -3,7 +3,7 @@ config:
   clientSecret: oauth2-proxy-${OAUTH2_PROXY_SECRET}
   cookieSecret: ${COOKIE_SECRET}
   configFile: |-
-    email_domains = [ "*" ]
+    email_domains = [ "${ROOT_DOMAIN}" ]
     upstreams = [ "file:///dev/null" ]
     whitelist_domains = ".${CLUSTER_FQDN}"
     cookie_domains = ".${CLUSTER_FQDN}"

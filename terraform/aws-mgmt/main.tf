@@ -40,6 +40,7 @@ terraform {
 locals {
   vpc_name     = var.cluster_fqdn
   cluster_name = split(".", var.cluster_fqdn)[0]
+  root_domain  = regex(".*\\.([^.]+\\.\\w+)", var.cluster_fqdn)[0]
 
   # Merging tfvars file when running terraform is not possible therefore I'm doing it here
   # (https://stackoverflow.com/questions/64615552/merge-more-than-2-tfvars-file-contents)
