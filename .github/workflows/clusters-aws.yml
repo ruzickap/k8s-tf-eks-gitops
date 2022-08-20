@@ -4,10 +4,19 @@ on:
   workflow_dispatch:
     inputs:
       clusters:
+        type: choice
         description: Cluster list
         # See details in `find` manual and look for `-regextype "posix-extended"` and `-regex`
-        default: .*(/aws-dev-mgmt/|/mgmt01.k8s.use1.dev.proj.aws.mylabs.dev$).*
+        default: .*/mgmt01.k8s.use1.dev.proj.aws.mylabs.dev
         required: true
+        options:
+          - .*/aws-dev-mgmt/.*
+          - .*/mgmt01.k8s.use1.dev.proj.aws.mylabs.dev
+          - .*/mgmt02.k8s.use1.dev.proj.aws.mylabs.dev
+      # clusters:
+      #   description: Cluster list
+      #   default: .*(/aws-dev-mgmt/|/mgmt01.k8s.use1.dev.proj.aws.mylabs.dev$).*
+      #   required: true
       action:
         type: choice
         description: Cluster Terraform action
