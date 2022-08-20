@@ -9,6 +9,7 @@ resources:
 
   - crossplane-aws-secretmanager-secret
   - crossplane-aws-provider
+  - dex
   - kuard
   - metrics-server
   - podinfo

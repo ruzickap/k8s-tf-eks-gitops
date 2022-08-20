@@ -1,3 +1,4 @@
 ui:
   color: "#7c346e"
   message: "| cluster-helmrelease-values |"
+  logo: https://raw.githubusercontent.com/stefanprodan/podinfo/gh-pages/cuddle_bunny.gif
