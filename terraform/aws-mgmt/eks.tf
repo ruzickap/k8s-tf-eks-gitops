@@ -535,6 +535,7 @@ resource "kubernetes_secret" "flux_cluster_apps_terraform_secret" {
     AWS_PARTITION               = data.aws_partition.current.id
     CLUSTER_FQDN                = var.cluster_fqdn
     CLUSTER_NAME                = local.cluster_name
+    ROOT_DOMAIN                 = local.root_domain
     CLUSTER_PATH                = var.cluster_path
     EMAIL                       = var.email
     ENVIRONMENT                 = var.environment
