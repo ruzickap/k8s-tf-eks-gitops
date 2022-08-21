@@ -22,9 +22,17 @@ jobs:
         with:
           fetch-depth: 2
 
+      - name: Get date
+        id: date
+        run: |
+          set -euxo pipefail
+          echo "::set-output name=date::$(date +%F -d '2 days ago')"
+
       - name: Get changed files
         id: changed-files
-        uses: tj-actions/changed-files@v26.1
+        uses: tj-actions/changed-files@v28.0.0
+        with:
+          since: ${{ steps.date.outputs.date }}
 
       - name: 💡 Scheduled run time check
         id: scheduled_run
