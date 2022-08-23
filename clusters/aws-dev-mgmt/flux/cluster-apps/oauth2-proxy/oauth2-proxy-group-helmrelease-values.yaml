@@ -3,7 +3,8 @@ config:
   clientSecret: oauth2-proxy-${OAUTH2_PROXY_SECRET}
   cookieSecret: ${COOKIE_SECRET}
   configFile: |-
-    email_domains = [ "${ROOT_DOMAIN}" ]
+    # email_domains = [ "*" ]
+    email_domains = []
     upstreams = [ "file:///dev/null" ]
     whitelist_domains = ".${CLUSTER_FQDN}"
     cookie_domains = ".${CLUSTER_FQDN}"
@@ -16,6 +17,10 @@ config:
     redeem_url = "https://dex.${CLUSTER_FQDN}/token"
     oidc_jwks_url = "https://dex.${CLUSTER_FQDN}/keys"
     set_authorization_header = "true"
+authenticatedEmailsFile:
+  enabled: true
+  restricted_access: |-
+    ${EMAIL}
 ingress:
   enabled: true
   className: nginx
