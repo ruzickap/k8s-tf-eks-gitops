@@ -124,6 +124,11 @@ grafana:
       forecastle.stakater.com/appName: Grafana
       nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/auth
       nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/start?rd=$scheme://$host$request_uri
+      nginx.ingress.kubernetes.io/configuration-snippet: |
+        auth_request_set $user   $upstream_http_x_auth_request_user;
+        auth_request_set $email  $upstream_http_x_auth_request_email;
+        proxy_set_header X-User  $user;
+        proxy_set_header X-Email $email;
     hosts:
       - grafana.${CLUSTER_FQDN}
     paths: ["/"]
@@ -277,9 +282,19 @@ grafana:
     server:
       root_url: https://grafana.${CLUSTER_FQDN}
     # Use oauth2-proxy instead of default Grafana Oauth
-    auth.anonymous:
+    # https://carlosbecker.com/posts/prometheus-authentication-with-oauth2_proxy/
+    auth.basic:
+      enabled: false
+    auth.proxy:
       enabled: true
-      org_role: Admin
+      header_name: X-Email
+      header_property: email
+      headers: "Email:X-Email, Name:X-User"
+      auto_sign_up: true
+    users:
+      allow_sign_up: false
+      auto_assign_org: true
+      auto_assign_org_role: Admin
   smtp:
     enabled: true
     host: "mailhog.mailhog.svc.cluster.local:1025"

@@ -5,10 +5,6 @@ on:
   schedule:
     - cron: "1 1 * * */2"
 
-env:
-  # renovate: datasource=github-tags depName=kubernetes/kubectl extractVersion=^kubernetes-(?<version>.+)$
-  KUBECTL_VERSION: "1.25.0"
-
 jobs:
   scheduled-run-time-check:
     name: "Scheduled run time check"
@@ -34,7 +30,7 @@ jobs:
         with:
           since: ${{ steps.date.outputs.date }}
 
-      - name: 💡 Scheduled run time check
+      - name: Scheduled run time check
         id: scheduled_run
         run: |
           set -euxo pipefail
@@ -122,18 +118,13 @@ jobs:
       matrix:
         stage: ${{ fromJSON(needs.scheduled-run-time-check.outputs.scheduled_clusters_matrix) }}
     steps:
-      - name: 💡 Check out repository code
+      - name: Check out repository code
         uses: actions/checkout@v3
 
-      - name: 💡 Setup kubectl
-        uses: azure/setup-kubectl@v3.0
-        with:
-          version: v${{ env.KUBECTL_VERSION }}
-
-      - name: 💡 Setup Flux
+      - name: Setup Flux
         uses: fluxcd/flux2/action@main
 
-      - name: 💡 Get and display environment variables
+      - name: Get and display environment variables
         run: |
           set -euxo pipefail
 
@@ -144,7 +135,7 @@ jobs:
             else
               VARIABLE_HELPER=$(awk -F \" "/^${TF_CODE_VARIABLE}/ { print \$2 }" "${CLUSTER_PATH}/../group-variables.tfvars")
             fi
-            echo -e "\n💡 Variable: \"${TF_CODE_VARIABLE^^}\" = \"${VARIABLE_HELPER}\""
+            echo -e "\nVariable: \"${TF_CODE_VARIABLE^^}\" = \"${VARIABLE_HELPER}\""
             echo "${TF_CODE_VARIABLE^^}=${VARIABLE_HELPER}" >> "${GITHUB_ENV}"
             export "${TF_CODE_VARIABLE^^}=${VARIABLE_HELPER}"
             echo "::set-output name=${TF_CODE_VARIABLE^^}::${VARIABLE_HELPER}"
@@ -157,18 +148,30 @@ jobs:
           get_variable_from_group_cluster_tfvars "${CLUSTER_PATH}" "cluster_fqdn"
           echo "CLUSTER_NAME=${CLUSTER_FQDN%%.*}" | tee -a "${GITHUB_ENV}"
 
-      - name: 💡 Configure AWS credentials
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           role-to-assume: ${{ env.AWS_ASSUME_ROLE }}
           role-session-name: GitHubOidcFederatedRole
           aws-region: ${{ env.AWS_DEFAULT_REGION }}
 
-      - name: 💡 Access Amazon EKS cluster and list nodes, Flux and ArgoCD details
+      - name: Get kubeconfig
         run: |
           set -euxo pipefail
           export KUBECONFIG="/tmp/kubeconfig-${CLUSTER_NAME}.conf"
           aws eks update-kubeconfig --region "${AWS_DEFAULT_REGION}" --name "${CLUSTER_NAME}" --kubeconfig "${KUBECONFIG}"
+
+      - name: 💡 Check installed components
+        run: |
+          set -euxo pipefail
+          kubectl wait helmrelease --for=condition=ready --all-namespaces --all --timeout=10m > /dev/null
+          kubectl wait kustomization --for=condition=ready --all-namespaces --all --timeout=10m > /dev/null
+          kubectl wait --for=condition=Ready pods --all --all-namespaces --timeout=10m > /dev/null
+
+      - name: Access Amazon EKS cluster and list nodes, Flux and ArgoCD details
+        if: ${{ failure() }}
+        run: |
+          set -euxo pipefail
           kubectl get nodes -o wide --show-labels
           kubectl get namespaces
           flux get all -A --status-selector ready=false
