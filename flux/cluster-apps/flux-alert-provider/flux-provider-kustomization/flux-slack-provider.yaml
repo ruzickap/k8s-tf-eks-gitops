@@ -4,7 +4,6 @@ metadata:
   name: slack
   namespace: flux-system
 spec:
-  channel: ${SLACK_CHANNEL}
   secretRef:
     name: slack-url
   type: slack

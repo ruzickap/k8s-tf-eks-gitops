@@ -27,7 +27,7 @@ alertmanager:
             require_tls: false
       - name: slack-notifications
         slack_configs:
-          - channel: "#${SLACK_CHANNEL}"
+          - channel: "#${CLUSTER_NAME}"
             send_resolved: True
             icon_url: "https://avatars3.githubusercontent.com/u/3380462"
             title: '{{ template "slack.cp.title" . }}'

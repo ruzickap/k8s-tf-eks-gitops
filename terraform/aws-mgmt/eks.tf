@@ -541,7 +541,6 @@ resource "kubernetes_secret" "flux_cluster_apps_terraform_secret" {
     ENVIRONMENT                 = var.environment
     GITHUB_WEBHOOK_TOKEN_BASE64 = base64encode(random_id.github_webhook_flux_secret.hex)
     LETSENCRYPT_ENVIRONMENT     = var.letsencrypt_environment
-    SLACK_CHANNEL               = var.slack_channel
     # Environment=dev,Team=test
     TAGS_INLINE = local.tags_inline
   }

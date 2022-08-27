@@ -148,11 +148,6 @@ variable "managed_node_groups" {
   type        = any
 }
 
-variable "slack_channel" {
-  description = "Slack Channel"
-  type        = string
-}
-
 # Variable used only in the cluster-aws pipeline
 variable "terraform_code_dir" {
   description = "Path to terraform code (not used in the code)"
