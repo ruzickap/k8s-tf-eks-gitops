@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    forecastle.stakater.com/expose: "true"
+    forecastle.stakater.com/icon: https://raw.githubusercontent.com/stefanprodan/podinfo/gh-pages/cuddle_bunny.gif
+    forecastle.stakater.com/appName: Podinfo + Keycloak auth
+    nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy-keycloak.${CLUSTER_FQDN}/oauth2/start?rd=$scheme://$host$request_uri
+    nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy-keycloak.${CLUSTER_FQDN}/oauth2/auth
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      auth_request_set $email  $upstream_http_x_auth_request_email;
+      proxy_set_header X-Email $email;
+  name: podinfo-keycloak
+  namespace: podinfo
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: podinfo-keycloak.${CLUSTER_FQDN}
+      http:
+        paths:
+          - backend:
+              service:
+                name: podinfo
+                port:
+                  number: 9898
+            path: /
+            pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - podinfo-keycloak.${CLUSTER_FQDN}

@@ -1,22 +1,21 @@
 config:
   clientID: oauth2-proxy.${CLUSTER_FQDN}
   clientSecret: oauth2-proxy-${OAUTH2_PROXY_SECRET}
-  cookieSecret: ${COOKIE_SECRET}
+  cookieSecret: ${OAUTH2_PROXY_COOKIE_SECRET}
   configFile: |-
-    upstreams = [ "file:///dev/null" ]
-    whitelist_domains = ".${CLUSTER_FQDN}"
     cookie_domains = ".${CLUSTER_FQDN}"
-    provider = "oidc"
-    oidc_issuer_url = "https://dex.${CLUSTER_FQDN}"
-    ssl_insecure_skip_verify = "true"
     insecure_oidc_skip_issuer_verification = "true"
-    skip_oidc_discovery = "true"
     login_url = "https://dex.${CLUSTER_FQDN}/auth"
-    redeem_url = "https://dex.${CLUSTER_FQDN}/token"
+    oidc_issuer_url = "https://dex.${CLUSTER_FQDN}"
     oidc_jwks_url = "https://dex.${CLUSTER_FQDN}/keys"
-    # Needed for oauth2-proxy + grafana
+    provider = "oidc"
+    redeem_url = "https://dex.${CLUSTER_FQDN}/token"
     set_authorization_header = "true"
     set_xauthrequest = "true"
+    skip_oidc_discovery = "true"
+    ssl_insecure_skip_verify = "true"
+    upstreams = [ "file:///dev/null" ]
+    whitelist_domains = ".${CLUSTER_FQDN}"
 authenticatedEmailsFile:
   enabled: true
   restricted_access: |-

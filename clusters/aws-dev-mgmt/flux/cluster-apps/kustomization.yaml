@@ -44,7 +44,6 @@ resources:
   - ../../../../flux/cluster-apps/oauth2-proxy-keycloak
   - ../../../../flux/cluster-apps/pgadmin4
   - ../../../../flux/cluster-apps/podinfo
-  - ../../../../flux/cluster-apps/podinfo-keycloak
   - ../../../../flux/cluster-apps/policy-reporter
   - ../../../../flux/cluster-apps/rancher
   - ../../../../flux/cluster-apps/secrets-store-csi-driver
@@ -69,7 +68,6 @@ resources:
   - oauth2-proxy-keycloak
   - policy-reporter
   - podinfo
-  - podinfo-keycloak
   - pgadmin4
   - rancher
   - secrets-store-csi-driver
