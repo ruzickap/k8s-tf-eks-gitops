@@ -9,6 +9,9 @@ ingress:
     forecastle.stakater.com/appName: Podinfo
     nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/auth
     nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/start?rd=$scheme://$host$request_uri
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      auth_request_set $email  $upstream_http_x_auth_request_email;
+      proxy_set_header X-Email $email;
   className: nginx
   hosts:
     - host: podinfo.${CLUSTER_FQDN}
