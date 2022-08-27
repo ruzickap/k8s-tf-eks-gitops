@@ -6,7 +6,6 @@ metadata:
 spec:
   dependsOn:
     - name: kube-prometheus-stack
-    - name: keycloak
   interval: 5m
   path: flux/cluster-apps/oauth2-proxy-keycloak/oauth2-proxy-keycloak-helmrelease-kustomization
   prune: true

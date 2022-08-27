@@ -3,21 +3,29 @@
 config:
   clientID: oauth2-proxy-keycloak.${CLUSTER_FQDN}
   clientSecret: oauth2-proxy-keycloak-${OAUTH2_PROXY_SECRET}
-  cookieSecret: ${COOKIE_SECRET}
+  cookieSecret: ${OAUTH2_PROXY_KEYCLOAK_COOKIE_SECRET}
   configFile: |-
-    email_domains = [ "*" ]
-    upstreams = [ "file:///dev/null" ]
-    whitelist_domains = ".${CLUSTER_FQDN}"
     cookie_domains = ".${CLUSTER_FQDN}"
+    email_domains = ["${CLUSTER_FQDN}"]
+    # Needed for keycloak without skip_oidc_discovery
+    extra_jwt_issuers = "https://auth.domain.tld/auth/realms/myrealm"
+    insecure_oidc_allow_unverified_email = "true"
+    oidc_issuer_url = "https://keycloak.${CLUSTER_FQDN}/realms/myrealm"
+    # Needed for keycloak without skip_oidc_discovery
+    oidc_jwks_url = "https://keycloak.${CLUSTER_FQDN}/realms/myrealm/protocol/openid-connect/certs"
     provider = "keycloak-oidc"
     redirect_url = "https://oauth2-proxy-keycloak.${CLUSTER_FQDN}/oauth2/callback"
-    oidc_issuer_url = "https://keycloak.${CLUSTER_FQDN}/realms/myrealm"
     scope = "openid email profile"
+    set_authorization_header = "true"
+    set_xauthrequest = "true"
+    skip_oidc_discovery = "true"
     ssl_insecure_skip_verify = "true"
-    insecure_oidc_allow_unverified_email = "true"
-    pass_access_token = "true"
-    pass_user_headers = "true"
-    pass_authorization_header = "true"
+    upstreams = [ "file:///dev/null" ]
+    whitelist_domains = ".${CLUSTER_FQDN}"
+# authenticatedEmailsFile:
+#   enabled: true
+#   restricted_access: |-
+#     ${EMAIL}
 ingress:
   enabled: true
   annotations:
