@@ -1,3 +1,4 @@
+# https://github.com/kubernetes/dashboard/blob/master/aio/deploy/helm-chart/kubernetes-dashboard/values.yaml
 extraArgs:
   - --enable-skip-login
   - --enable-insecure-login
@@ -22,5 +23,3 @@ settings:
   itemsPerPage: 50
 metricsScraper:
   enabled: true
-serviceAccount:
-  name: kubernetes-dashboard-admin
