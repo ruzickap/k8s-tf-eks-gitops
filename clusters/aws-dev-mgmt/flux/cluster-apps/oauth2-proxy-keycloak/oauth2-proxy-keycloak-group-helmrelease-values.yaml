@@ -17,10 +17,10 @@ config:
     ssl_insecure_skip_verify = "true"
     upstreams = [ "file:///dev/null" ]
     whitelist_domains = ".${CLUSTER_FQDN}"
-# authenticatedEmailsFile:
-#   enabled: true
-#   restricted_access: |-
-#     ${EMAIL}
+authenticatedEmailsFile:
+  enabled: true
+  restricted_access: |-
+    ${EMAIL}
 ingress:
   enabled: true
   annotations:

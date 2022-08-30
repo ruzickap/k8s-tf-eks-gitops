@@ -66,7 +66,7 @@ keycloakConfigCli:
       identityProviders:
         - providerId: google
           alias: google
-          enabled: false
+          enabled: true
           config:
             syncMode: IMPORT
             clientId: ${GOOGLE_CLIENT_ID}
