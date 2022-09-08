@@ -40,7 +40,7 @@ jobs:
 
           # For each /terrafrom/<code> select one cluster which will be built
           SCHEDULED_CLUSTERS=""
-          if [[ "${ALL_CHANGED_FILES}" =~ mgmt01.k8s.use1.dev.proj.aws.mylabs.dev|\ terraform/aws-mgmt/ ]]; then
+          if [[ "${ALL_CHANGED_FILES}" =~ mgmt01.k8s.use1.dev.proj.aws.mylabs.dev|\ terraform/aws-mgmt/ ]] || [[ '${{ github.event_name }}' = 'workflow_dispatch' ]]; then
             SCHEDULED_CLUSTERS+="|mgmt01.k8s.use1.dev.proj.aws.mylabs.dev"
           fi
 
@@ -159,6 +159,7 @@ jobs:
         run: |
           set -euxo pipefail
           export KUBECONFIG="/tmp/kubeconfig-${CLUSTER_NAME}.conf"
+          echo "KUBECONFIG=${KUBECONFIG}" >> "${GITHUB_ENV}"
           aws eks update-kubeconfig --region "${AWS_DEFAULT_REGION}" --name "${CLUSTER_NAME}" --kubeconfig "${KUBECONFIG}"
 
       - name: 💡 Check installed components
