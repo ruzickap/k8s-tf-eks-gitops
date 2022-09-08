@@ -2,6 +2,8 @@ skip-check:
   # Skip ArgoCD checks
   - CKV_ARGO_1
   - CKV_ARGO_2
+  # Ensure Domain Name System Security Extensions (DNSSEC) signing is enabled for Amazon Route 53 public hosted zones
+  - CKV2_AWS_38
   # Ensure Domain Name System (DNS) query logging is enabled for Amazon Route 53 hosted zones
   - CKV2_AWS_39
   # The build output cannot be affected by user parameters other than the build entry point and the top-level source location. GitHub Actions workflow_dispatch inputs MUST be empty
