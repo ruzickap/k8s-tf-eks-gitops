@@ -167,7 +167,8 @@ jobs:
           set -euxo pipefail
           kubectl wait helmrelease --for=condition=ready --all-namespaces --all --timeout=10m > /dev/null
           kubectl wait kustomization --for=condition=ready --all-namespaces --all --timeout=10m > /dev/null
-          kubectl wait --for=condition=Ready pods --all --all-namespaces --timeout=10m > /dev/null
+          # Disabled due to rancher and helm-operation
+          # kubectl wait --for=condition=Ready pods --all --all-namespaces --timeout=10m > /dev/null
 
       - name: Access Amazon EKS cluster and list nodes, Flux and ArgoCD details
         if: ${{ failure() }}
