@@ -11,7 +11,7 @@ spec:
         kind: HelmRepository
         name: autoscaler
         namespace: flux-system
-      version: 9.20.1
+      version: 9.21.0
   interval: 1m
   valuesFrom:
     - kind: ConfigMap
