@@ -11,7 +11,7 @@ spec:
         kind: HelmRepository
         name: policy-reporter
         namespace: flux-system
-      version: 2.11.3
+      version: 2.12.0
   interval: 1m
   valuesFrom:
     - kind: ConfigMap
