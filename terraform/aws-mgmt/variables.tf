@@ -147,9 +147,3 @@ variable "managed_node_groups" {
   description = "Map of maps of eks_node_groups to create"
   type        = any
 }
-
-# Variable used only in the cluster-aws pipeline
-variable "terraform_code_dir" {
-  description = "Path to terraform code (not used in the code)"
-  type        = string
-}

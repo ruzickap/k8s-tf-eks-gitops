@@ -3,7 +3,8 @@ terraform {
 
   required_providers {
     aws = {
-      source = "hashicorp/aws"
+      source  = "hashicorp/aws"
+      version = "4.30.0"
     }
     git = {
       source  = "innovationnorway/git"
@@ -25,9 +26,21 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = "2.13.1"
     }
+    local = {
+      source  = "hashicorp/local"
+      version = "2.2.3"
+    }
+    null = {
+      source  = "hashicorp/null"
+      version = "3.1.1"
+    }
     random = {
       source  = "hashicorp/random"
       version = "3.4.3"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = "0.8.0"
     }
     tls = {
       source  = "hashicorp/tls"
@@ -71,7 +84,7 @@ locals {
     clusters = [{
       name = module.eks_blueprints.eks_cluster_id
       cluster = {
-        certificate-authority-data = data.aws_eks_cluster.eks-cluster.certificate_authority.0.data
+        certificate-authority-data = data.aws_eks_cluster.eks-cluster.certificate_authority[0].data
         server                     = data.aws_eks_cluster.eks-cluster.endpoint
       }
     }]
@@ -108,13 +121,13 @@ provider "github" {
 
 provider "kubernetes" {
   host                   = data.aws_eks_cluster.eks-cluster.endpoint
-  cluster_ca_certificate = base64decode(data.aws_eks_cluster.eks-cluster.certificate_authority.0.data)
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.eks-cluster.certificate_authority[0].data)
   token                  = data.aws_eks_cluster_auth.eks-cluster.token
 }
 
 provider "kubectl" {
   host                   = data.aws_eks_cluster.eks-cluster.endpoint
-  cluster_ca_certificate = base64decode(data.aws_eks_cluster.eks-cluster.certificate_authority.0.data)
+  cluster_ca_certificate = base64decode(data.aws_eks_cluster.eks-cluster.certificate_authority[0].data)
   token                  = data.aws_eks_cluster_auth.eks-cluster.token
   load_config_file       = false
 }
