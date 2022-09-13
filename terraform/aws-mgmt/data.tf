@@ -10,10 +10,6 @@ data "aws_eks_cluster_auth" "eks-cluster" {
   name = module.eks_blueprints.eks_cluster_id
 }
 
-data "aws_iam_session_context" "current" {
-  arn = data.aws_caller_identity.current.arn
-}
-
 data "aws_kms_alias" "kms_secretmanager" {
   name = "alias/aws/secretsmanager"
 }
