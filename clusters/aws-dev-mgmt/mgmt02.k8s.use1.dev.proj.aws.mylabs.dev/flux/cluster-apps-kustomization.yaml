@@ -25,3 +25,5 @@ spec:
         name: cluster-apps-secrets
       - kind: Secret
         name: cluster-apps-group-secrets
+  decryption:
+    provider: sops

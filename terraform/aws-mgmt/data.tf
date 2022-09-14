@@ -34,7 +34,7 @@ data "http" "argo-cd_core-install" {
 }
 
 data "kubectl_file_documents" "argo-cd_core-install" {
-  content = data.http.argo-cd_core-install.body
+  content = data.http.argo-cd_core-install.response_body
 }
 
 # ---------------------------------------------------------------------------------------------------------------------

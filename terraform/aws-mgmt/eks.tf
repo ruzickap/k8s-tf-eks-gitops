@@ -530,17 +530,17 @@ resource "kubernetes_secret" "flux_cluster_apps_terraform_secret" {
   }
 
   data = {
-    AWS_ACCOUNT_ID              = data.aws_caller_identity.current.account_id
-    AWS_DEFAULT_REGION          = var.aws_default_region
-    AWS_PARTITION               = data.aws_partition.current.id
-    CLUSTER_FQDN                = var.cluster_fqdn
-    CLUSTER_NAME                = local.cluster_name
-    ROOT_DOMAIN                 = local.root_domain
-    CLUSTER_PATH                = var.cluster_path
-    EMAIL                       = var.email
-    ENVIRONMENT                 = var.environment
-    GITHUB_WEBHOOK_TOKEN_BASE64 = base64encode(random_id.github_webhook_flux_secret.hex)
-    LETSENCRYPT_ENVIRONMENT     = var.letsencrypt_environment
+    AWS_ACCOUNT_ID                   = data.aws_caller_identity.current.account_id
+    AWS_DEFAULT_REGION               = var.aws_default_region
+    AWS_PARTITION                    = data.aws_partition.current.id
+    CLUSTER_FQDN                     = var.cluster_fqdn
+    CLUSTER_NAME                     = local.cluster_name
+    ROOT_DOMAIN                      = local.root_domain
+    CLUSTER_PATH                     = var.cluster_path
+    EMAIL                            = var.email
+    ENVIRONMENT                      = var.environment
+    FLUX_GITHUB_WEBHOOK_TOKEN_BASE64 = base64encode(random_id.github_webhook_flux_secret.hex)
+    LETSENCRYPT_ENVIRONMENT          = var.letsencrypt_environment
     # Environment=dev,Team=test
     TAGS_INLINE = local.tags_inline
   }
