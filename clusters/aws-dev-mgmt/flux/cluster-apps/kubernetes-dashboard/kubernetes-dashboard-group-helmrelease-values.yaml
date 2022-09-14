@@ -1,25 +1,28 @@
 # https://github.com/kubernetes/dashboard/blob/master/aio/deploy/helm-chart/kubernetes-dashboard/values.yaml
 extraArgs:
-  - --enable-skip-login
   - --enable-insecure-login
-  - --disable-settings-authorizer
+#  - --disable-settings-authorizer
 protocolHttp: true
 ingress:
   enabled: true
   annotations:
-    forecastle.stakater.com/expose: "true"
-    forecastle.stakater.com/icon: "https://kubernetes.io/images/kubernetes-horizontal-color.png"
-    forecastle.stakater.com/appName: Kubernetes Dashboard
-    nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/auth
-    nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/start?rd=$scheme://$host$request_uri
+    # forecastle.stakater.com/expose: "true"
+    # forecastle.stakater.com/icon: "https://kubernetes.io/images/kubernetes-horizontal-color.png"
+    # forecastle.stakater.com/appName: Kubernetes Dashboard
+    # nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/auth
+    # nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/start?rd=$scheme://$host$request_uri
+    nginx.ingress.kubernetes.io/auth-snippet: |
+      auth_request_set $token $upstream_http_authorization;
+      proxy_set_header Authorization "Bearer ${KUBERNETES_DASHBOARD_TOKEN}";
+      proxy_pass_header Authorization;
   className: nginx
   hosts:
     - kubernetes-dashboard.${CLUSTER_FQDN}
   tls:
     - hosts:
         - kubernetes-dashboard.${CLUSTER_FQDN}
-settings:
-  clusterName: ${CLUSTER_FQDN}
-  itemsPerPage: 50
-metricsScraper:
-  enabled: true
+# settings:
+#   clusterName: ${CLUSTER_FQDN}
+#   itemsPerPage: 50
+# metricsScraper:
+#   enabled: true

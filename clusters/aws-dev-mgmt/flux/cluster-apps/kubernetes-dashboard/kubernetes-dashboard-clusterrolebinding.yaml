@@ -1,18 +1,74 @@
+# apiVersion: rbac.authorization.k8s.io/v1
+# kind: ClusterRoleBinding
+# metadata:
+#   name: kubernetes-dashboard-admin
+#   labels:
+#     app: kubernetes-dashboard
+# roleRef:
+#   apiGroup: rbac.authorization.k8s.io
+#   kind: ClusterRole
+#   name: cluster-admin
+# subjects:
+#   - kind: ServiceAccount
+#     name: kubernetes-dashboard-admin
+#     namespace: kubernetes-dashboard
+# ---
+# apiVersion: v1
+# kind: ServiceAccount
+# metadata:
+#   name: kubernetes-dashboard-admin
+#   namespace: kubernetes-dashboard
+# secrets:
+#   - name: kubernetes-dashboard-admin-token-secret
+#
+#
+#
+# ---
+#
+#
+#
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
+kind: Role
 metadata:
-  name: kubernetes-dashboard-admin
+  name: kubernetes-dashboard-podinfo-read-only
+  namespace: podinfo
+rules:
+  - apiGroups:
+      - ""
+      - extensions
+      - apps
+    resources:
+      - deployments
+      - namespaces
+      - pods
+      - replicasets
+      - services
+    verbs:
+      - describe
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: kubernetes-dashboard-podinfo-read-only
+  namespace: podinfo
+  labels:
+    app: kubernetes-dashboard
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cluster-admin
+  kind: Role
+  name: kubernetes-dashboard-podinfo-read-only
 subjects:
   - kind: ServiceAccount
-    name: kubernetes-dashboard-admin
-    namespace: kube-system
+    name: kubernetes-dashboard-podinfo-read-only
+    namespace: podinfo
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: kubernetes-dashboard-admin
-  namespace: kube-system
+  name: kubernetes-dashboard-podinfo-read-only
+  namespace: podinfo
+# secrets:
+#   - name: kubernetes-dashboard-podinfo-read-only-token-secret

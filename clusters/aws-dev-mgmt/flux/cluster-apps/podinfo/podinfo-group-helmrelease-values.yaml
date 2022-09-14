@@ -12,6 +12,8 @@ ingress:
     nginx.ingress.kubernetes.io/configuration-snippet: |
       auth_request_set $email  $upstream_http_x_auth_request_email;
       proxy_set_header X-Email $email;
+      proxy_set_header Authorization "Bearer ${KUBERNETES_DASHBOARD_TOKEN}";
+      # proxy_pass_header Authorization;
   className: nginx
   hosts:
     - host: podinfo.${CLUSTER_FQDN}
