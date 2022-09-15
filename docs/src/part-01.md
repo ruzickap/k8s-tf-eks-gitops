@@ -34,7 +34,7 @@ Install [AWS CLI](https://aws.amazon.com/cli/) binary:
 ```bash
 if ! command -v aws &> /dev/null; then
   # renovate: datasource=github-tags depName=aws/aws-cli
-  AWSCLI_VERSION="2.7.31"
+  AWSCLI_VERSION="2.7.32"
   curl -sL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${AWSCLI_VERSION}.zip" -o "/tmp/awscli.zip"
   unzip -q -o /tmp/awscli.zip -d /tmp/
   sudo /tmp/aws/install
