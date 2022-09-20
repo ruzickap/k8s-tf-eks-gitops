@@ -10,22 +10,23 @@ resources:
   - ../../../../flux/sources/forecastle
   - ../../../../flux/sources/ingress-nginx
   - ../../../../flux/sources/jetstack
-  - ../../../../flux/sources/kyverno
   - ../../../../flux/sources/kubernetes-dashboard
+  - ../../../../flux/sources/kyverno
   - ../../../../flux/sources/metrics-server
   - ../../../../flux/sources/oauth2-proxy
-  - ../../../../flux/sources/runix
   - ../../../../flux/sources/podinfo
-  - ../../../../flux/sources/prometheus-community
   - ../../../../flux/sources/policy-reporter
+  - ../../../../flux/sources/prometheus-community
   - ../../../../flux/sources/rancher
+  - ../../../../flux/sources/runix
   - ../../../../flux/sources/secrets-store-csi-driver
   - ../../../../flux/sources/vmware-tanzu
+  - ../../../../flux/sources/ww-gitops
 
   - ../../../../flux/cluster-apps/cert-manager
 #  - ../../../../flux/cluster-apps/cilium
-  - ../../../../flux/cluster-apps/cnpg
   - ../../../../flux/cluster-apps/cluster-autoscaler
+  - ../../../../flux/cluster-apps/cnpg
   - ../../../../flux/cluster-apps/dex
   - ../../../../flux/cluster-apps/external-dns
   - ../../../../flux/cluster-apps/flux-alert-provider
@@ -49,6 +50,7 @@ resources:
   - ../../../../flux/cluster-apps/secrets-store-csi-driver
   - ../../../../flux/cluster-apps/secrets-store-csi-driver-provider-aws
   - ../../../../flux/cluster-apps/velero
+  - ../../../../flux/cluster-apps/ww-gitops
 
   - cert-manager
 #  - cilium
@@ -62,13 +64,14 @@ resources:
   - kube-prometheus-stack
   - kubernetes-dashboard
   - kyverno
-  - metrics-server
   - mailhog
+  - metrics-server
   - oauth2-proxy
 #  - oauth2-proxy-keycloak
-  - policy-reporter
-  - podinfo
   - pgadmin4
+  - podinfo
+  - policy-reporter
   - rancher
   - secrets-store-csi-driver
   - velero
+  - ww-gitops

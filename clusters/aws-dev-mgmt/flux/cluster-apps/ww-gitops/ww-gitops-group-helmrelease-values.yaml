@@ -1,0 +1,24 @@
+# https://github.com/weaveworks/weave-gitops/blob/main/charts/gitops-server/values.yaml
+adminUser:
+  create: true
+  username: ${WW_GITOPS_USERNAME}
+  passwordHash: ${WW_GITOPS_PASSWORDHASH}
+ingress:
+  enabled: true
+  annotations:
+    forecastle.stakater.com/expose: "true"
+    forecastle.stakater.com/icon: https://docs.gitops.weave.works/img/weave-logo.png
+    forecastle.stakater.com/appName: Weave GitOps
+    nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/auth
+    nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/start?rd=$scheme://$host$request_uri
+  className: nginx
+  hosts:
+    - host: ww-gitops.${CLUSTER_FQDN}
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - ww-gitops.${CLUSTER_FQDN}
+metrics:
+  enabled: true
