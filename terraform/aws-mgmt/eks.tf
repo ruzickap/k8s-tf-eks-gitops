@@ -52,7 +52,7 @@ resource "aws_route53_record" "base_domain" {
 # ---------------------------------------------------------------------------------------------------------------------
 
 module "eks_blueprints" {
-  source = "github.com/aws-ia/terraform-aws-eks-blueprints?ref=v4.10.0"
+  source = "github.com/aws-ia/terraform-aws-eks-blueprints?ref=v4.11.0"
 
   # EKS Cluster VPC and Subnet mandatory config
   vpc_id             = module.vpc.vpc_id
@@ -77,7 +77,7 @@ module "eks_blueprints" {
 }
 
 module "eks_blueprints_kubernetes_addons" {
-  source = "github.com/aws-ia/terraform-aws-eks-blueprints//modules/kubernetes-addons?ref=v4.10.0"
+  source = "github.com/aws-ia/terraform-aws-eks-blueprints//modules/kubernetes-addons?ref=v4.11.0"
 
   eks_cluster_id       = module.eks_blueprints.eks_cluster_id
   eks_cluster_endpoint = module.eks_blueprints.eks_cluster_endpoint
