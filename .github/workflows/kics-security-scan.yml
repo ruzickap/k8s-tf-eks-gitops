@@ -21,7 +21,7 @@ jobs:
         run: mkdir -p results-dir
 
       - name: Run KICS Scan with SARIF result
-        uses: checkmarx/kics-action@v1.5
+        uses: checkmarx/kics-action@v1.6
         with:
           path: terraform
           output_path: results-dir
