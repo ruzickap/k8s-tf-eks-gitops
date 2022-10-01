@@ -21,7 +21,7 @@ gitops = "flux"
 argocd_core_version = "2.4.12"
 
 # renovate: datasource=github-tags depName=fluxcd/flux2
-flux_version = "0.34.0"
+flux_version = "0.35.0"
 
 cluster_version                 = "1.23"
 cluster_endpoint_private_access = false
