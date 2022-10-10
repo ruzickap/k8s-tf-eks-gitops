@@ -6,8 +6,8 @@ on:
     branches-ignore:
       - main
     paths:
-      - '**.sh'
-      - '**.md'
+      - "**.sh"
+      - "**.md"
       - .github/workflows/shellcheck.yml
 
 jobs:

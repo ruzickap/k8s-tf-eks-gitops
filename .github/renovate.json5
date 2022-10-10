@@ -5,6 +5,7 @@
     "fileMatch": ["flux/.+\\.ya?ml$"]
   },
   // ignore individual fluxcd images
+  // https://renovatebot.com/docs/configuration-options/#ignoredeps
   "ignoreDeps": [
     "ghcr.io/fluxcd/helm-controller",
     "ghcr.io/fluxcd/image-automation-controller",
@@ -16,6 +17,7 @@
   "kubernetes": {
     "fileMatch": ["\\.ya?ml$"]
   },
+  // https://renovatebot.com/docs/configuration-options/#labels
   "labels": ["renovate", "renovate/{{replace '.*/' '' depName}}", "renovate/{{updateType}}"],
   "packageRules": [
     {
@@ -41,12 +43,6 @@
       "ignoreTests": true,
       "schedule": ["on Sunday"],
     },
-
-    {
-      "description": "Ignore terraform-aws-eks-blueprints updates",
-      "matchPackageNames": ["github.com/aws-ia/terraform-aws-eks-blueprints"],
-      "automerge": false,
-    },
   ],
   "prBodyTemplate": "{{{table}}}{{{notes}}}{{{changelogs}}}",
   "concurrentRequestLimit": 20,
@@ -54,11 +50,9 @@
   "regexManagers": [
     {
       "fileMatch": [
-        "^\\.github/workflows/.*\\.ya?ml$",
-        "^docs/src/part-.*\\.md$",
+        ".*\\.ya?ml$",
+        ".*\\.md$",
         ".*\\.tfvars$",
-        "README\\.md$",
-        "kustomization\\.yaml$",
       ],
       "matchStrings": [
         "# renovate: datasource=(?<datasource>.+?) depName=(?<depName>.+?)( versioning=(?<versioning>.+?))?( extractVersion=(?<extractVersion>.+?))?( registryUrl=(?<registryUrl>.+?))?\\s.*[=:]\\s*\"?(?<currentValue>.+?)\"?\\s",
