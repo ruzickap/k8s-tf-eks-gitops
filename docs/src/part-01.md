@@ -57,7 +57,7 @@ Install [Helm](https://helm.sh/):
 ```bash
 if ! command -v helm &> /dev/null; then
   # renovate: datasource=github-tags depName=helm/helm
-  HELM_VERSION="3.10.0"
+  HELM_VERSION="3.10.1"
   curl -s https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash -s -- --version "v${HELM_VERSION}"
 fi
 ```
