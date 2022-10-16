@@ -10,8 +10,8 @@ jobs:
     name: "Scheduled run time check"
     runs-on: ubuntu-latest
     outputs:
-      scheduled_clusters: ${{ steps.scheduled_run.outputs.scheduled_clusters }}
-      scheduled_clusters_matrix: ${{ steps.scheduled_run.outputs.scheduled_clusters_matrix }}
+      scheduled_clusters: ${{ steps.scheduled_run.outputs.SCHEDULED_CLUSTERS }}
+      scheduled_clusters_matrix: ${{ steps.scheduled_run.outputs.SCHEDULED_CLUSTERS_MATRIX }}
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
@@ -22,13 +22,13 @@ jobs:
         id: date
         run: |
           set -euxo pipefail
-          echo "::set-output name=date::$(date +%F -d '2 days ago')"
+          echo "DATE=$(date +%F -d '2 days ago')" | tee -a "${GITHUB_OUTPUT}"
 
       - name: Get changed files
         id: changed-files
         uses: tj-actions/changed-files@v32.1.1
         with:
-          since: ${{ steps.date.outputs.date }}
+          since: ${{ steps.date.outputs.DATE }}
 
       - name: Scheduled run time check
         id: scheduled_run
@@ -76,17 +76,17 @@ jobs:
             }
           EOF
 
-          # In case no clusters were selected SCHEDULED_CLUSTERS_REGEXP is not going to be used, because scheduled_clusters_matrix = '[]'
+          # In case no clusters were selected SCHEDULED_CLUSTERS_REGEXP is not going to be used, because SCHEDULED_CLUSTERS_MATRIX = '[]'
           SCHEDULED_CLUSTERS_REGEXP=".*(${SCHEDULED_CLUSTERS:1}).*"
           echo "SCHEDULED_CLUSTERS=${SCHEDULED_CLUSTERS_REGEXP}" >> "${GITHUB_ENV}"
 
           # This is workaround for: https://github.community/t/reusable-workflow-env-context-not-available-in-jobs-job-id-with/206111/3
-          echo "::set-output name=scheduled_clusters::${SCHEDULED_CLUSTERS_REGEXP}"
-          echo "::set-output name=scheduled_clusters_matrix::$( echo -n "${SCHEDULED_CLUSTERS:1}" | jq -c -R -s 'split("|")' )"
+          echo "SCHEDULED_CLUSTERS=${SCHEDULED_CLUSTERS_REGEXP}" | tee -a "${GITHUB_OUTPUT}"
+          echo "SCHEDULED_CLUSTERS_MATRIX=$( echo -n "${SCHEDULED_CLUSTERS:1}" | jq -c -R -s 'split("|")' )" | tee -a "${GITHUB_OUTPUT}"
 
       - name: Send Slack message
         uses: slackapi/slack-github-action@v1.23.0
-        if: ${{ steps.scheduled_run.outputs.scheduled_clusters_matrix != '[]' }}
+        if: ${{ steps.scheduled_run.outputs.SCHEDULED_CLUSTERS_MATRIX != '[]' }}
         with:
           payload-file-path: payload-slack-content.json
         env:
@@ -95,10 +95,10 @@ jobs:
 
   scheduled-create:
     needs: scheduled-run-time-check
-    if: ${{ needs.scheduled-run-time-check.outputs.scheduled_clusters_matrix != '[]' }}
+    if: ${{ needs.scheduled-run-time-check.outputs.SCHEDULED_CLUSTERS_MATRIX != '[]' }}
     uses: ./.github/workflows/clusters-aws-reusable-workflow.yml
     with:
-      clusters: ${{ needs.scheduled-run-time-check.outputs.scheduled_clusters }}
+      clusters: ${{ needs.scheduled-run-time-check.outputs.SCHEDULED_CLUSTERS }}
       terraform_action: apply
       env-variables: "'TF_LOG=ERROR' 'TF_DATA_DIR=.terraform'"
     secrets:
@@ -110,13 +110,13 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    if: ${{ needs.scheduled-run-time-check.outputs.scheduled_clusters_matrix != '[""]' }}
+    if: ${{ needs.scheduled-run-time-check.outputs.SCHEDULED_CLUSTERS_MATRIX != '[""]' }}
     needs: [scheduled-run-time-check, scheduled-create]
     strategy:
       # Do not cancel matrix jobs if one of them fails
       fail-fast: false
       matrix:
-        stage: ${{ fromJSON(needs.scheduled-run-time-check.outputs.scheduled_clusters_matrix) }}
+        stage: ${{ fromJSON(needs.scheduled-run-time-check.outputs.SCHEDULED_CLUSTERS_MATRIX) }}
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
@@ -137,8 +137,7 @@ jobs:
             fi
             echo -e "\nVariable: \"${TF_CODE_VARIABLE^^}\" = \"${VARIABLE_HELPER}\""
             echo "${TF_CODE_VARIABLE^^}=${VARIABLE_HELPER}" >> "${GITHUB_ENV}"
-            export "${TF_CODE_VARIABLE^^}=${VARIABLE_HELPER}"
-            echo "::set-output name=${TF_CODE_VARIABLE^^}::${VARIABLE_HELPER}"
+            echo "${TF_CODE_VARIABLE^^}=${VARIABLE_HELPER}" | tee -a "${GITHUB_OUTPUT}"
           }
 
           CLUSTER_PATH=$(find clusters/*/*\.*\.* -maxdepth 0 -mindepth 0 -type d -regextype "posix-extended" -regex ".*${{ matrix.stage }}.*")
@@ -183,11 +182,11 @@ jobs:
 
   scheduled-delete:
     needs: [scheduled-run-time-check, scheduled-check]
-    if: ${{ needs.scheduled-run-time-check.outputs.scheduled_clusters_matrix != '[]' }}
+    if: ${{ needs.scheduled-run-time-check.outputs.SCHEDULED_CLUSTERS_MATRIX != '[]' }}
     uses: ./.github/workflows/clusters-aws-reusable-workflow.yml
     with:
       # https://github.community/t/reusable-workflow-env-context-not-available-in-jobs-job-id-with/206111
-      clusters: ${{ needs.scheduled-run-time-check.outputs.scheduled_clusters }}
+      clusters: ${{ needs.scheduled-run-time-check.outputs.SCHEDULED_CLUSTERS }}
       terraform_action: destroy
       env-variables: "'TF_LOG=ERROR' 'TF_DATA_DIR=.terraform'"
     secrets:

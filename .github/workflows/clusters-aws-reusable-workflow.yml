@@ -25,7 +25,7 @@ jobs:
     name: "Generate AWS Cluster matrix"
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      matrix: ${{ steps.set-matrix.outputs.MATRIX }}
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
@@ -45,7 +45,7 @@ jobs:
             echo "🔥 No clusters found / selected / ... !!!"
             exit 1
           fi
-          echo "::set-output name=matrix::$( echo "${CLUSTERS}" | jq -c -R -s 'split("\n")[:-1]' )"
+          echo "MATRIX=$( echo "${CLUSTERS}" | jq -c -R -s 'split("\n")[:-1]' )" | tee -a "${GITHUB_OUTPUT}"
 
   cluster-aws-pipeline:
     name: "${{ inputs.terraform_action }} | ${{ matrix.stage }}"
@@ -55,7 +55,7 @@ jobs:
       contents: read
     # Cancel job after 100 minutes (just in case)
     timeout-minutes: 100
-    if: ${{ needs.generate-cluster-aws-matrix.outputs.matrix != '[""]' }}
+    if: ${{ needs.generate-cluster-aws-matrix.outputs.MATRIX != '[""]' }}
     needs: generate-cluster-aws-matrix
     env:
       # Terraform variables (https://www.terraform.io/docs/cli/config/environment-variables.html)
@@ -73,7 +73,7 @@ jobs:
       # Do not cancel matrix jobs if one of them fails
       fail-fast: false
       matrix:
-        stage: ${{ fromJSON(needs.generate-cluster-aws-matrix.outputs.matrix) }}
+        stage: ${{ fromJSON(needs.generate-cluster-aws-matrix.outputs.MATRIX) }}
 
     steps:
       - name: 💡🔪 Check out repository code
@@ -95,7 +95,7 @@ jobs:
             echo -e "\n💡 Variable: \"${TF_CODE_VARIABLE^^}\" = \"${VARIABLE_HELPER}\""
             echo "${TF_CODE_VARIABLE^^}=${VARIABLE_HELPER}" >> "${GITHUB_ENV}"
             export "${TF_CODE_VARIABLE^^}=${VARIABLE_HELPER}"
-            echo "::set-output name=${TF_CODE_VARIABLE^^}::${VARIABLE_HELPER}"
+            echo "${TF_CODE_VARIABLE^^}=${VARIABLE_HELPER}" | tee -a "${GITHUB_OUTPUT}"
           }
 
           echo -e "🎉 The job was automatically triggered by a \"${{ github.event_name }}\" event."
