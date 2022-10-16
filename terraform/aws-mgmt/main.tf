@@ -12,7 +12,7 @@ terraform {
     }
     github = {
       source  = "integrations/github"
-      version = "5.3.0"
+      version = "5.5.0"
     }
     http = {
       source  = "hashicorp/http"
@@ -40,7 +40,7 @@ terraform {
     }
     time = {
       source  = "hashicorp/time"
-      version = "0.8.0"
+      version = "0.9.0"
     }
     tls = {
       source  = "hashicorp/tls"
