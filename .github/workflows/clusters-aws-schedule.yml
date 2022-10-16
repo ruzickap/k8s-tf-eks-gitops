@@ -137,6 +137,7 @@ jobs:
             fi
             echo -e "\nVariable: \"${TF_CODE_VARIABLE^^}\" = \"${VARIABLE_HELPER}\""
             echo "${TF_CODE_VARIABLE^^}=${VARIABLE_HELPER}" >> "${GITHUB_ENV}"
+            export "${TF_CODE_VARIABLE^^}=${VARIABLE_HELPER}"
             echo "${TF_CODE_VARIABLE^^}=${VARIABLE_HELPER}" | tee -a "${GITHUB_OUTPUT}"
           }
 
