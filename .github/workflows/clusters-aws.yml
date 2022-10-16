@@ -33,22 +33,18 @@ on:
         # 'TF_CLI_ARGS_destroy=-auto-approve -lock=false'
         default: "'TF_LOG=ERROR' 'TF_DATA_DIR=.terraform'"
         required: false
-  # push:
-  #   # Run pipeline in case there are any changes in these directories in `main` branch
-  #   paths:
-  #     # If you change this path change it also in the rest of the pipeline (variable can not be used)
-  #     - 'clusters/dev-sandbox/**'
-  #     - 'terraform/dev/**'
-  #   branches:
-  #     - main
+  push:
+    paths:
+      - 'clusters/dev-sandbox/**'
+      - 'terraform/dev/**'
 
 jobs:
   cluster-aws-pipeline:
     name: "aws"
     uses: ./.github/workflows/clusters-aws-reusable-workflow.yml
     with:
-      clusters: ${{ github.event.inputs.clusters }}
-      terraform_action: ${{ github.event.inputs.action }}
+      clusters: ${{ github.event.inputs.clusters || '.*/mgmt01.k8s.use1.dev.proj.aws.mylabs.dev' }}
+      terraform_action: ${{ github.event.inputs.action || 'plan' }}
       env-variables: ${{ github.event.inputs.env-variables }}
     secrets:
       CREATE_FLUX_DEPLOY_KEY_GITHUB_TOKEN: ${{ secrets.CREATE_FLUX_DEPLOY_KEY_GITHUB_TOKEN }}
