@@ -11,7 +11,7 @@ spec:
         kind: HelmRepository
         name: vmware-tanzu
         namespace: flux-system
-      version: 2.31.9
+      version: 2.32.0
   interval: 1m
   valuesFrom:
     - kind: ConfigMap
