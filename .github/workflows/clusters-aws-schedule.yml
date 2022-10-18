@@ -10,8 +10,8 @@ jobs:
     name: "Scheduled run time check"
     runs-on: ubuntu-latest
     outputs:
-      scheduled_clusters: ${{ steps.scheduled_run.outputs.SCHEDULED_CLUSTERS }}
-      scheduled_clusters_matrix: ${{ steps.scheduled_run.outputs.SCHEDULED_CLUSTERS_MATRIX }}
+      scheduled_clusters: ${{ steps.scheduled_run.outputs.scheduled_clusters }}
+      scheduled_clusters_matrix: ${{ steps.scheduled_run.outputs.scheduled_clusters_matrix }}
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
@@ -40,11 +40,7 @@ jobs:
 
           # For each /terrafrom/<code> select one cluster which will be built
           SCHEDULED_CLUSTERS=""
-          if [[ "${ALL_CHANGED_FILES}" =~ mgmt01.k8s.use1.dev.proj.aws.mylabs.dev|\ terraform/aws-mgmt/ ]] || [[ '${{ github.event_name }}' = 'workflow_dispatch' ]]; then
-            SCHEDULED_CLUSTERS+="|mgmt01.k8s.use1.dev.proj.aws.mylabs.dev"
-          fi
-
-          if [[ "${ALL_CHANGED_FILES}" =~ /mgmt01.k8s.use1.dev.proj.aws.mylabs.dev/|/aws-dev-mgmt/(group-variables.tfvars|flux/|argocd/)|\ flux/|\ argocd/|\ terraform/aws-mgmt/ ]]; then
+          if [[ "${ALL_CHANGED_FILES}" =~ mgmt01.k8s.use1.dev.proj.aws.mylabs.dev|/aws-dev-mgmt/(group-variables.tfvars|flux/|argocd/)|\ flux/|\ argocd/|\ terraform/aws-mgmt/ ]] || [[ '${{ github.event_name }}' = 'workflow_dispatch' ]]; then
             SCHEDULED_CLUSTERS+="|mgmt01.k8s.use1.dev.proj.aws.mylabs.dev"
           fi
 

@@ -90,25 +90,25 @@ module "eks_blueprints_kubernetes_addons" {
   enable_amazon_eks_vpc_cni = true
   amazon_eks_vpc_cni_config = {
     addon_name        = "vpc-cni"
-    addon_version     = "v1.11.3-eksbuild.1"
+    addon_version     = "v1.11.4-eksbuild.1"
     resolve_conflicts = "OVERWRITE"
   }
   enable_amazon_eks_coredns = true
   amazon_eks_coredns_config = {
     addon_name        = "coredns"
-    addon_version     = "v1.8.7-eksbuild.2"
+    addon_version     = "v1.8.7-eksbuild.3"
     resolve_conflicts = "OVERWRITE"
   }
   enable_amazon_eks_kube_proxy = true
   amazon_eks_kube_proxy_config = {
     addon_name        = "kube-proxy"
-    addon_version     = "v1.23.7-eksbuild.1"
+    addon_version     = "v1.23.8-eksbuild.2"
     resolve_conflicts = "OVERWRITE"
   }
   enable_amazon_eks_aws_ebs_csi_driver = true
   amazon_eks_aws_ebs_csi_driver_config = {
     addon_name        = "aws-ebs-csi-driver"
-    addon_version     = "v1.10.0-eksbuild.1"
+    addon_version     = "v1.11.4-eksbuild.1"
     resolve_conflicts = "OVERWRITE"
   }
 
@@ -118,6 +118,8 @@ module "eks_blueprints_kubernetes_addons" {
 # ---------------------------------------------------------------------------------------------------------------------
 # IRSA
 # ---------------------------------------------------------------------------------------------------------------------
+
+## cert-manager
 
 resource "aws_iam_policy" "cert_manager" {
   name        = "${module.eks_blueprints.eks_cluster_id}-cert-manager"
@@ -161,6 +163,8 @@ module "iam_assumable_role_cert_manager" {
   oidc_fully_qualified_subjects = ["system:serviceaccount:cert-manager:cert-manager"]
 }
 
+## Cloud Native Postgres
+
 resource "aws_iam_policy" "cnpg_db01" {
   name        = "${module.eks_blueprints.eks_cluster_id}-cnpg-db01"
   description = "Policy allowing cnpg-db01 to access S3"
@@ -199,6 +203,8 @@ module "iam_assumable_role_cnpg_db01" {
   role_policy_arns              = [aws_iam_policy.velero_server.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:cnpg-db01:cnpg-db01"]
 }
+
+## external-dns
 
 resource "aws_iam_policy" "external_dns" {
   name        = "${module.eks_blueprints.eks_cluster_id}-external-dns"
@@ -242,6 +248,8 @@ module "iam_assumable_role_external_dns" {
   role_policy_arns              = [aws_iam_policy.external_dns.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:external-dns:external-dns"]
 }
+
+## kuard
 
 resource "aws_iam_policy" "kuard" {
   name        = "${module.eks_blueprints.eks_cluster_id}-kuard"
@@ -293,6 +301,8 @@ module "iam_assumable_role_kuard" {
   oidc_fully_qualified_subjects = ["system:serviceaccount:kuard:kuard"]
 }
 
+## Flux - kustomize-controller
+
 resource "aws_iam_policy" "kustomize_controller" {
   name        = "${module.eks_blueprints.eks_cluster_id}-kustomize-controller"
   description = "Policy allowing Flux kustomize-controller to access KMS"
@@ -327,6 +337,8 @@ module "iam_assumable_role_kustomize_controller" {
   role_policy_arns              = [aws_iam_policy.kustomize_controller.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:flux-system:kustomize-controller"]
 }
+
+## cluster-autoscaler
 
 # https://aws.github.io/aws-eks-best-practices/cluster-autoscaling/#employ-least-privileged-access-to-the-iam-role
 resource "aws_iam_policy" "cluster_autoscaler" {
@@ -379,6 +391,8 @@ module "iam_assumable_role_cluster_autoscaler" {
   oidc_fully_qualified_subjects = ["system:serviceaccount:cluster-autoscaler:cluster-autoscaler"]
 }
 
+
+## velero
 
 resource "aws_iam_policy" "velero_server" {
   name        = "${module.eks_blueprints.eks_cluster_id}-velero-server"
