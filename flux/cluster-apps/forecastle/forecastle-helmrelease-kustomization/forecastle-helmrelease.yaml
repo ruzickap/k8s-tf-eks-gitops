@@ -11,7 +11,7 @@ spec:
         kind: HelmRepository
         name: stakater
         namespace: flux-system
-      version: v1.0.98
+      version: v1.0.103
   interval: 1m
   valuesFrom:
     - kind: ConfigMap
