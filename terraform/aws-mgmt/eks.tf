@@ -87,24 +87,24 @@ module "eks_blueprints_kubernetes_addons" {
   # aws eks describe-addon-versions --addon-name kube-proxy --kubernetes-version 1.23 --query "addons[].addonVersions[].[addonVersion, compatibilities[].defaultVersion]"
 
   # EKS Managed Add-ons
-  enable_amazon_eks_vpc_cni = true
-  amazon_eks_vpc_cni_config = {
-    addon_name        = "vpc-cni"
-    addon_version     = "v1.11.4-eksbuild.1"
-    resolve_conflicts = "OVERWRITE"
-  }
-  enable_amazon_eks_coredns = true
-  amazon_eks_coredns_config = {
-    addon_name        = "coredns"
-    addon_version     = "v1.8.7-eksbuild.3"
-    resolve_conflicts = "OVERWRITE"
-  }
-  enable_amazon_eks_kube_proxy = true
-  amazon_eks_kube_proxy_config = {
-    addon_name        = "kube-proxy"
-    addon_version     = "v1.23.8-eksbuild.2"
-    resolve_conflicts = "OVERWRITE"
-  }
+  #   enable_amazon_eks_vpc_cni = true
+  #   amazon_eks_vpc_cni_config = {
+  #     addon_name        = "vpc-cni"
+  #     addon_version     = "v1.11.4-eksbuild.1"
+  #     resolve_conflicts = "OVERWRITE"
+  #   }
+  #   enable_amazon_eks_coredns = true
+  #   amazon_eks_coredns_config = {
+  #     addon_name        = "coredns"
+  #     addon_version     = "v1.8.7-eksbuild.3"
+  #     resolve_conflicts = "OVERWRITE"
+  #   }
+  #   enable_amazon_eks_kube_proxy = true
+  #   amazon_eks_kube_proxy_config = {
+  #     addon_name        = "kube-proxy"
+  #     addon_version     = "v1.23.8-eksbuild.2"
+  #     resolve_conflicts = "OVERWRITE"
+  #   }
   enable_amazon_eks_aws_ebs_csi_driver = true
   amazon_eks_aws_ebs_csi_driver_config = {
     addon_name        = "aws-ebs-csi-driver"

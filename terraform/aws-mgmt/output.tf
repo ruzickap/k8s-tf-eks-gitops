@@ -22,3 +22,8 @@ output "eks_cluster_id" {
   description = "Kubernetes Cluster Name"
   value       = module.eks_blueprints.eks_cluster_id
 }
+
+output "terraform_code_dir" {
+  description = "Directory containing the Terraform code"
+  value       = var.terraform_code_dir
+}

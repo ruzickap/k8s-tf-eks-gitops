@@ -6,6 +6,9 @@ metadata:
 spec:
   dependsOn:
     - name: cert-manager-crds
+    # Adding kyverno due to race-condition conflicts of webhooks:
+    # Internal error occurred: failed calling webhook "validate.kyverno.svc-fail": failed to call webhook: Post "https://kyverno-svc.kyverno.svc:443/validate/fail?timeout=10s": no endpoints available for service "kyverno-svc"
+    - name: kyverno
     - name: kube-prometheus-stack
   interval: 5m
   path: flux/cluster-apps/cert-manager/cert-manager-helmrelease-kustomization
