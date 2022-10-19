@@ -147,3 +147,8 @@ variable "managed_node_groups" {
   description = "Map of maps of eks_node_groups to create"
   type        = any
 }
+
+variable "terraform_code_dir" {
+  description = "Directory containing the Terraform code"
+  type        = string
+}

@@ -4,6 +4,7 @@ metadata:
   name: pkg-aws-provider
   namespace: crossplane-system
 spec:
+  # renovate: datasource=github-tags depName=crossplane-contrib/provider-aws
   package: crossplane/provider-aws:v0.28.1
   controllerConfigRef:
     name: pkg-aws-controllerconfig
