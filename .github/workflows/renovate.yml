@@ -7,17 +7,19 @@ on:
         type: choice
         description: "Dry-Run"
         default: "false"
+        required: false
         options:
-          - true
-          - false
+          - "true"
+          - "false"
       logLevel:
         type: choice
         description: "Log-Level"
         default: "debug"
+        required: false
         options:
-          - info
-          - debug
-          - trace
+          - "info"
+          - "debug"
+          - "trace"
   push:
     branches:
       - main
