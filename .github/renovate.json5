@@ -36,12 +36,21 @@
     },
 
     {
+      "description": "Update renovate once per week only if there is new minor version",
       "matchPackageNames": ["renovatebot/github-action"],
       "matchUpdateTypes": ["minor"],
       "automergeType": "branch",
       "automerge": true,
       "ignoreTests": true,
       "schedule": ["on Sunday"],
+    },
+
+    {
+      "matchPaths": ["clusters/**", "docs/**", "flux/**", "terraform/**"],
+      "matchUpdateTypes": ["major", "minor"],
+      "groupName": "major and minor dependencies",
+      "groupSlug": "major-minor-dependencies",
+      "commitBodyTable": true,
     },
   ],
   "prBodyTemplate": "{{{table}}}{{{notes}}}{{{changelogs}}}",
