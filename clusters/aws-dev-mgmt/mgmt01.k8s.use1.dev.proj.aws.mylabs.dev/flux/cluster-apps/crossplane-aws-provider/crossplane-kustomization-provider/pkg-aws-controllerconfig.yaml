@@ -1,7 +1,7 @@
 apiVersion: pkg.crossplane.io/v1alpha1
 kind: ControllerConfig
 metadata:
-  name: pkg-aws-controllerconfig
+  name: aws-controllerconfig
   namespace: crossplane-system
   annotations:
     eks.amazonaws.com/role-arn: arn:${AWS_PARTITION}:iam::${AWS_ACCOUNT_ID}:role/${CLUSTER_NAME}-irsa-crossplane-provider-aws
