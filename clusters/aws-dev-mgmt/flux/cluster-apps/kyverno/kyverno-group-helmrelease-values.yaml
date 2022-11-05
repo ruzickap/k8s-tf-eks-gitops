@@ -1,2 +1,4 @@
+# https://github.com/kyverno/kyverno/blob/main/charts/kyverno/values.yaml
+replicaCount: 3
 serviceMonitor:
   enabled: true
