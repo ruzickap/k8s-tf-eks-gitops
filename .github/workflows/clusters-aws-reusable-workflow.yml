@@ -190,7 +190,6 @@ jobs:
               kubectl delete deployments -n external-dns -l app.kubernetes.io/name=external-dns
               kubectl delete service -n ingress-nginx -l app.kubernetes.io/component=controller
               kubectl delete secrets.secretsmanager.aws.crossplane.io -n crossplane-system secretsmanager-kuard-secret
-              kubectl get providers.pkg.crossplane.io pkg-aws-provider -o jsonpath='{.status.currentRevision}' > /tmp/crossplane_provider_aws_serviceaccount_name.txt
             ) || true
             rm "${KUBECONFIG}"
           fi

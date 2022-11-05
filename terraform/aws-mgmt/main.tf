@@ -51,9 +51,10 @@ terraform {
 }
 
 locals {
-  vpc_name     = var.cluster_fqdn
-  cluster_name = split(".", var.cluster_fqdn)[0]
-  root_domain  = regex(".*\\.([^.]+\\.\\w+)", var.cluster_fqdn)[0]
+  vpc_name                         = var.cluster_fqdn
+  cluster_name                     = split(".", var.cluster_fqdn)[0]
+  root_domain                      = regex(".*\\.([^.]+\\.\\w+)", var.cluster_fqdn)[0]
+  crossplane_pkg_provider_aws_name = "aws-provider"
 
   # Merging tfvars file when running terraform is not possible therefore I'm doing it here
   # (https://stackoverflow.com/questions/64615552/merge-more-than-2-tfvars-file-contents)
@@ -76,32 +77,6 @@ locals {
     content : v
     }
   ]
-
-  kubeconfig = yamlencode({
-    apiVersion      = "v1"
-    kind            = "Config"
-    current-context = "terraform"
-    clusters = [{
-      name = module.eks_blueprints.eks_cluster_id
-      cluster = {
-        certificate-authority-data = data.aws_eks_cluster.eks-cluster.certificate_authority[0].data
-        server                     = data.aws_eks_cluster.eks-cluster.endpoint
-      }
-    }]
-    contexts = [{
-      name = "terraform"
-      context = {
-        cluster = module.eks_blueprints.eks_cluster_id
-        user    = "terraform"
-      }
-    }]
-    users = [{
-      name = "terraform"
-      user = {
-        token = data.aws_eks_cluster_auth.eks-cluster.token
-      }
-    }]
-  })
 
   known_hosts = "github.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg="
 }
