@@ -21,9 +21,9 @@
   "labels": ["renovate", "renovate/{{replace '.*/' '' depName}}", "renovate/{{updateType}}"],
   "packageRules": [
     {
+      "description": "Update all 'patch' versions without waiting for tests",
       "matchUpdateTypes": ["patch"],
       "automergeType": "branch",
-      // Do not wait for tests - this will speed up the whole process - updating many branches + running many tests
       "ignoreTests": true,
       "automerge": true,
     },
@@ -36,13 +36,19 @@
     },
 
     {
-      "description": "Update renovate once per week only if there is new minor version",
+      "description": "Update renovate once per week only if there is a new version",
       "matchPackageNames": ["renovatebot/github-action"],
-      "matchUpdateTypes": ["minor"],
+      "matchUpdateTypes": ["major", "minor"],
       "automergeType": "branch",
       "automerge": true,
-      "ignoreTests": true,
       "schedule": ["on Sunday"],
+    },
+
+    {
+      "description": "Update all github-actions by default",
+      "matchManagers": ["github-actions"],
+      "automergeType": "branch",
+      "automerge": true,
     },
 
     {
