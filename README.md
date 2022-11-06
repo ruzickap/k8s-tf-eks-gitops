@@ -5,11 +5,13 @@ align="left" width="144px" height="144px"/>
 
 _... managed by Flux/ArgoCD and serviced with Renovate ..._
 
+[![Kubernetes](https://img.shields.io/badge/Kubernetes-grey?style=for-the-badge&logo=kubernetes)](https://kubernetes.io/)
 [![Amazon EKS](https://img.shields.io/badge/Amazon%20EKS-grey?style=for-the-badge&logo=amazoneks)](https://aws.amazon.com/eks/)
 [![Cilium](https://img.shields.io/badge/Cilium-grey?style=for-the-badge&logo=cilium)](https://github.com/argoproj/argo-cd)
+[![Argo CD](https://img.shields.io/badge/Argo%20CD-grey?style=for-the-badge&logo=argo)](https://github.com/argoproj/argo-cd)
 [![Rancher](https://img.shields.io/badge/Rancher-grey?style=for-the-badge&logo=rancher)](https://rancher.com/)
 [![Prometheus](https://img.shields.io/badge/Prometheus-grey?style=for-the-badge&logo=prometheus)](https://prometheus.io/)
-[![Argo CD](https://img.shields.io/badge/Argo%20CD-grey?style=for-the-badge&logo=argo)](https://github.com/argoproj/argo-cd)
+[![Grafana](https://img.shields.io/badge/Grafana-grey?style=for-the-badge&logo=grafana)](https://github.com/grafana/grafana)
 [![Renovate](https://img.shields.io/badge/Renovate-grey?style=for-the-badge&logo=renovatebot)](https://github.com/renovatebot/renovate)
 
 [![Build Status](https://github.com/ruzickap/k8s-tf-eks-gitops/actions/workflows/mdbook-build-check-deploy.yml/badge.svg)](https://github.com/ruzickap/k8s-tf-eks-gitops/actions/workflows/mdbook-build-check-deploy.yml)
