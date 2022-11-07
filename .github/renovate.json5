@@ -53,7 +53,7 @@
 
     {
       "matchPaths": ["clusters/**", "docs/**", "flux/**", "terraform/**"],
-      "matchUpdateTypes": ["major", "minor"],
+      // "matchUpdateTypes": ["major", "minor"],
       "groupName": "major and minor dependencies",
       "groupSlug": "major-minor-dependencies",
       "commitBodyTable": true,
