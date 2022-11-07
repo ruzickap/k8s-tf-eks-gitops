@@ -57,6 +57,7 @@
       "groupName": "major and minor dependencies",
       "groupSlug": "major-minor-dependencies",
       "commitBodyTable": true,
+      "separateMajorMinor": false,
     },
   ],
   "prBodyTemplate": "{{{table}}}{{{notes}}}{{{changelogs}}}",
