@@ -13,8 +13,6 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
 
       - name: MegaLinter
         uses: megalinter/megalinter@v6.14.0
@@ -31,6 +29,6 @@ jobs:
           SARIF_REPORTER: true
           # Skip "existant" in docs/theme/css/chrome.css
           SPELL_MISSPELL_ARGUMENTS: -i existant
-          VALIDATE_ALL_CODEBASE: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          VALIDATE_ALL_CODEBASE: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' }}
           YAML_PRETTIER_FILTER_REGEX_EXCLUDE: argocd/cluster-addons/templates/.*
           YAML_YAMLLINT_FILTER_REGEX_EXCLUDE: '(argocd/cluster-addons/templates/|/flux-system/gotk-components\.yaml)'

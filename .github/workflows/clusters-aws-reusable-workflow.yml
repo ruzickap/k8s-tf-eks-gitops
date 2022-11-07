@@ -189,7 +189,7 @@ jobs:
               kubectl delete certificate -n cert-manager --all
               kubectl delete deployments -n external-dns -l app.kubernetes.io/name=external-dns
               kubectl delete service -n ingress-nginx -l app.kubernetes.io/component=controller
-              kubectl delete secrets.secretsmanager.aws.crossplane.io -n crossplane-system secretsmanager-kuard-secret
+              kubectl delete --timeout=60s secrets.secretsmanager.aws.crossplane.io -n crossplane-system secretsmanager-kuard-secret
             ) || true
             rm "${KUBECONFIG}"
           fi
