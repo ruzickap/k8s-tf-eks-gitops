@@ -154,7 +154,7 @@ resource "aws_iam_policy" "cert_manager" {
 
 module "iam_assumable_role_cert_manager" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "5.5.5"
+  version                       = "5.5.6"
   create_role                   = true
   provider_url                  = module.eks_blueprints.eks_oidc_issuer_url
   role_name                     = "${module.eks_blueprints.eks_cluster_id}-irsa-cert-manager"
@@ -195,7 +195,7 @@ resource "aws_iam_policy" "cnpg_db01" {
 
 module "iam_assumable_role_cnpg_db01" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "5.5.5"
+  version                       = "5.5.6"
   create_role                   = true
   provider_url                  = module.eks_blueprints.eks_oidc_issuer_url
   role_name                     = "${module.eks_blueprints.eks_cluster_id}-irsa-cnpg-db01"
@@ -208,7 +208,7 @@ module "iam_assumable_role_cnpg_db01" {
 
 module "iam_assumable_role_crossplane_provider_aws" {
   source           = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version          = "5.5.5"
+  version          = "5.5.6"
   create_role      = true
   provider_url     = module.eks_blueprints.eks_oidc_issuer_url
   role_name        = "${module.eks_blueprints.eks_cluster_id}-irsa-crossplane-provider-aws"
@@ -255,7 +255,7 @@ resource "aws_iam_policy" "external_dns" {
 
 module "iam_assumable_role_external_dns" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "5.5.5"
+  version                       = "5.5.6"
   create_role                   = true
   provider_url                  = module.eks_blueprints.eks_oidc_issuer_url
   role_name                     = "${module.eks_blueprints.eks_cluster_id}-irsa-external-dns"
@@ -307,7 +307,7 @@ resource "aws_iam_policy" "kuard" {
 
 module "iam_assumable_role_kuard" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "5.5.5"
+  version                       = "5.5.6"
   create_role                   = true
   provider_url                  = module.eks_blueprints.eks_oidc_issuer_url
   role_name                     = "${module.eks_blueprints.eks_cluster_id}-irsa-kuard"
@@ -344,7 +344,7 @@ resource "aws_iam_policy" "kustomize_controller" {
 # Role created by this module must be in stored in git in clusters/aws-dev-mgmt/<cluster_name>/flux/flux-system/kustomization.yaml
 module "iam_assumable_role_kustomize_controller" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "5.5.5"
+  version                       = "5.5.6"
   create_role                   = true
   provider_url                  = module.eks_blueprints.eks_oidc_issuer_url
   role_name                     = "${module.eks_blueprints.eks_cluster_id}-irsa-kustomize-controller"
@@ -397,7 +397,7 @@ resource "aws_iam_policy" "cluster_autoscaler" {
 # Role created by this module must be in stored in git in clusters/aws-dev-mgmt/<cluster_name>/flux/flux-system/kustomization.yaml
 module "iam_assumable_role_cluster_autoscaler" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "5.5.5"
+  version                       = "5.5.6"
   create_role                   = true
   provider_url                  = module.eks_blueprints.eks_oidc_issuer_url
   role_name                     = "${module.eks_blueprints.eks_cluster_id}-irsa-cluster-autoscaler"
@@ -459,7 +459,7 @@ resource "aws_iam_policy" "velero_server" {
 
 module "iam_assumable_role_velero_server" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "5.5.5"
+  version                       = "5.5.6"
   create_role                   = true
   provider_url                  = module.eks_blueprints.eks_oidc_issuer_url
   role_name                     = "${module.eks_blueprints.eks_cluster_id}-irsa-velero-server"
