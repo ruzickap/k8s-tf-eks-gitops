@@ -46,7 +46,7 @@ Install [kubectl](https://github.com/kubernetes/kubectl) binary:
 ```bash
 if ! command -v kubectl &> /dev/null; then
   # renovate: datasource=github-tags depName=kubernetes/kubectl extractVersion=^kubernetes-(?<version>.+)$
-  KUBECTL_VERSION="1.25.3"
+  KUBECTL_VERSION="1.25.4"
   sudo curl -s -Lo /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/$(uname | sed "s/./\L&/g")/amd64/kubectl"
   sudo chmod a+x /usr/local/bin/kubectl
 fi
@@ -57,7 +57,7 @@ Install [Helm](https://helm.sh/):
 ```bash
 if ! command -v helm &> /dev/null; then
   # renovate: datasource=github-tags depName=helm/helm
-  HELM_VERSION="3.10.1"
+  HELM_VERSION="3.10.2"
   curl -s https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash -s -- --version "v${HELM_VERSION}"
 fi
 ```
