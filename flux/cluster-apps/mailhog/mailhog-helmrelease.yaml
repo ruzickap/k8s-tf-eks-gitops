@@ -11,7 +11,7 @@ spec:
         kind: HelmRepository
         name: codecentric
         namespace: flux-system
-      version: 5.2.1
+      version: 5.2.2
   interval: 1m
   valuesFrom:
     - kind: ConfigMap
