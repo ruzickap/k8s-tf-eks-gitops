@@ -14,6 +14,20 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      - name: Extract commands from markdown files
+        run: |
+          set -euxo pipefail
+          echo '#!/usr/bin/env bash' > README.sh
+          find . -name '*.md' -print0 | while IFS= read -r -d '' FILE ; do
+            sed -n "/^\`\`\`\(bash\|shell\).*/,/^\`\`\`$/p" "${FILE}" \
+            | \
+            sed \
+              -e 's/^```\(bash\|shell\).*//' \
+              -e '/^```$/d' \
+            >> README.sh
+          done
+          chmod a+x README.sh
+
       - name: MegaLinter
         uses: megalinter/megalinter@v6.15.0
         env:
@@ -29,6 +43,7 @@ jobs:
           SARIF_REPORTER: true
           # Skip "existant" in docs/theme/css/chrome.css
           SPELL_MISSPELL_ARGUMENTS: -i existant
-          VALIDATE_ALL_CODEBASE: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' }}
+          # Needed for scanning generated README.sh file
+          VALIDATE_ALL_CODEBASE: true
           YAML_PRETTIER_FILTER_REGEX_EXCLUDE: argocd/cluster-addons/templates/.*
           YAML_YAMLLINT_FILTER_REGEX_EXCLUDE: '(argocd/cluster-addons/templates/|/flux-system/gotk-components\.yaml)'
