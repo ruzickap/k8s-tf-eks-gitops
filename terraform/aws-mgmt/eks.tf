@@ -84,33 +84,34 @@ module "eks_blueprints_kubernetes_addons" {
   eks_oidc_provider    = module.eks_blueprints.oidc_provider
   eks_cluster_version  = module.eks_blueprints.eks_cluster_version
 
-  # aws eks describe-addon-versions --addon-name kube-proxy --kubernetes-version 1.23 --query "addons[].addonVersions[].[addonVersion, compatibilities[].defaultVersion]"
-
-  # EKS Managed Add-ons
-  #   enable_amazon_eks_vpc_cni = true
-  #   amazon_eks_vpc_cni_config = {
-  #     addon_name        = "vpc-cni"
-  #     addon_version     = "v1.11.4-eksbuild.1"
-  #     resolve_conflicts = "OVERWRITE"
-  #   }
-  #   enable_amazon_eks_coredns = true
-  #   amazon_eks_coredns_config = {
-  #     addon_name        = "coredns"
-  #     addon_version     = "v1.8.7-eksbuild.3"
-  #     resolve_conflicts = "OVERWRITE"
-  #   }
-  #   enable_amazon_eks_kube_proxy = true
-  #   amazon_eks_kube_proxy_config = {
-  #     addon_name        = "kube-proxy"
-  #     addon_version     = "v1.23.8-eksbuild.2"
-  #     resolve_conflicts = "OVERWRITE"
-  #   }
+  #---------------------------------------
+  # Amazon EKS Managed Add-ons
+  #---------------------------------------
+  # aws eks describe-addon-versions --addon-name coredns --kubernetes-version 1.24 --query "addons[].addonVersions[].[addonVersion, compatibilities[].defaultVersion]"
+  enable_amazon_eks_vpc_cni = false
+  # amazon_eks_vpc_cni_config = {
+  #   addon_name        = "vpc-cni"
+  #   addon_version     = "v1.12.0-eksbuild.1"
+  #   resolve_conflicts = "OVERWRITE"
+  # }
+  enable_amazon_eks_coredns = false
+  # amazon_eks_coredns_config = {
+  #   addon_name        = "coredns"
+  #   addon_version     = "v1.8.4-eksbuild.2"
+  #   resolve_conflicts = "OVERWRITE"
+  # }
+  enable_amazon_eks_kube_proxy = false
+  # amazon_eks_kube_proxy_config = {
+  #   addon_name        = "kube-proxy"
+  #   addon_version     = "v1.24.7-eksbuild.2"
+  #   resolve_conflicts = "OVERWRITE"
+  # }
   enable_amazon_eks_aws_ebs_csi_driver = true
-  amazon_eks_aws_ebs_csi_driver_config = {
-    addon_name        = "aws-ebs-csi-driver"
-    addon_version     = "v1.11.4-eksbuild.1"
-    resolve_conflicts = "OVERWRITE"
-  }
+  # amazon_eks_aws_ebs_csi_driver_config = {
+  #   addon_name        = "aws-ebs-csi-driver"
+  #   addon_version     = "v1.13.0-eksbuild.3"
+  #   resolve_conflicts = "OVERWRITE"
+  # }
 
   tags = local.aws_default_tags
 }
