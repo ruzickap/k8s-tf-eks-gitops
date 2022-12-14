@@ -20,6 +20,7 @@
   // https://renovatebot.com/docs/configuration-options/#labels
   "labels": ["renovate", "renovate/{{replace '.*/' '' depName}}", "renovate/{{updateType}}"],
   "packageRules": [
+
     {
       "description": "Update all 'patch' versions without waiting for tests",
       "matchUpdateTypes": ["patch"],
@@ -48,8 +49,14 @@
       "automerge": true,
     },
     {
-      "matchPaths": ["clusters/**", "docs/**", "flux/**", "terraform/**"],
-      // "matchUpdateTypes": ["major", "minor"],
+      "matchPaths": ["clusters/**", "flux/**"],
+      "groupName": "k8s apps major and minor dependencies",
+      "groupSlug": "k8s-apps-major-minor-dependencies",
+      "commitBodyTable": true,
+      "separateMajorMinor": false,
+    },
+    {
+      "matchPaths": ["docs/**", "terraform/**"],
       "groupName": "major and minor dependencies",
       "groupSlug": "major-minor-dependencies",
       "commitBodyTable": true,
@@ -57,7 +64,6 @@
     },
   ],
   "prBodyTemplate": "{{{table}}}{{{notes}}}{{{changelogs}}}",
-  "concurrentRequestLimit": 20,
   "rebaseWhen": "behind-base-branch",
   "regexManagers": [
     {
