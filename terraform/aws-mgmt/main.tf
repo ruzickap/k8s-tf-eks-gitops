@@ -4,7 +4,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "4.36.1"
+      version = "4.46.0"
     }
     git = {
       source  = "innovationnorway/git"
@@ -12,11 +12,11 @@ terraform {
     }
     github = {
       source  = "integrations/github"
-      version = "5.6.0"
+      version = "5.12.0"
     }
     http = {
       source  = "hashicorp/http"
-      version = "3.1.0"
+      version = "3.2.1"
     }
     kubectl = {
       source  = "gavinbunney/kubectl"
@@ -24,7 +24,7 @@ terraform {
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "2.14.0"
+      version = "2.16.1"
     }
     local = {
       source  = "hashicorp/local"
@@ -32,7 +32,7 @@ terraform {
     }
     null = {
       source  = "hashicorp/null"
-      version = "3.1.1"
+      version = "3.2.1"
     }
     random = {
       source  = "hashicorp/random"
@@ -44,7 +44,7 @@ terraform {
     }
     tls = {
       source  = "hashicorp/tls"
-      version = "~> 3.0"
+      version = "~> 4.0"
     }
   }
   required_version = ">= 1.2.5"
