@@ -2,6 +2,9 @@
 ingress:
   enabled: true
   annotations:
+    forecastle.stakater.com/expose: "true"
+    forecastle.stakater.com/icon: https://avatars.githubusercontent.com/u/10258541
+    forecastle.stakater.com/appName: Mailhog
     nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/auth
     nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/start?rd=$scheme://$host$request_uri
   ingressClassName: nginx
