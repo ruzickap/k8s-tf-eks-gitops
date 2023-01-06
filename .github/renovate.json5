@@ -40,7 +40,7 @@
       "matchUpdateTypes": ["major", "minor"],
       "automergeType": "branch",
       "automerge": true,
-      "schedule": ["on Sunday"],
+      "schedule": ["* 0,2,4 1-7 * 0"],
     },
     {
       "description": "Update all github-actions by default",
