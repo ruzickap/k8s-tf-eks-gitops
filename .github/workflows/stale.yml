@@ -1,8 +1,8 @@
-name: 'Close stale issues and PRs'
+name: Close stale issues and PRs
 
 on:
   schedule:
-    - cron: '30 1 * * *'
+    - cron: "30 1 * * *"
 
 permissions:
   issues: write
@@ -14,11 +14,23 @@ jobs:
     steps:
       - uses: actions/stale@v7
         with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          stale-issue-message: 'This issue appears to be stale because it has been open 30 days with no activity. This issue will be closed in 7 days unless `Stale` label is removed, a new comment is made, or `not-Stale` label is added.'
-          exempt-issue-labels: 'not-Stale'
-          stale-pr-message: 'This PR appears to be stale because it has been open 30 days with no activity. This PR will be closed in 7 days unless `Stale` label is removed, a new comment is made, or `not-Stale` label is added.'
-          exempt-pr-labels: 'not-Stale'
-          labels-to-remove-when-unstale: 'Stale'
+          close-issue-message: |
+            This issue has not seen any activity since it was marked stale.
+            Closing.
+          close-pr-message: |
+            This pull request has not seen any activity since it was marked stale.
+            Closing.
+          days-before-close: 14
           days-before-stale: 30
-          days-before-close: 7
+          exempt-issue-labels: good-first-issue,need-help,no-stale,pinned,security
+          exempt-pr-labels: good-first-issue,need-help,no-stale,pinned,security
+          labels-to-remove-when-unstale: stale
+          stale-issue-label: stale
+          stale-issue-message: |
+            This issue has been automatically marked as stale because it has not
+            had recent activity. It will be closed if no further activity occurs.
+          stale-pr-label: stale
+          stale-pr-message: |
+            This pull request has been automatically marked as stale because it
+            has not had recent activity. It will be closed if no further activity
+            occurs. Thank you for your contributions.
