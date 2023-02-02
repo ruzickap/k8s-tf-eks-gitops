@@ -64,7 +64,8 @@ locals {
   )
 
   # Environment=dev,Team=test,Owner=aaaa
-  tags_inline = join(",", [for key, value in local.aws_default_tags : "${key}=${value}"])
+  tags_inline          = join(",", [for key, value in local.aws_default_tags : "${key}=${value}"])
+  tags_yaml_flow_style = "{ ${join(", ", [for key, value in local.aws_default_tags : "${key}: ${value}"])} }"
 
   flux_install = [for v in data.kubectl_file_documents.flux_install.documents : {
     data : yamldecode(v)

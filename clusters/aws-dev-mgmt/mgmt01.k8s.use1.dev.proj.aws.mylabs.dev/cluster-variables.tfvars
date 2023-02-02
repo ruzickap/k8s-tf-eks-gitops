@@ -37,7 +37,7 @@ aws_tags_cluster_level = {
 
 map_roles = [
   {
-    rolearn  = "arn:aws:iam::729560437327:role/Admins"
+    rolearn  = "arn:aws:iam::729560437327:role/admin"
     username = "system:aws:root"
     groups   = ["system:masters"]
   },
@@ -55,14 +55,14 @@ managed_node_groups = {
   mgmt01-ng01 = {
     node_group_name = "mgmt01-ng01"
 
-    desired_size    = 4
+    desired_size    = 3
     min_size        = 2
     max_size        = 5
     max_unavailable = 1
 
     ami_type       = "BOTTLEROCKET_x86_64"
     capacity_type  = "ON_DEMAND"
-    instance_types = ["t2.large"]
+    instance_types = ["t3a.medium"]
     disk_size      = 20
   }
 }

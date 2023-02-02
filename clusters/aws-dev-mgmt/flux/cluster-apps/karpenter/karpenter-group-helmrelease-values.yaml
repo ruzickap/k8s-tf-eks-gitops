@@ -1,0 +1,17 @@
+# https://github.com/aws/karpenter/blob/main/charts/karpenter/values.yaml
+serviceAccount:
+  name: karpenter
+  create: true
+  annotations:
+    eks.amazonaws.com/role-arn: arn:${AWS_PARTITION}:iam::${AWS_ACCOUNT_ID}:role/${CLUSTER_NAME}-irsa-karpenter
+serviceMonitor:
+  enabled: true
+replicas: 1
+settings:
+  aws:
+    clusterName: ${CLUSTER_NAME}
+    clusterEndpoint: ${CLUSTER_ENDPOINT}
+    defaultInstanceProfile: ${KARPENTER_INSTANCE_PROFILE_NAME}
+    interruptionQueueName: ${KARPENTER_SQS_QUEUE_ARN}
+    tags:
+      ${TAGS_YAML_FLOW_STYLE}

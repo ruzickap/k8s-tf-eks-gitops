@@ -1,0 +1,21 @@
+apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
+kind: Kustomization
+metadata:
+  name: karpenter-certificate
+  namespace: flux-system
+spec:
+  dependsOn:
+    - name: karpenter
+  interval: 5m
+  path: ${CLUSTER_PATH}/../flux/cluster-apps/karpenter/karpenter-kustomization
+  prune: true
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  wait: true
+  timeout: 10m
+  postBuild:
+    substituteFrom:
+      - kind: Secret
+        name: cluster-apps-vars-terraform-secret
