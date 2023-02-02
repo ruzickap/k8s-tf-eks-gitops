@@ -194,6 +194,12 @@ jobs:
             rm "${KUBECONFIG}"
           fi
 
+          echo "*** Remove orphan EC2s created by Karpenter"
+          for EC2 in $(aws ec2 describe-instances --filters "Name=tag:kubernetes.io/cluster/${CLUSTER_NAME},Values=owned" Name=instance-state-name,Values=running --query "Reservations[].Instances[].InstanceId" --output text); do
+            echo "Removing EC2: ${EC2}"
+            aws ec2 terminate-instances --instance-ids "${EC2}"
+          done
+
           echo "*** Remove Classic ELBs"
           for CLASSIC_ELB_NAME in $(aws elb describe-load-balancers --query "LoadBalancerDescriptions[].LoadBalancerName" --output=text) ; do
             if [[ "$(aws elb describe-tags --load-balancer-names "${CLASSIC_ELB_NAME}" --query "TagDescriptions[].Tags[?Key == \`kubernetes.io/cluster/${CLUSTER_NAME}\`]" --output text)" =~ ${CLUSTER_NAME} ]]; then

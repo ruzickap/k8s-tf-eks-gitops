@@ -17,6 +17,14 @@ module "vpc" {
   single_nat_gateway   = true
   enable_dns_hostnames = true
 
+  # Manage so we can name
+  manage_default_network_acl    = true
+  default_network_acl_tags      = { Name = "${local.cluster_name}-default" }
+  manage_default_route_table    = true
+  default_route_table_tags      = { Name = "${local.cluster_name}-default" }
+  manage_default_security_group = true
+  default_security_group_tags   = { Name = "${local.cluster_name}-default" }
+
   public_subnet_tags = {
     "kubernetes.io/cluster/${local.cluster_name}" = "shared"
     "kubernetes.io/role/elb"                      = 1
@@ -25,6 +33,8 @@ module "vpc" {
   private_subnet_tags = {
     "kubernetes.io/cluster/${local.cluster_name}" = "shared"
     "kubernetes.io/role/internal-elb"             = 1
+    # Tags subnets for Karpenter auto-discovery
+    "karpenter.sh/discovery" = local.cluster_name
   }
 
   tags = local.aws_default_tags
@@ -71,47 +81,65 @@ module "eks_blueprints" {
   map_roles = var.map_roles
   map_users = var.map_users
 
-  tags = local.aws_default_tags
+  tags = merge(local.aws_default_tags, {
+    "karpenter.sh/discovery" = local.cluster_name
+  })
 
   managed_node_groups = var.managed_node_groups
 }
 
-module "eks_blueprints_kubernetes_addons" {
-  source = "github.com/aws-ia/terraform-aws-eks-blueprints//modules/kubernetes-addons?ref=v4.22.0"
+# VPC-CNI Custom CNI and IPv4 Prefix Delegation
+resource "aws_eks_addon" "vpc-cni" {
+  cluster_name      = module.eks_blueprints.eks_cluster_id
+  addon_name        = "vpc-cni"
+  resolve_conflicts = "OVERWRITE"
+  addon_version     = data.aws_eks_addon_version.latest["vpc-cni"].version
 
-  eks_cluster_id       = module.eks_blueprints.eks_cluster_id
-  eks_cluster_endpoint = module.eks_blueprints.eks_cluster_endpoint
-  eks_oidc_provider    = module.eks_blueprints.oidc_provider
-  eks_cluster_version  = module.eks_blueprints.eks_cluster_version
+  configuration_values = jsonencode({
+    env = {
+      # Reference docs https://docs.aws.amazon.com/eks/latest/userguide/cni-increase-ip-addresses.html
+      ENABLE_PREFIX_DELEGATION = "true"
+      WARM_PREFIX_TARGET       = "1"
+    }
+  })
+  tags = local.aws_default_tags
+}
 
-  #---------------------------------------
-  # Amazon EKS Managed Add-ons
-  #---------------------------------------
-  # aws eks describe-addon-versions --addon-name coredns --kubernetes-version 1.24 --query "addons[].addonVersions[].[addonVersion, compatibilities[].defaultVersion]"
-  enable_amazon_eks_vpc_cni = false
-  # amazon_eks_vpc_cni_config = {
-  #   addon_name        = "vpc-cni"
-  #   addon_version     = "v1.12.0-eksbuild.1"
-  #   resolve_conflicts = "OVERWRITE"
-  # }
-  enable_amazon_eks_coredns = false
-  # amazon_eks_coredns_config = {
-  #   addon_name        = "coredns"
-  #   addon_version     = "v1.8.4-eksbuild.2"
-  #   resolve_conflicts = "OVERWRITE"
-  # }
-  enable_amazon_eks_kube_proxy = false
-  # amazon_eks_kube_proxy_config = {
-  #   addon_name        = "kube-proxy"
-  #   addon_version     = "v1.24.7-eksbuild.2"
-  #   resolve_conflicts = "OVERWRITE"
-  # }
-  enable_amazon_eks_aws_ebs_csi_driver = true
-  # amazon_eks_aws_ebs_csi_driver_config = {
-  #   addon_name        = "aws-ebs-csi-driver"
-  #   addon_version     = "v1.13.0-eksbuild.3"
-  #   resolve_conflicts = "OVERWRITE"
-  # }
+resource "aws_eks_addon" "kube-proxy" {
+  depends_on        = [aws_eks_addon.vpc-cni]
+  cluster_name      = module.eks_blueprints.eks_cluster_id
+  addon_name        = "kube-proxy"
+  resolve_conflicts = "OVERWRITE"
+  addon_version     = data.aws_eks_addon_version.latest["kube-proxy"].version
+  tags              = local.aws_default_tags
+}
+
+resource "aws_eks_addon" "aws-ebs-csi-driver" {
+  depends_on        = [aws_eks_addon.kube-proxy]
+  cluster_name      = module.eks_blueprints.eks_cluster_id
+  addon_name        = "aws-ebs-csi-driver"
+  resolve_conflicts = "OVERWRITE"
+  addon_version     = data.aws_eks_addon_version.latest["aws-ebs-csi-driver"].version
+  tags              = local.aws_default_tags
+}
+
+# resource "aws_eks_addon" "coredns" {
+#   cluster_name      = module.eks_blueprints.eks_cluster_id
+#   addon_name        = "coredns"
+#   resolve_conflicts = "OVERWRITE"
+#   addon_version     = data.aws_eks_addon_version.latest["coredns"].version
+#   tags              = local.aws_default_tags
+# }
+
+# Creates Karpenter native node termination handler resources and IAM instance profile
+module "karpenter" {
+  source  = "terraform-aws-modules/eks/aws//modules/karpenter"
+  version = "19.6.0"
+
+  cluster_name           = module.eks_blueprints.eks_cluster_id
+  irsa_name              = "${module.eks_blueprints.eks_cluster_id}-irsa-karpenter"
+  irsa_use_name_prefix   = false
+  irsa_oidc_provider_arn = module.eks_blueprints.eks_oidc_provider_arn
 
   tags = local.aws_default_tags
 }
@@ -162,6 +190,7 @@ module "iam_assumable_role_cert_manager" {
   role_description              = "Allow cert-manager to change Route53 entries"
   role_policy_arns              = [aws_iam_policy.cert_manager.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:cert-manager:cert-manager"]
+  tags                          = local.aws_default_tags
 }
 
 ## Cloud Native Postgres
@@ -203,6 +232,7 @@ module "iam_assumable_role_cnpg_db01" {
   role_description              = "Allow cnpg-db01 to access S3 bucket"
   role_policy_arns              = [aws_iam_policy.velero_server.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:cnpg-db01:cnpg-db01"]
+  tags                          = local.aws_default_tags
 }
 
 ## Crossplane
@@ -218,6 +248,7 @@ module "iam_assumable_role_crossplane_provider_aws" {
   # `*` needs to be used because service account is generated by Crossplane and postifx is random
   # The CROSSPLANE_PKG_PROVIDER_AWS_NAME variable is being used in Provider + pkg.crossplane.io/v1
   oidc_subjects_with_wildcards = ["system:serviceaccount:crossplane-system:${local.crossplane_pkg_provider_aws_name}-*"]
+  tags                         = local.aws_default_tags
 }
 
 ## external-dns
@@ -263,7 +294,12 @@ module "iam_assumable_role_external_dns" {
   role_description              = "Allow external-dns to change Route53 entries"
   role_policy_arns              = [aws_iam_policy.external_dns.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:external-dns:external-dns"]
+  tags                          = local.aws_default_tags
 }
+
+## karpenter
+
+# Karpenter role + policy + service account was created by the karpenter TF module: "terraform-aws-modules/eks/aws//modules/karpenter"
 
 ## kuard
 
@@ -315,6 +351,7 @@ module "iam_assumable_role_kuard" {
   role_description              = "Allow kuard to access secrtes in SecretManager"
   role_policy_arns              = [aws_iam_policy.kuard.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:kuard:kuard"]
+  tags                          = local.aws_default_tags
 }
 
 ## Flux - kustomize-controller
@@ -352,6 +389,7 @@ module "iam_assumable_role_kustomize_controller" {
   role_description              = "Allow Flux kustomize-controller to access KMS"
   role_policy_arns              = [aws_iam_policy.kustomize_controller.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:flux-system:kustomize-controller"]
+  tags                          = local.aws_default_tags
 }
 
 ## cluster-autoscaler
@@ -405,6 +443,7 @@ module "iam_assumable_role_cluster_autoscaler" {
   role_description              = "Allow cluster-autoscaler to interact with the autoscaling groups"
   role_policy_arns              = [aws_iam_policy.cluster_autoscaler.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:cluster-autoscaler:cluster-autoscaler"]
+  tags                          = local.aws_default_tags
 }
 
 
@@ -467,6 +506,7 @@ module "iam_assumable_role_velero_server" {
   role_description              = "Allow velero to access S3 bucket"
   role_policy_arns              = [aws_iam_policy.velero_server.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:velero:velero-server"]
+  tags                          = local.aws_default_tags
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -485,7 +525,9 @@ metadata:
 }
 
 resource "kubectl_manifest" "argo-cd_core-install" {
-  depends_on         = [kubectl_manifest.argo-cd_namespace]
+  depends_on = [
+    kubectl_manifest.argo-cd_namespace,
+  ]
   for_each           = data.kubectl_file_documents.argo-cd_core-install.manifests
   apply_only         = true
   wait               = true
@@ -565,6 +607,7 @@ resource "kubernetes_secret" "flux_cluster_apps_terraform_secret" {
     AWS_PARTITION                    = data.aws_partition.current.id
     CLUSTER_FQDN                     = var.cluster_fqdn
     CLUSTER_NAME                     = local.cluster_name
+    CLUSTER_ENDPOINT                 = module.eks_blueprints.eks_cluster_endpoint
     ROOT_DOMAIN                      = local.root_domain
     CROSSPLANE_PKG_PROVIDER_AWS_NAME = local.crossplane_pkg_provider_aws_name
     CLUSTER_PATH                     = var.cluster_path
@@ -572,8 +615,10 @@ resource "kubernetes_secret" "flux_cluster_apps_terraform_secret" {
     ENVIRONMENT                      = var.environment
     FLUX_GITHUB_WEBHOOK_TOKEN_BASE64 = base64encode(random_id.github_webhook_flux_secret.hex)
     LETSENCRYPT_ENVIRONMENT          = var.letsencrypt_environment
-    # Environment=dev,Team=test
-    TAGS_INLINE = local.tags_inline
+    KARPENTER_INSTANCE_PROFILE_NAME  = module.karpenter.instance_profile_name
+    KARPENTER_SQS_QUEUE_ARN          = module.karpenter.queue_name
+    TAGS_INLINE                      = local.tags_inline
+    TAGS_YAML_FLOW_STYLE             = local.tags_yaml_flow_style
   }
 }
 
@@ -618,7 +663,8 @@ resource "kubectl_manifest" "flux_install" {
     kubernetes_secret.flux_github_keys,
     kubernetes_secret.flux_cluster_apps_terraform_secret,
   ]
-  yaml_body = each.value
+  apply_only = true
+  yaml_body  = each.value
 }
 
 resource "kubectl_manifest" "flux_sync" {
@@ -638,7 +684,7 @@ resource "github_repository_webhook" "flux" {
     # Allow providing custom URL to the Receiver to allow IaC for webhooks - https://github.com/fluxcd/flux2/issues/2672
     url          = format("https://flux-receiver.%s/hook/%s", var.cluster_fqdn, sha256("${random_id.github_webhook_flux_secret.hex}github-receiverflux-system"))
     content_type = "form"
-    # checkov:skip=CKV_GIT_2:Ensure Repository Webhook uses secure Ssl
+    # checkov:skip=CKV_GIT_2:Ensure Repository Webhook uses secure SSL
     insecure_ssl = var.letsencrypt_environment == "staging" ? "1" : "0"
     secret       = random_id.github_webhook_flux_secret.hex
   }

@@ -1,22 +1,22 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: ingress-nginx
-  namespace: ingress-nginx
+  name: karpenter
+  namespace: karpenter
 spec:
   chart:
     spec:
-      chart: ingress-nginx
+      chart: karpenter
       sourceRef:
         kind: HelmRepository
-        name: ingress-nginx
+        name: karpenter
         namespace: flux-system
-      version: 4.4.2
+      version: v0.23.0
   interval: 1m
   valuesFrom:
     - kind: ConfigMap
-      name: ingress-nginx-group-helmrelease-values
+      name: karpenter-group-helmrelease-values
       optional: true
     - kind: ConfigMap
-      name: ingress-nginx-cluster-helmrelease-values
+      name: karpenter-cluster-helmrelease-values
       optional: true
