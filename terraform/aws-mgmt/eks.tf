@@ -62,7 +62,7 @@ resource "aws_route53_record" "base_domain" {
 # ---------------------------------------------------------------------------------------------------------------------
 
 module "eks_blueprints" {
-  source = "github.com/aws-ia/terraform-aws-eks-blueprints?ref=v4.22.0"
+  source = "github.com/aws-ia/terraform-aws-eks-blueprints?ref=v4.23.0"
 
   # EKS Cluster VPC and Subnet mandatory config
   vpc_id             = module.vpc.vpc_id
@@ -78,7 +78,17 @@ module "eks_blueprints" {
   cluster_endpoint_public_access          = var.cluster_endpoint_public_access
   cluster_kms_key_deletion_window_in_days = var.cluster_kms_key_deletion_window_in_days
 
-  map_roles = var.map_roles
+  # We need to add in the Karpenter node IAM role for nodes launched by Karpenter
+  map_roles = concat(var.map_roles, [
+    {
+      rolearn  = module.karpenter.role_arn
+      username = "system:node:{{EC2PrivateDNSName}}"
+      groups = [
+        "system:bootstrappers",
+        "system:nodes",
+      ]
+    }
+  ])
   map_users = var.map_users
 
   tags = merge(local.aws_default_tags, {
@@ -105,48 +115,61 @@ resource "aws_eks_addon" "vpc-cni" {
   tags = local.aws_default_tags
 }
 
-resource "aws_eks_addon" "kube-proxy" {
-  depends_on        = [aws_eks_addon.vpc-cni]
+resource "aws_eks_addon" "core" {
+  for_each = toset([
+    "kube-proxy",
+    # "coredns",
+  ])
+
   cluster_name      = module.eks_blueprints.eks_cluster_id
-  addon_name        = "kube-proxy"
+  addon_name        = each.key
   resolve_conflicts = "OVERWRITE"
-  addon_version     = data.aws_eks_addon_version.latest["kube-proxy"].version
+  addon_version     = data.aws_eks_addon_version.latest[each.key].version
   tags              = local.aws_default_tags
 }
-
-resource "aws_eks_addon" "aws-ebs-csi-driver" {
-  depends_on        = [aws_eks_addon.kube-proxy]
-  cluster_name      = module.eks_blueprints.eks_cluster_id
-  addon_name        = "aws-ebs-csi-driver"
-  resolve_conflicts = "OVERWRITE"
-  addon_version     = data.aws_eks_addon_version.latest["aws-ebs-csi-driver"].version
-  tags              = local.aws_default_tags
-}
-
-# resource "aws_eks_addon" "coredns" {
-#   cluster_name      = module.eks_blueprints.eks_cluster_id
-#   addon_name        = "coredns"
-#   resolve_conflicts = "OVERWRITE"
-#   addon_version     = data.aws_eks_addon_version.latest["coredns"].version
-#   tags              = local.aws_default_tags
-# }
 
 # Creates Karpenter native node termination handler resources and IAM instance profile
 module "karpenter" {
   source  = "terraform-aws-modules/eks/aws//modules/karpenter"
   version = "19.6.0"
 
-  cluster_name           = module.eks_blueprints.eks_cluster_id
-  irsa_name              = "${module.eks_blueprints.eks_cluster_id}-irsa-karpenter"
-  irsa_use_name_prefix   = false
-  irsa_oidc_provider_arn = module.eks_blueprints.eks_oidc_provider_arn
+  cluster_name                 = module.eks_blueprints.eks_cluster_id
+  irsa_name                    = "${module.eks_blueprints.eks_cluster_id}-irsa-karpenter"
+  irsa_use_name_prefix         = false
+  irsa_oidc_provider_arn       = module.eks_blueprints.eks_oidc_provider_arn
+  iam_role_additional_policies = ["arn:${data.aws_partition.current.id}:iam::aws:policy/AmazonSSMManagedInstanceCore"]
+  tags                         = local.aws_default_tags
+}
 
-  tags = local.aws_default_tags
+
+# Patch the obsolete gp2 StorageClass which EKS creates, so that we can set our
+# own one as the default
+resource "kubernetes_annotations" "delete_default_storageclass" {
+  api_version = "storage.k8s.io/v1"
+  kind        = "StorageClass"
+  force       = "true"
+  metadata { name = "gp2" }
+  annotations = { "storageclass.kubernetes.io/is-default-class" = "false" }
 }
 
 # ---------------------------------------------------------------------------------------------------------------------
 # IRSA
 # ---------------------------------------------------------------------------------------------------------------------
+
+## ebs-csi-controller-irsa
+
+module "iam_assumable_role_aws_ebs_csi_driver" {
+  source                         = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
+  version                        = "5.11.1"
+  create_role                    = true
+  provider_url                   = module.eks_blueprints.eks_oidc_issuer_url
+  role_name                      = "${module.eks_blueprints.eks_cluster_id}-irsa-aws-ebs-csi-driver"
+  role_description               = "Allow aws-ebs-csi-driver to work with volumes / snapshots"
+  role_policy_arns               = ["arn:${data.aws_partition.current.id}:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"]
+  oidc_fully_qualified_audiences = ["sts.amazonaws.com"]
+  oidc_fully_qualified_subjects  = ["system:serviceaccount:aws-ebs-csi-driver:aws-ebs-csi-driver"]
+  tags                           = local.aws_default_tags
+}
 
 ## cert-manager
 
@@ -446,7 +469,6 @@ module "iam_assumable_role_cluster_autoscaler" {
   tags                          = local.aws_default_tags
 }
 
-
 ## velero
 
 resource "aws_iam_policy" "velero_server" {
@@ -525,9 +547,7 @@ metadata:
 }
 
 resource "kubectl_manifest" "argo-cd_core-install" {
-  depends_on = [
-    kubectl_manifest.argo-cd_namespace,
-  ]
+  depends_on         = [kubectl_manifest.argo-cd_namespace]
   for_each           = data.kubectl_file_documents.argo-cd_core-install.manifests
   apply_only         = true
   wait               = true

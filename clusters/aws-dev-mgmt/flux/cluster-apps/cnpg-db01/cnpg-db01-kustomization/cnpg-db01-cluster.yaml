@@ -21,7 +21,7 @@ spec:
     name: cnpg-db01-superuser
 
   storage:
-    storageClass: gp2
+    storageClass: gp3
     size: 1Gi
 
   backup:

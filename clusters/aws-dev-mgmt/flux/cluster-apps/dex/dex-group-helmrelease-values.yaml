@@ -1,3 +1,4 @@
+# https://github.com/dexidp/helm-charts/blob/master/charts/dex/values.yaml
 config:
   issuer: https://dex.${CLUSTER_FQDN}
   storage:

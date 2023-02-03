@@ -1,13 +1,11 @@
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta2
 kind: Kustomization
 metadata:
-  name: kube-prometheus-stack
+  name: external-snapshotter-crds
   namespace: flux-system
 spec:
-  dependsOn:
-    - name: aws-ebs-csi-driver
   interval: 5m
-  path: flux/cluster-apps/kube-prometheus-stack/kube-prometheus-stack-helmrelease-kustomization
+  path: flux/cluster-apps/external-snapshotter/external-snapshotter-crds-kustomization
   prune: true
   sourceRef:
     kind: GitRepository
