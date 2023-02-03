@@ -1,6 +1,6 @@
 # https://github.com/bitnami/charts/blob/master/bitnami/keycloak/values.yaml
 global:
-  storageClass: "gp2"
+  storageClass: gp3
 clusterDomain: ${CLUSTER_FQDN}
 auth:
   adminUser: ${KEYCLOAK_ADMIN_USERNAME}

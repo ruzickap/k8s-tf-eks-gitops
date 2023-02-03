@@ -187,6 +187,7 @@ jobs:
             (
               kubectl patch kustomization -n flux-system external-dns ingress-nginx cert-manager-certificate --type='json' -p='[{"op": "add", "path": "/spec/suspend", "value":true}]'
               kubectl delete certificate -n cert-manager --all
+              kubectl delete provisioner --all
               kubectl delete deployments -n external-dns -l app.kubernetes.io/name=external-dns
               kubectl delete service -n ingress-nginx -l app.kubernetes.io/component=controller
               kubectl delete --timeout=60s secrets.secretsmanager.aws.crossplane.io -n crossplane-system secretsmanager-kuard-secret

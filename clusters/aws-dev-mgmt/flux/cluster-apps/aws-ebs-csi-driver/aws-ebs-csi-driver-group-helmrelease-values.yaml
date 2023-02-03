@@ -1,0 +1,17 @@
+# https://github.com/kubernetes-sigs/aws-ebs-csi-driver/blob/master/charts/aws-ebs-csi-driver/values.yaml
+controller:
+  extraVolumeTags:
+    ${TAGS_YAML_FLOW_STYLE}
+  serviceMonitor:
+    forceEnable: true
+  replicaCount: 1
+  serviceAccount:
+    name: aws-ebs-csi-driver
+    annotations:
+      eks.amazonaws.com/role-arn: arn:${AWS_PARTITION}:iam::${AWS_ACCOUNT_ID}:role/${CLUSTER_NAME}-irsa-aws-ebs-csi-driver
+storageClasses:
+  - name: gp3
+    annotations:
+      storageclass.kubernetes.io/is-default-class: "true"
+    parameters:
+      encrypted: "true"

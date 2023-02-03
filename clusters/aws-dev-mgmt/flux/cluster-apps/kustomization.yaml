@@ -1,6 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+  - ../../../../flux/sources/aws-ebs-csi-driver
 #  - ../../../../flux/sources/autoscaler
   - ../../../../flux/sources/bitnami
 #  - ../../../../flux/sources/cilium
@@ -24,12 +25,14 @@ resources:
   - ../../../../flux/sources/vmware-tanzu
   - ../../../../flux/sources/ww-gitops
 
+  - ../../../../flux/cluster-apps/aws-ebs-csi-driver
   - ../../../../flux/cluster-apps/cert-manager
 #  - ../../../../flux/cluster-apps/cilium
 #  - ../../../../flux/cluster-apps/cluster-autoscaler
   - ../../../../flux/cluster-apps/cnpg
   - ../../../../flux/cluster-apps/dex
   - ../../../../flux/cluster-apps/external-dns
+  - ../../../../flux/cluster-apps/external-snapshotter
   - ../../../../flux/cluster-apps/flux-alert-provider
   - ../../../../flux/cluster-apps/flux-podmonitor
   - ../../../../flux/cluster-apps/flux-receiver
@@ -54,6 +57,7 @@ resources:
   - ../../../../flux/cluster-apps/velero
   - ../../../../flux/cluster-apps/ww-gitops
 
+  - aws-ebs-csi-driver
   - cert-manager
 #  - cilium
 #  - cluster-autoscaler

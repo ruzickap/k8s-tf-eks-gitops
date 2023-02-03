@@ -7,9 +7,9 @@ resources:
   # Cluster specific applications / configurations
   - ../../../../../flux/cluster-apps/crossplane/
 
-  # - crossplane-aws-secretmanager-secret
-  # - crossplane-aws-provider
-  # - dex
-  # - kuard
-  # - metrics-server
-  # - podinfo
+  - crossplane-aws-secretmanager-secret
+  - crossplane-aws-provider
+  - dex
+  - kuard
+  - metrics-server
+  - podinfo

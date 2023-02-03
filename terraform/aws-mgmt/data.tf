@@ -25,7 +25,7 @@ data "git_repository" "current_git_repository" {
 }
 
 data "aws_eks_addon_version" "latest" {
-  for_each           = toset(["vpc-cni", "aws-ebs-csi-driver", "kube-proxy", "coredns"])
+  for_each           = toset(["vpc-cni", "kube-proxy", "coredns"])
   addon_name         = each.value
   kubernetes_version = var.cluster_version
   most_recent        = true
