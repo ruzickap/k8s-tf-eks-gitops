@@ -67,7 +67,7 @@ Install [kustomize](https://kustomize.io/):
 ```bash
 if ! command -v kustomize &> /dev/null; then
   # renovate: datasource=github-tags depName=kubernetes-sigs/kustomize extractVersion=^kustomize\/v(?<version>.+)$
-  KUSTOMIZE_VERSION="4.5.7"
+  KUSTOMIZE_VERSION="5.0.0"
   curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | sudo bash -s "${KUSTOMIZE_VERSION}" /usr/local/bin/
 fi
 ```
@@ -78,7 +78,7 @@ Install [flux](https://fluxcd.io/):
 if ! command -v flux &> /dev/null; then
   # shellcheck disable=SC2034
   # renovate: datasource=github-tags depName=fluxcd/flux2
-  FLUX_VERSION="0.38.3"
+  FLUX_VERSION="0.39.0"
   curl -s https://fluxcd.io/install.sh | sudo -E bash
 fi
 ```
