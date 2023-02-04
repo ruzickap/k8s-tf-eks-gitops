@@ -39,6 +39,8 @@ eks_managed_node_groups = {
     min_size     = 2
     max_size     = 3
 
+    kubelet_extra_args = "--max-pods=110"
+
     block_device_mappings = {
       root = {
         device_name = "/dev/xvda"

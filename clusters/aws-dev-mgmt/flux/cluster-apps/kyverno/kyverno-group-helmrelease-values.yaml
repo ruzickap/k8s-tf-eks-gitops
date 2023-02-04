@@ -1,4 +1,16 @@
 # https://github.com/kyverno/kyverno/blob/main/charts/kyverno/values.yaml
 replicaCount: 3
+extraArgs:
+  - --clientRateLimitQPS=20
+  - --clientRateLimitBurst=50
 serviceMonitor:
   enabled: true
+cleanupController:
+  serviceMonitor:
+    enabled: true
+reportsController:
+  serviceMonitor:
+    enabled: true
+backgroundController:
+  serviceMonitor:
+    enabled: true
