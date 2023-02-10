@@ -36,16 +36,14 @@ Resources:
     Properties:
       TableName: !Sub "${ClusterFQDN}"
       PointInTimeRecoverySpecification:
-        PointInTimeRecoveryEnabled: true
+        PointInTimeRecoveryEnabled: false
       AttributeDefinitions:
         - AttributeName: LockID
           AttributeType: S
       KeySchema:
         - AttributeName: LockID
           KeyType: HASH
-      ProvisionedThroughput:
-        ReadCapacityUnits: 5
-        WriteCapacityUnits: 5
+      BillingMode: PAY_PER_REQUEST
       SSESpecification:
         SSEEnabled: true
         SSEType: KMS

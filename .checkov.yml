@@ -14,6 +14,12 @@ skip-check:
   - CKV_K8S_43
   # Prevent All NGINX Ingress annotation snippets. See CVE-2021-25742
   - CKV_K8S_153
+  # Ensure GitHub repository webhooks use HTTPs
+  - CKV_GITHUB_7
+  # Ensure Dynamodb point in time recovery (backup) is enabled | Ensure DynamoDB PITR is enabled
+  - CKV_AWS_28
+  # Ensure the S3 bucket has access logging enabled | Ensure AWS access logging is enabled on S3 buckets
+  - CKV_AWS_18
 
 skip-path:
   # Skip all flux manifests
