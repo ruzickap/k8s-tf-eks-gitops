@@ -103,7 +103,9 @@ resource "aws_eks_addon" "vpc-cni" {
   cluster_name      = module.eks_blueprints.eks_cluster_id
   addon_name        = "vpc-cni"
   resolve_conflicts = "OVERWRITE"
-  addon_version     = data.aws_eks_addon_version.latest["vpc-cni"].version
+  # Due to kyverno - Error: error waiting for EKS Add-On (mgmt01:vpc-cni) to delete: unexpected state 'DELETE_FAILED', wanted target ''. last error: 1 error occurred: * : AdmissionRequestDenied: Internal error occurred: failed calling webhook "validate.kyverno.svc-fail": failed to call webhook: Post "https://kyverno-svc.kyverno.svc:443/validate/fail?timeout=10s": service "kyverno-svc" not found
+  preserve      = true
+  addon_version = data.aws_eks_addon_version.latest["vpc-cni"].version
 
   configuration_values = jsonencode({
     env = {
@@ -124,6 +126,7 @@ resource "aws_eks_addon" "core" {
   cluster_name      = module.eks_blueprints.eks_cluster_id
   addon_name        = each.key
   resolve_conflicts = "OVERWRITE"
+  preserve          = true
   addon_version     = data.aws_eks_addon_version.latest[each.key].version
   tags              = local.aws_default_tags
 }
