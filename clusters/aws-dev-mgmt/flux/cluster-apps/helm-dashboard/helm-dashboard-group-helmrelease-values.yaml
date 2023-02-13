@@ -1,0 +1,24 @@
+# https://github.com/komodorio/helm-charts/blob/master/charts/helm-dashboard/values.yaml
+dashboard:
+  allowWriteActions: false
+  persistence:
+    enabled: false
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    forecastle.stakater.com/expose: "true"
+    forecastle.stakater.com/icon: "https://raw.githubusercontent.com/komodorio/helm-dashboard/9bb597f366426daa2ada06fb87eee2094e862aa3/pkg/dashboard/static/logo.svg"
+    forecastle.stakater.com/appName: Helm Dashboard
+    nginx.ingress.kubernetes.io/auth-url: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/auth
+    nginx.ingress.kubernetes.io/auth-signin: https://oauth2-proxy.${CLUSTER_FQDN}/oauth2/start?rd=$scheme://$host$request_uri
+  hosts:
+    - host: helm-dashboard.${CLUSTER_FQDN}
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - helm-dashboard.${CLUSTER_FQDN}
+autoscaling:
+  enabled: true
