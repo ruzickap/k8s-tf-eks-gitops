@@ -11,7 +11,7 @@ spec:
         kind: HelmRepository
         name: oauth2-proxy
         namespace: flux-system
-      version: 6.8.0
+      version: 6.9.0
   interval: 1m
   valuesFrom:
     - kind: ConfigMap
