@@ -2,7 +2,7 @@
 
 ```bash
 # renovate: datasource=github-tags depName=fluxcd/flux2
-FLUX_VERSION="0.39.0"
+FLUX_VERSION="0.40.1"
 flux install --version "${FLUX_VERSION}" --export > gotk-components.yaml
 ```
 
