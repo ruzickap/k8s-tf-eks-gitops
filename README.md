@@ -138,3 +138,14 @@ There are several secrets:
 A lot of inspiration for my cluster came from the people that have shared their
 clusters over at [awesome-home-kubernetes](https://github.com/k8s-at-home/awesome-home-kubernetes)
 and many other "GitHub" repositories...
+
+## Requirements for K8s cluster management
+
+> Not complete...
+
+* Run change on only 3% of the clusters, then another 3%, ...
+* Changes applied to group of clusters
+* Easily add / remove application from specific cluster / cluster group
+* One source (file) for "variables/secrets"
+* Move cluster from one cluster to another... ?
+* Different TF code for different clusters / cluster groups
