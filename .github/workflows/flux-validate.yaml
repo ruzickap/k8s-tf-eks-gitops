@@ -13,7 +13,7 @@ on:
 
 env:
   # renovate: datasource=github-tags depName=yannh/kubeconform
-  KUBECONFORM_VERSION: 0.5.0
+  KUBECONFORM_VERSION: 0.6.0
 
 jobs:
   flux-validate:
