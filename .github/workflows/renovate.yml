@@ -4,10 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       dryRun:
-        type: boolean
+        type: choice
         description: "Dry-Run"
         required: false
-        default: false
+        default: "false"
+        options:
+          - "true"
+          - "false"
       logLevel:
         type: choice
         description: "Log-Level"
