@@ -62,7 +62,7 @@ resource "aws_route53_record" "base_domain" {
 # ---------------------------------------------------------------------------------------------------------------------
 
 module "eks_blueprints" {
-  source = "github.com/aws-ia/terraform-aws-eks-blueprints?ref=v4.24.0"
+  source = "github.com/aws-ia/terraform-aws-eks-blueprints?ref=v4.25.0"
 
   # EKS Cluster VPC and Subnet mandatory config
   vpc_id             = module.vpc.vpc_id
@@ -134,7 +134,7 @@ resource "aws_eks_addon" "core" {
 # Creates Karpenter native node termination handler resources and IAM instance profile
 module "karpenter" {
   source  = "terraform-aws-modules/eks/aws//modules/karpenter"
-  version = "19.8.0"
+  version = "19.10.0"
 
   cluster_name                 = module.eks_blueprints.eks_cluster_id
   irsa_name                    = "${module.eks_blueprints.eks_cluster_id}-irsa-karpenter"
