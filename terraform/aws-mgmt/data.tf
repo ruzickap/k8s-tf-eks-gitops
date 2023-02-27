@@ -2,12 +2,8 @@ data "aws_availability_zones" "available" {}
 
 data "aws_caller_identity" "current" {}
 
-data "aws_eks_cluster" "eks-cluster" {
-  name = module.eks_blueprints.eks_cluster_id
-}
-
 data "aws_eks_cluster_auth" "eks-cluster" {
-  name = module.eks_blueprints.eks_cluster_id
+  name = module.eks.cluster_name
 }
 
 data "aws_kms_alias" "kms_secretmanager" {
@@ -24,17 +20,9 @@ data "git_repository" "current_git_repository" {
   path = path.cwd
 }
 
-data "aws_eks_addon_version" "latest" {
-  for_each           = toset(["vpc-cni", "kube-proxy", "coredns"])
-  addon_name         = each.value
-  kubernetes_version = var.cluster_version
-  most_recent        = true
-}
-
 # ---------------------------------------------------------------------------------------------------------------------
 # ArgoCD
 # ---------------------------------------------------------------------------------------------------------------------
-
 
 data "http" "argo-cd_core-install" {
   url = "https://raw.githubusercontent.com/argoproj/argo-cd/v${var.argocd_core_version}/manifests/core-install.yaml"

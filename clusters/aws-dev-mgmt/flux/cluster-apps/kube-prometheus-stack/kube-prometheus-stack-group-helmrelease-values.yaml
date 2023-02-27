@@ -1,3 +1,4 @@
+# https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/values.yaml
 defaultRules:
   rules:
     etcd: false
@@ -308,6 +309,7 @@ prometheusOperator:
     enabled: false
   admissionWebhooks:
     enabled: false
+# https://github.com/prometheus-community/helm-charts/blob/main/charts/prometheus/values.yaml
 prometheus:
   ingress:
     enabled: true
@@ -333,6 +335,7 @@ prometheus:
     serviceMonitorSelectorNilUsesHelmValues: false
     podMonitorSelectorNilUsesHelmValues: false
     retentionSize: 1GB
+    retention: 30d
     walCompression: true
     storageSpec:
       volumeClaimTemplate:

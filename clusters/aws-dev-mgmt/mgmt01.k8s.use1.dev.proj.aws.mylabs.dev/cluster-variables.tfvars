@@ -35,7 +35,12 @@ aws_tags_cluster_level = {
   owner = "petr.ruzicka@gmail.com"
 }
 
-map_roles = [
+kms_key_owners = [
+  "arn:aws:iam::729560437327:role/admin",
+  "arn:aws:iam::729560437327:user/aws-cli",
+]
+
+aws_auth_roles = [
   {
     rolearn  = "arn:aws:iam::729560437327:role/admin"
     username = "system:aws:root"
@@ -43,7 +48,7 @@ map_roles = [
   },
 ]
 
-map_users = [
+aws_auth_users = [
   {
     userarn  = "arn:aws:iam::729560437327:user/aws-cli"
     username = "system:aws:root"
@@ -51,7 +56,7 @@ map_users = [
   },
 ]
 
-managed_node_groups = {
+eks_managed_node_groups = {
   mgmt01-ng01 = {
     node_group_name = "mgmt01-ng01"
 
@@ -59,10 +64,6 @@ managed_node_groups = {
     min_size        = 2
     max_size        = 5
     max_unavailable = 1
-
-    ami_type       = "BOTTLEROCKET_x86_64"
-    capacity_type  = "ON_DEMAND"
-    instance_types = ["t3a.medium"]
-    disk_size      = 20
+    capacity_type   = "SPOT"
   }
 }

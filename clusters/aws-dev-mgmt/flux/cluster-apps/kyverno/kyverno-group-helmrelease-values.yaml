@@ -3,8 +3,11 @@ replicaCount: 3
 extraArgs:
   - --clientRateLimitQPS=20
   - --clientRateLimitBurst=50
-serviceMonitor:
-  enabled: true
+webhooksCleanup:
+  enable: true
+admissionController:
+  serviceMonitor:
+    enabled: true
 cleanupController:
   serviceMonitor:
     enabled: true
