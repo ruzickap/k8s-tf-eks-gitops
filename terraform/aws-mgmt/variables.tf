@@ -3,6 +3,26 @@ variable "argocd_core_version" {
   description = "ArgoCD Helm Chart version"
 }
 
+variable "aws_auth_roles" {
+  description = "Additional IAM roles to add to the aws-auth ConfigMap"
+  type = list(object({
+    rolearn  = string
+    username = string
+    groups   = list(string)
+  }))
+  default = []
+}
+
+variable "aws_auth_users" {
+  description = "Additional IAM users to add to the aws-auth ConfigMap"
+  type = list(object({
+    userarn  = string
+    username = string
+    groups   = list(string)
+  }))
+  default = []
+}
+
 variable "aws_assume_role" {
   description = "IAM Role to assume when working with AWS"
   type        = string
@@ -69,20 +89,24 @@ variable "cluster_path" {
   type        = string
 }
 
+variable "cluster_version" {
+  type        = string
+  description = "Desired kubernetes version. If you do not specify a value, the latest available version is used"
+}
+
 variable "cloudwatch_log_group_retention_in_days" {
   description = "Number of days to retain log events. Default retention - 90 days."
   type        = number
 }
 
-variable "cluster_kms_key_deletion_window_in_days" {
-  type        = number
-  default     = 30
-  description = "The waiting period, specified in number of days (7 - 30). After the waiting period ends, AWS KMS deletes the KMS key"
+variable "eks_managed_node_group_defaults" {
+  description = "Map of EKS managed node group default configurations"
+  type        = any
 }
 
-variable "cluster_version" {
-  type        = string
-  description = "Desired kubernetes version. If you do not specify a value, the latest available version is used"
+variable "eks_managed_node_groups" {
+  description = "Map of EKS managed node group definitions to create"
+  type        = any
 }
 
 variable "email" {
@@ -117,35 +141,21 @@ variable "gitops" {
   default     = ""
 }
 
+variable "kms_key_owners" {
+  type        = list(string)
+  description = "A list of IAM ARNs for those who will have full key permissions (`kms:*`)"
+}
+
+variable "kms_key_deletion_window_in_days" {
+  type        = number
+  default     = 30
+  description = "The waiting period, specified in number of days (7 - 30). After the waiting period ends, AWS KMS deletes the KMS key"
+}
+
 variable "letsencrypt_environment" {
   description = "Let's Encrypt Environment"
   type        = string
   default     = "staging"
-}
-
-variable "map_roles" {
-  description = "Additional IAM roles to add to the aws-auth ConfigMap"
-  type = list(object({
-    rolearn  = string
-    username = string
-    groups   = list(string)
-  }))
-  default = []
-}
-
-variable "map_users" {
-  description = "Additional IAM users to add to the aws-auth ConfigMap"
-  type = list(object({
-    userarn  = string
-    username = string
-    groups   = list(string)
-  }))
-  default = []
-}
-
-variable "managed_node_groups" {
-  description = "Map of maps of eks_node_groups to create"
-  type        = any
 }
 
 variable "terraform_code_dir" {

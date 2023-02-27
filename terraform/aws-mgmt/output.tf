@@ -8,19 +8,19 @@ output "amazon_eks_kubectl_commands" {
   EOF
 }
 
-output "eks_oidc_issuer_url" {
+output "eks_cluster_oidc_issuer_url" {
   description = "The URL on the EKS cluster OIDC Issuer"
-  value       = module.eks_blueprints.eks_oidc_issuer_url
+  value       = module.eks.cluster_oidc_issuer_url
 }
 
 output "eks_oidc_provider_arn" {
   description = "The ARN of the OIDC Provider if `enable_irsa = true`."
-  value       = module.eks_blueprints.eks_oidc_provider_arn
+  value       = module.eks.oidc_provider_arn
 }
 
-output "eks_cluster_id" {
+output "eks_cluster_name" {
   description = "Kubernetes Cluster Name"
-  value       = module.eks_blueprints.eks_cluster_id
+  value       = module.eks.cluster_name
 }
 
 output "terraform_code_dir" {

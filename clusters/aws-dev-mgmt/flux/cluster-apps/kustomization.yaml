@@ -13,11 +13,11 @@ resources:
   - ../../../../flux/sources/jetstack
   - ../../../../flux/sources/karpenter
   - ../../../../flux/sources/kubernetes-dashboard
-  - ../../../../flux/sources/kyverno
+#   - ../../../../flux/sources/kyverno
   - ../../../../flux/sources/metrics-server
   - ../../../../flux/sources/oauth2-proxy
   - ../../../../flux/sources/podinfo
-  - ../../../../flux/sources/policy-reporter
+#   - ../../../../flux/sources/policy-reporter
   - ../../../../flux/sources/prometheus-community
   - ../../../../flux/sources/rancher
   - ../../../../flux/sources/runix
@@ -42,15 +42,15 @@ resources:
 #  - ../../../../flux/cluster-apps/keycloak
   - ../../../../flux/cluster-apps/kube-prometheus-stack
   - ../../../../flux/cluster-apps/kubernetes-dashboard
-  - ../../../../flux/cluster-apps/kyverno
-  - ../../../../flux/cluster-apps/kyverno-policies
+#   - ../../../../flux/cluster-apps/kyverno
+#   - ../../../../flux/cluster-apps/kyverno-policies
   - ../../../../flux/cluster-apps/mailhog
   - ../../../../flux/cluster-apps/metrics-server
   - ../../../../flux/cluster-apps/oauth2-proxy
 #  - ../../../../flux/cluster-apps/oauth2-proxy-keycloak
   - ../../../../flux/cluster-apps/pgadmin4
   - ../../../../flux/cluster-apps/podinfo
-  - ../../../../flux/cluster-apps/policy-reporter
+#   - ../../../../flux/cluster-apps/policy-reporter
   - ../../../../flux/cluster-apps/rancher
   - ../../../../flux/cluster-apps/secrets-store-csi-driver
   - ../../../../flux/cluster-apps/secrets-store-csi-driver-provider-aws
@@ -70,14 +70,14 @@ resources:
 #  - keycloak
   - kube-prometheus-stack
   - kubernetes-dashboard
-  - kyverno
+#   - kyverno
   - mailhog
   - metrics-server
   - oauth2-proxy
 #  - oauth2-proxy-keycloak
   - pgadmin4
   - podinfo
-  - policy-reporter
+#   - policy-reporter
   - rancher
   - secrets-store-csi-driver
   - velero

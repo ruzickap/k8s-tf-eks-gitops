@@ -177,65 +177,38 @@ jobs:
       # which then prevents terrafrom to "cleanly" remove all it's objects.
       # Therefore I need to remove them in k8s which will cause deleting them
       # from AWS
-      - name: 🔪 Delete k8s objects Loadbalancer, external-dns
+      - name: 🔪 Delete AWS objects like NLB, EBS, AWS Secrets Manager, ...
         if: ${{ startsWith(inputs.terraform_action, 'destroy') }}
         run: |
-          set -euxo pipefail
+          set -euo pipefail
 
           export KUBECONFIG="/tmp/kubeconfig-${CLUSTER_NAME}.conf"
           if aws eks update-kubeconfig --name "${CLUSTER_NAME}" --kubeconfig "${KUBECONFIG}" ; then
             (
-              kubectl patch kustomization -n flux-system external-dns ingress-nginx cert-manager-certificate --type='json' -p='[{"op": "add", "path": "/spec/suspend", "value":true}]'
-              kubectl delete certificate -n cert-manager --all
-              kubectl delete provisioner --all
-              kubectl delete deployments -n external-dns -l app.kubernetes.io/name=external-dns
-              kubectl delete service -n ingress-nginx -l app.kubernetes.io/component=controller
-              kubectl delete --timeout=60s secrets.secretsmanager.aws.crossplane.io -n crossplane-system secretsmanager-kuard-secret
+              # Delete Flux based cluster-apps
+              kubectl delete kustomization -n flux-system cluster-apps --wait=false
+              # Delete all PVC related objects + validatingwebhooks
+              kubectl delete clusters.postgresql.cnpg.io,prometheuses.monitoring.coreos.com,provisioners.karpenter.sh,pvc,validatingwebhookconfigurations -A --all --wait=false
+              # Delete AWS NLB
+              kubectl delete service -n ingress-nginx ingress-nginx-controller --wait=false
+              # Delete secrets from AWS Secrets Manager
+              kubectl delete secrets.secretsmanager.aws.crossplane.io -n crossplane-system secretsmanager-kuard-secret --wait=false
             ) || true
-            rm "${KUBECONFIG}"
           fi
 
-          echo "*** Remove orphan EC2s created by Karpenter"
+          echo "*** Remove orphaned EC2s created by Karpenter"
           for EC2 in $(aws ec2 describe-instances --filters "Name=tag:kubernetes.io/cluster/${CLUSTER_NAME},Values=owned" Name=instance-state-name,Values=running --query "Reservations[].Instances[].InstanceId" --output text); do
             echo "Removing EC2: ${EC2}"
             aws ec2 terminate-instances --instance-ids "${EC2}"
           done
 
-          echo "*** Remove Classic ELBs"
-          for CLASSIC_ELB_NAME in $(aws elb describe-load-balancers --query "LoadBalancerDescriptions[].LoadBalancerName" --output=text) ; do
-            if [[ "$(aws elb describe-tags --load-balancer-names "${CLASSIC_ELB_NAME}" --query "TagDescriptions[].Tags[?Key == \`kubernetes.io/cluster/${CLUSTER_NAME}\`]" --output text)" =~ ${CLUSTER_NAME} ]]; then
-              echo "*** Deleting Classic ELB: ${CLASSIC_ELB_NAME}"
-              aws elb delete-load-balancer --load-balancer-name "${CLASSIC_ELB_NAME}"
+          echo "*** Remove NLBs"
+          for NLB_ARN in $(aws elbv2 describe-load-balancers --query "LoadBalancers[].LoadBalancerArn" --output=text) ; do
+            if [[ "$(aws elbv2 describe-tags --resource-arns "${NLB_ARN}" --query "TagDescriptions[].Tags[?Key == \`kubernetes.io/cluster/${CLUSTER_NAME}\`]" --output text)" =~ ${CLUSTER_NAME} ]]; then
+              echo "*** Deleting Network ELB: ${NLB_ARN}"
+              aws elbv2 delete-load-balancer --load-balancer-arn "${NLB_ARN}"
             fi
           done
-
-          echo "*** Remove Network ELBs"
-          for NETWORK_ELB_ARN in $(aws elbv2 describe-load-balancers --query "LoadBalancers[].LoadBalancerArn" --output=text) ; do
-            if [[ "$(aws elbv2 describe-tags --resource-arns "${NETWORK_ELB_ARN}" --query "TagDescriptions[].Tags[?Key == \`kubernetes.io/cluster/${CLUSTER_NAME}\`]" --output text)" =~ ${CLUSTER_NAME} ]]; then
-              echo "*** Deleting Network ELB: ${NETWORK_ELB_ARN}"
-              aws elbv2 delete-load-balancer --load-balancer-arn "${NETWORK_ELB_ARN}"
-            fi
-          done
-
-          echo "*** Remove orphan Target Groups"
-          for TARGET_GROUP_ARN in $(aws elbv2 describe-target-groups --region=eu-central-1 --query "TargetGroups[].TargetGroupArn" --output=text) ; do
-            if [[ "$(aws elbv2 describe-tags --resource-arns "${TARGET_GROUP_ARN}" --query "TagDescriptions[].Tags[?Key == \`kubernetes.io/cluster/${CLUSTER_NAME}\`]" --output text)" =~ ${CLUSTER_NAME} ]]; then
-              echo "*** Deleting Target Group: ${TARGET_GROUP_ARN}"
-              aws elbv2 delete-target-group --target-group-arn "${TARGET_GROUP_ARN}"
-            fi
-          done
-
-          echo "*** Remove entries froum Route53"
-          CLUSTER_FQDN_ZONE_ID=$(aws route53 list-hosted-zones --query "HostedZones[?Name==\`${CLUSTER_FQDN}.\`].Id" --output text)
-          if [[ -n "${CLUSTER_FQDN_ZONE_ID}" ]]; then
-            aws route53 list-resource-record-sets --hosted-zone-id "${CLUSTER_FQDN_ZONE_ID}" | jq -c '.ResourceRecordSets[] | select (.Type != "SOA" and .Type != "NS")' |
-            while read -r RESOURCERECORDSET; do
-              aws route53 change-resource-record-sets \
-                --hosted-zone-id "${CLUSTER_FQDN_ZONE_ID}" \
-                --change-batch '{"Changes":[{"Action":"DELETE","ResourceRecordSet": '"${RESOURCERECORDSET}"' }]}' \
-                --output text --query 'ChangeInfo.Id'
-            done
-          fi
 
       - name: 💡🔪 Terraform action
         run: |
@@ -280,10 +253,3 @@ jobs:
 
           aws cloudformation delete-stack --stack-name "${CLUSTER_FQDN//./-}-s3-dynamodb-tfstate"
           aws cloudformation wait stack-delete-complete --stack-name "${CLUSTER_FQDN//./-}-s3-dynamodb-tfstate"
-
-      # - name: Setup tmate session
-      #   if: ${{ failure() }}
-      #   uses: mxschmitt/action-tmate@v3
-      #   timeout-minutes: 15
-      #   with:
-      #     limit-access-to-actor: true

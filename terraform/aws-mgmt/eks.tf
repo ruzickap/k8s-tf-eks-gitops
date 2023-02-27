@@ -45,8 +45,9 @@ module "vpc" {
 # ---------------------------------------------------------------------------------------------------------------------
 
 resource "aws_route53_zone" "cluster_fqdn" {
-  name    = var.cluster_fqdn
-  comment = "Managed by ${local.aws_default_tags.owner}"
+  name          = var.cluster_fqdn
+  comment       = "Managed by ${local.aws_default_tags.owner}"
+  force_destroy = true
 }
 
 resource "aws_route53_record" "base_domain" {
@@ -61,25 +62,49 @@ resource "aws_route53_record" "base_domain" {
 # Create the EKS cluster
 # ---------------------------------------------------------------------------------------------------------------------
 
-module "eks_blueprints" {
-  source = "github.com/aws-ia/terraform-aws-eks-blueprints?ref=v4.25.0"
+module "eks" {
+  source  = "terraform-aws-modules/eks/aws"
+  version = "19.10.0"
 
-  # EKS Cluster VPC and Subnet mandatory config
-  vpc_id             = module.vpc.vpc_id
-  private_subnet_ids = module.vpc.private_subnets
-
-  # EKS CONTROL PLANE VARIABLES
-  cluster_version = var.cluster_version
   cluster_name    = local.cluster_name
+  cluster_version = var.cluster_version
 
-  cloudwatch_log_group_retention_in_days  = var.cloudwatch_log_group_retention_in_days
-  cluster_enabled_log_types               = var.cluster_enabled_log_types
-  cluster_endpoint_private_access         = var.cluster_endpoint_private_access
-  cluster_endpoint_public_access          = var.cluster_endpoint_public_access
-  cluster_kms_key_deletion_window_in_days = var.cluster_kms_key_deletion_window_in_days
+  cluster_endpoint_private_access = var.cluster_endpoint_private_access
+  cluster_endpoint_public_access  = var.cluster_endpoint_public_access
 
-  # We need to add in the Karpenter node IAM role for nodes launched by Karpenter
-  map_roles = concat(var.map_roles, [
+  cloudwatch_log_group_retention_in_days = var.cloudwatch_log_group_retention_in_days
+  cluster_enabled_log_types              = var.cluster_enabled_log_types
+
+  kms_key_owners                  = var.kms_key_owners
+  kms_key_deletion_window_in_days = var.kms_key_deletion_window_in_days
+
+  # EKS Addons
+  cluster_addons = {
+    coredns = {
+      most_recent = true
+    }
+    kube-proxy = {
+      most_recent = true
+    }
+    vpc-cni = {
+      before_compute = true
+      most_recent    = true
+      configuration_values = jsonencode({
+        env = {
+          # Reference docs https://docs.aws.amazon.com/eks/latest/userguide/cni-increase-ip-addresses.html
+          ENABLE_PREFIX_DELEGATION = "true"
+          WARM_PREFIX_TARGET       = "1"
+        }
+      })
+    }
+  }
+
+  vpc_id     = module.vpc.vpc_id
+  subnet_ids = module.vpc.private_subnets
+
+  manage_aws_auth_configmap = true
+  aws_auth_roles = concat(var.aws_auth_roles, [
+    # We need to add in the Karpenter node IAM role for nodes launched by Karpenter
     {
       rolearn  = module.karpenter.role_arn
       username = "system:node:{{EC2PrivateDNSName}}"
@@ -87,48 +112,16 @@ module "eks_blueprints" {
         "system:bootstrappers",
         "system:nodes",
       ]
-    }
+    },
   ])
-  map_users = var.map_users
+  aws_auth_users = var.aws_auth_users
+
+  eks_managed_node_group_defaults = var.eks_managed_node_group_defaults
+  eks_managed_node_groups         = var.eks_managed_node_groups
 
   tags = merge(local.aws_default_tags, {
     "karpenter.sh/discovery" = local.cluster_name
   })
-
-  managed_node_groups = var.managed_node_groups
-}
-
-# VPC-CNI Custom CNI and IPv4 Prefix Delegation
-resource "aws_eks_addon" "vpc-cni" {
-  cluster_name      = module.eks_blueprints.eks_cluster_id
-  addon_name        = "vpc-cni"
-  resolve_conflicts = "OVERWRITE"
-  # Due to kyverno - Error: error waiting for EKS Add-On (mgmt01:vpc-cni) to delete: unexpected state 'DELETE_FAILED', wanted target ''. last error: 1 error occurred: * : AdmissionRequestDenied: Internal error occurred: failed calling webhook "validate.kyverno.svc-fail": failed to call webhook: Post "https://kyverno-svc.kyverno.svc:443/validate/fail?timeout=10s": service "kyverno-svc" not found
-  preserve      = true
-  addon_version = data.aws_eks_addon_version.latest["vpc-cni"].version
-
-  configuration_values = jsonencode({
-    env = {
-      # Reference docs https://docs.aws.amazon.com/eks/latest/userguide/cni-increase-ip-addresses.html
-      ENABLE_PREFIX_DELEGATION = "true"
-      WARM_PREFIX_TARGET       = "1"
-    }
-  })
-  tags = local.aws_default_tags
-}
-
-resource "aws_eks_addon" "core" {
-  for_each = toset([
-    "kube-proxy",
-    # "coredns",
-  ])
-
-  cluster_name      = module.eks_blueprints.eks_cluster_id
-  addon_name        = each.key
-  resolve_conflicts = "OVERWRITE"
-  preserve          = true
-  addon_version     = data.aws_eks_addon_version.latest[each.key].version
-  tags              = local.aws_default_tags
 }
 
 # Creates Karpenter native node termination handler resources and IAM instance profile
@@ -136,14 +129,13 @@ module "karpenter" {
   source  = "terraform-aws-modules/eks/aws//modules/karpenter"
   version = "19.10.0"
 
-  cluster_name                 = module.eks_blueprints.eks_cluster_id
-  irsa_name                    = "${module.eks_blueprints.eks_cluster_id}-irsa-karpenter"
+  cluster_name                 = module.eks.cluster_name
+  irsa_name                    = "${module.eks.cluster_name}-irsa-karpenter"
   irsa_use_name_prefix         = false
-  irsa_oidc_provider_arn       = module.eks_blueprints.eks_oidc_provider_arn
+  irsa_oidc_provider_arn       = module.eks.oidc_provider_arn
   iam_role_additional_policies = ["arn:${data.aws_partition.current.id}:iam::aws:policy/AmazonSSMManagedInstanceCore"]
   tags                         = local.aws_default_tags
 }
-
 
 # Patch the obsolete gp2 StorageClass which EKS creates, so that we can set our
 # own one as the default
@@ -165,8 +157,8 @@ module "iam_assumable_role_aws_ebs_csi_driver" {
   source                         = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
   version                        = "5.11.2"
   create_role                    = true
-  provider_url                   = module.eks_blueprints.eks_oidc_issuer_url
-  role_name                      = "${module.eks_blueprints.eks_cluster_id}-irsa-aws-ebs-csi-driver"
+  provider_url                   = module.eks.cluster_oidc_issuer_url
+  role_name                      = "${module.eks.cluster_name}-irsa-aws-ebs-csi-driver"
   role_description               = "Allow aws-ebs-csi-driver to work with volumes / snapshots"
   role_policy_arns               = ["arn:${data.aws_partition.current.id}:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"]
   oidc_fully_qualified_audiences = ["sts.amazonaws.com"]
@@ -177,7 +169,7 @@ module "iam_assumable_role_aws_ebs_csi_driver" {
 ## cert-manager
 
 resource "aws_iam_policy" "cert_manager" {
-  name        = "${module.eks_blueprints.eks_cluster_id}-cert-manager"
+  name        = "${module.eks.cluster_name}-cert-manager"
   description = "Policy allowing external-dns to change Route53 entries"
   tags        = local.aws_default_tags
   policy      = <<EOF
@@ -211,8 +203,8 @@ module "iam_assumable_role_cert_manager" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
   version                       = "5.11.2"
   create_role                   = true
-  provider_url                  = module.eks_blueprints.eks_oidc_issuer_url
-  role_name                     = "${module.eks_blueprints.eks_cluster_id}-irsa-cert-manager"
+  provider_url                  = module.eks.cluster_oidc_issuer_url
+  role_name                     = "${module.eks.cluster_name}-irsa-cert-manager"
   role_description              = "Allow cert-manager to change Route53 entries"
   role_policy_arns              = [aws_iam_policy.cert_manager.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:cert-manager:cert-manager"]
@@ -222,7 +214,7 @@ module "iam_assumable_role_cert_manager" {
 ## Cloud Native Postgres
 
 resource "aws_iam_policy" "cnpg_db01" {
-  name        = "${module.eks_blueprints.eks_cluster_id}-cnpg-db01"
+  name        = "${module.eks.cluster_name}-cnpg-db01"
   description = "Policy allowing cnpg-db01 to access S3"
   tags        = local.aws_default_tags
   policy      = <<EOF
@@ -253,8 +245,8 @@ module "iam_assumable_role_cnpg_db01" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
   version                       = "5.11.2"
   create_role                   = true
-  provider_url                  = module.eks_blueprints.eks_oidc_issuer_url
-  role_name                     = "${module.eks_blueprints.eks_cluster_id}-irsa-cnpg-db01"
+  provider_url                  = module.eks.cluster_oidc_issuer_url
+  role_name                     = "${module.eks.cluster_name}-irsa-cnpg-db01"
   role_description              = "Allow cnpg-db01 to access S3 bucket"
   role_policy_arns              = [aws_iam_policy.velero_server.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:cnpg-db01:cnpg-db01"]
@@ -267,8 +259,8 @@ module "iam_assumable_role_crossplane_provider_aws" {
   source           = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
   version          = "5.11.2"
   create_role      = true
-  provider_url     = module.eks_blueprints.eks_oidc_issuer_url
-  role_name        = "${module.eks_blueprints.eks_cluster_id}-irsa-crossplane-provider-aws"
+  provider_url     = module.eks.cluster_oidc_issuer_url
+  role_name        = "${module.eks.cluster_name}-irsa-crossplane-provider-aws"
   role_description = "Allow Crossplane to create AWS objects"
   role_policy_arns = ["arn:${data.aws_partition.current.id}:iam::aws:policy/AdministratorAccess"]
   # `*` needs to be used because service account is generated by Crossplane and postifx is random
@@ -280,7 +272,7 @@ module "iam_assumable_role_crossplane_provider_aws" {
 ## external-dns
 
 resource "aws_iam_policy" "external_dns" {
-  name        = "${module.eks_blueprints.eks_cluster_id}-external-dns"
+  name        = "${module.eks.cluster_name}-external-dns"
   description = "Policy allowing external-dns to change Route53 entries"
   tags        = local.aws_default_tags
   policy      = <<EOF
@@ -315,8 +307,8 @@ module "iam_assumable_role_external_dns" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
   version                       = "5.11.2"
   create_role                   = true
-  provider_url                  = module.eks_blueprints.eks_oidc_issuer_url
-  role_name                     = "${module.eks_blueprints.eks_cluster_id}-irsa-external-dns"
+  provider_url                  = module.eks.cluster_oidc_issuer_url
+  role_name                     = "${module.eks.cluster_name}-irsa-external-dns"
   role_description              = "Allow external-dns to change Route53 entries"
   role_policy_arns              = [aws_iam_policy.external_dns.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:external-dns:external-dns"]
@@ -330,7 +322,7 @@ module "iam_assumable_role_external_dns" {
 ## kuard
 
 resource "aws_iam_policy" "kuard" {
-  name        = "${module.eks_blueprints.eks_cluster_id}-kuard"
+  name        = "${module.eks.cluster_name}-kuard"
   description = "Policy allowing kuard to access secrtes in SecretManager"
   tags        = local.aws_default_tags
   policy      = <<EOF
@@ -372,8 +364,8 @@ module "iam_assumable_role_kuard" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
   version                       = "5.11.2"
   create_role                   = true
-  provider_url                  = module.eks_blueprints.eks_oidc_issuer_url
-  role_name                     = "${module.eks_blueprints.eks_cluster_id}-irsa-kuard"
+  provider_url                  = module.eks.cluster_oidc_issuer_url
+  role_name                     = "${module.eks.cluster_name}-irsa-kuard"
   role_description              = "Allow kuard to access secrtes in SecretManager"
   role_policy_arns              = [aws_iam_policy.kuard.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:kuard:kuard"]
@@ -383,7 +375,7 @@ module "iam_assumable_role_kuard" {
 ## Flux - kustomize-controller
 
 resource "aws_iam_policy" "kustomize_controller" {
-  name        = "${module.eks_blueprints.eks_cluster_id}-kustomize-controller"
+  name        = "${module.eks.cluster_name}-kustomize-controller"
   description = "Policy allowing Flux kustomize-controller to access KMS"
   tags        = local.aws_default_tags
   policy      = <<EOF
@@ -410,8 +402,8 @@ module "iam_assumable_role_kustomize_controller" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
   version                       = "5.11.2"
   create_role                   = true
-  provider_url                  = module.eks_blueprints.eks_oidc_issuer_url
-  role_name                     = "${module.eks_blueprints.eks_cluster_id}-irsa-kustomize-controller"
+  provider_url                  = module.eks.cluster_oidc_issuer_url
+  role_name                     = "${module.eks.cluster_name}-irsa-kustomize-controller"
   role_description              = "Allow Flux kustomize-controller to access KMS"
   role_policy_arns              = [aws_iam_policy.kustomize_controller.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:flux-system:kustomize-controller"]
@@ -422,7 +414,7 @@ module "iam_assumable_role_kustomize_controller" {
 
 # https://aws.github.io/aws-eks-best-practices/cluster-autoscaling/#employ-least-privileged-access-to-the-iam-role
 resource "aws_iam_policy" "cluster_autoscaler" {
-  name        = "${module.eks_blueprints.eks_cluster_id}-cluster-autoscaler"
+  name        = "${module.eks.cluster_name}-cluster-autoscaler"
   description = "Policy allowing cluster-autoscaler to interact with the autoscaling groups"
   tags        = local.aws_default_tags
   policy      = <<EOF
@@ -464,8 +456,8 @@ module "iam_assumable_role_cluster_autoscaler" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
   version                       = "5.11.2"
   create_role                   = true
-  provider_url                  = module.eks_blueprints.eks_oidc_issuer_url
-  role_name                     = "${module.eks_blueprints.eks_cluster_id}-irsa-cluster-autoscaler"
+  provider_url                  = module.eks.cluster_oidc_issuer_url
+  role_name                     = "${module.eks.cluster_name}-irsa-cluster-autoscaler"
   role_description              = "Allow cluster-autoscaler to interact with the autoscaling groups"
   role_policy_arns              = [aws_iam_policy.cluster_autoscaler.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:cluster-autoscaler:cluster-autoscaler"]
@@ -475,7 +467,7 @@ module "iam_assumable_role_cluster_autoscaler" {
 ## velero
 
 resource "aws_iam_policy" "velero_server" {
-  name        = "${module.eks_blueprints.eks_cluster_id}-velero-server"
+  name        = "${module.eks.cluster_name}-velero-server"
   description = "Policy allowing Velero to access S3"
   tags        = local.aws_default_tags
   policy      = <<EOF
@@ -526,8 +518,8 @@ module "iam_assumable_role_velero_server" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
   version                       = "5.11.2"
   create_role                   = true
-  provider_url                  = module.eks_blueprints.eks_oidc_issuer_url
-  role_name                     = "${module.eks_blueprints.eks_cluster_id}-irsa-velero-server"
+  provider_url                  = module.eks.cluster_oidc_issuer_url
+  role_name                     = "${module.eks.cluster_name}-irsa-velero-server"
   role_description              = "Allow velero to access S3 bucket"
   role_policy_arns              = [aws_iam_policy.velero_server.arn]
   oidc_fully_qualified_subjects = ["system:serviceaccount:velero:velero-server"]
@@ -630,7 +622,7 @@ resource "kubernetes_secret" "flux_cluster_apps_terraform_secret" {
     AWS_PARTITION                    = data.aws_partition.current.id
     CLUSTER_FQDN                     = var.cluster_fqdn
     CLUSTER_NAME                     = local.cluster_name
-    CLUSTER_ENDPOINT                 = module.eks_blueprints.eks_cluster_endpoint
+    CLUSTER_ENDPOINT                 = module.eks.cluster_endpoint
     ROOT_DOMAIN                      = local.root_domain
     CROSSPLANE_PKG_PROVIDER_AWS_NAME = local.crossplane_pkg_provider_aws_name
     CLUSTER_PATH                     = var.cluster_path

@@ -35,7 +35,7 @@ aws_tags_cluster_level = {
   owner = "petr.ruzicka@gmail.com"
 }
 
-map_roles = [
+aws_auth_roles = [
   {
     rolearn  = "arn:aws:iam::729560437327:role/Admins"
     username = "system:aws:root"
@@ -43,7 +43,7 @@ map_roles = [
   },
 ]
 
-map_users = [
+aws_auth_users = [
   {
     userarn  = "arn:aws:iam::729560437327:user/aws-cli"
     username = "system:aws:root"
@@ -51,7 +51,7 @@ map_users = [
   },
 ]
 
-managed_node_groups = {
+eks_managed_node_groups = {
   mgmt02-ng01 = {
     node_group_name = "mgmt02-ng01"
 
