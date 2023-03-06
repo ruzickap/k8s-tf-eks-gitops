@@ -467,8 +467,6 @@ module "iam_assumable_role_cluster_autoscaler" {
 ## velero
 
 resource "aws_iam_policy" "velero_server" {
-  #checkov:skip=CKV_AWS_290:IAM policies does not allow write access without constraints
-  #checkov:skip=CKV_AWS_287:Ensure IAM policies does not allow credentials exposure
   name        = "${module.eks.cluster_name}-velero-server"
   description = "Policy allowing Velero to access S3"
   tags        = local.aws_default_tags
