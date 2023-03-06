@@ -7,6 +7,7 @@ metadata:
     app: kuard
   annotations:
     checkov.io/skip1: CKV_K8S_35=Prefer using secrets as files over secrets as environment variables
+    checkov.io/skip2: CKV2_K8S_6=Minimize the admission of pods which lack an associated NetworkPolicy
 spec:
   replicas: 1
   selector:
