@@ -15,6 +15,8 @@ env:
   # renovate: datasource=github-tags depName=yannh/kubeconform
   KUBECONFORM_VERSION: 0.6.1
 
+permissions: read-all
+
 jobs:
   flux-validate:
     runs-on: ubuntu-latest
