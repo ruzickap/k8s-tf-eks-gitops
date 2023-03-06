@@ -20,7 +20,8 @@ on:
         description: GitHub token used to create Flux deploy key
         required: true
 
-permissions: read-all
+permissions:
+  contents: read
 
 jobs:
   generate-cluster-aws-matrix:
@@ -54,7 +55,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
-      contents: read
     # Cancel job after 100 minutes (just in case)
     timeout-minutes: 100
     if: ${{ needs.generate-cluster-aws-matrix.outputs.MATRIX != '[""]' }}
