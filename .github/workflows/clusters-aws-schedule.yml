@@ -95,6 +95,9 @@ jobs:
     needs: scheduled-run-time-check
     if: ${{ needs.scheduled-run-time-check.outputs.SCHEDULED_CLUSTERS_MATRIX != '[]' }}
     uses: ./.github/workflows/clusters-aws-reusable-workflow.yml
+    permissions:
+      contents: read
+      id-token: write
     with:
       clusters: ${{ needs.scheduled-run-time-check.outputs.SCHEDULED_CLUSTERS }}
       terraform_action: apply
@@ -181,6 +184,9 @@ jobs:
     needs: [scheduled-run-time-check, scheduled-check]
     if: ${{ needs.scheduled-run-time-check.outputs.SCHEDULED_CLUSTERS_MATRIX != '[]' }}
     uses: ./.github/workflows/clusters-aws-reusable-workflow.yml
+    permissions:
+      contents: read
+      id-token: write
     with:
       # https://github.community/t/reusable-workflow-env-context-not-available-in-jobs-job-id-with/206111
       clusters: ${{ needs.scheduled-run-time-check.outputs.SCHEDULED_CLUSTERS }}
