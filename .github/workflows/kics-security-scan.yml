@@ -9,6 +9,8 @@ on:
   #     - cloudformation/**
   #     - terraform/**
 
+permissions: read-all
+
 jobs:
   kics-job:
     runs-on: ubuntu-latest

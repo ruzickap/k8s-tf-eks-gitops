@@ -38,6 +38,8 @@ on:
       - 'clusters/dev-sandbox/**'
       - 'terraform/dev/**'
 
+permissions: read-all
+
 jobs:
   cluster-aws-pipeline:
     name: "aws"

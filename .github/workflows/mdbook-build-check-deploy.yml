@@ -18,6 +18,8 @@ on:
       - .spelling
       - docs/**
 
+permissions: read-all
+
 jobs:
   mdbook-build-check-deploy:
     runs-on: ubuntu-latest

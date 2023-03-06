@@ -20,6 +20,8 @@ on:
         description: GitHub token used to create Flux deploy key
         required: true
 
+permissions: read-all
+
 jobs:
   generate-cluster-aws-matrix:
     name: "Generate AWS Cluster matrix"
