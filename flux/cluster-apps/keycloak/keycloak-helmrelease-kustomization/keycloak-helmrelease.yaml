@@ -11,7 +11,7 @@ spec:
         kind: HelmRepository
         name: bitnami
         namespace: flux-system
-      version: 13.1.3
+      version: 13.2.0
   interval: 1m
   valuesFrom:
     - kind: ConfigMap
