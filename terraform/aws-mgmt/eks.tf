@@ -64,7 +64,7 @@ resource "aws_route53_record" "base_domain" {
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "19.10.0"
+  version = "19.10.1"
 
   cluster_name    = local.cluster_name
   cluster_version = var.cluster_version
@@ -127,7 +127,7 @@ module "eks" {
 # Creates Karpenter native node termination handler resources and IAM instance profile
 module "karpenter" {
   source  = "terraform-aws-modules/eks/aws//modules/karpenter"
-  version = "19.10.0"
+  version = "19.10.1"
 
   cluster_name                 = module.eks.cluster_name
   irsa_name                    = "${module.eks.cluster_name}-irsa-karpenter"

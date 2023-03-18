@@ -34,7 +34,7 @@ Install [AWS CLI](https://aws.amazon.com/cli/) binary:
 ```bash
 if ! command -v aws &> /dev/null; then
   # renovate: datasource=github-tags depName=aws/aws-cli
-  AWSCLI_VERSION="2.11.3"
+  AWSCLI_VERSION="2.11.4"
   curl -sL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${AWSCLI_VERSION}.zip" -o "/tmp/awscli.zip"
   unzip -q -o /tmp/awscli.zip -d /tmp/
   sudo /tmp/aws/install
@@ -46,7 +46,7 @@ Install [kubectl](https://github.com/kubernetes/kubectl) binary:
 ```bash
 if ! command -v kubectl &> /dev/null; then
   # renovate: datasource=github-tags depName=kubernetes/kubectl extractVersion=^kubernetes-(?<version>.+)$
-  KUBECTL_VERSION="1.26.2"
+  KUBECTL_VERSION="1.26.3"
   sudo curl -s -Lo /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/$(uname | sed "s/./\L&/g")/amd64/kubectl"
   sudo chmod a+x /usr/local/bin/kubectl
 fi
