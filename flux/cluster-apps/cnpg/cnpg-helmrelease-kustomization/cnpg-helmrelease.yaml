@@ -11,7 +11,7 @@ spec:
         kind: HelmRepository
         name: cnpg
         namespace: flux-system
-      version: 0.17.0
+      version: 0.17.1
   interval: 1m
   valuesFrom:
     - kind: ConfigMap
