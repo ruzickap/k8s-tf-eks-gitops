@@ -11,7 +11,7 @@ spec:
         kind: HelmRepository
         name: rancher-stable
         namespace: flux-system
-      version: 2.7.1
+      version: 2.7.2
   interval: 1m
   valuesFrom:
     - kind: ConfigMap
