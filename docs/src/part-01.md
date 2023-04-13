@@ -34,7 +34,7 @@ Install [AWS CLI](https://aws.amazon.com/cli/) binary:
 ```bash
 if ! command -v aws &> /dev/null; then
   # renovate: datasource=github-tags depName=aws/aws-cli
-  AWSCLI_VERSION="2.11.11"
+  AWSCLI_VERSION="2.11.12"
   curl -sL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${AWSCLI_VERSION}.zip" -o "/tmp/awscli.zip"
   unzip -q -o /tmp/awscli.zip -d /tmp/
   sudo /tmp/aws/install
@@ -57,7 +57,7 @@ Install [Helm](https://helm.sh/):
 ```bash
 if ! command -v helm &> /dev/null; then
   # renovate: datasource=github-tags depName=helm/helm
-  HELM_VERSION="3.11.2"
+  HELM_VERSION="3.11.3"
   curl -s https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash -s -- --version "v${HELM_VERSION}"
 fi
 ```
