@@ -34,7 +34,7 @@ Install [AWS CLI](https://aws.amazon.com/cli/) binary:
 ```bash
 if ! command -v aws &> /dev/null; then
   # renovate: datasource=github-tags depName=aws/aws-cli
-  AWSCLI_VERSION="2.11.17"
+  AWSCLI_VERSION="2.11.18"
   curl -sL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${AWSCLI_VERSION}.zip" -o "/tmp/awscli.zip"
   unzip -q -o /tmp/awscli.zip -d /tmp/
   sudo /tmp/aws/install
@@ -67,7 +67,7 @@ Install [kustomize](https://kustomize.io/):
 ```bash
 if ! command -v kustomize &> /dev/null; then
   # renovate: datasource=github-tags depName=kubernetes-sigs/kustomize extractVersion=^kustomize\/v(?<version>.+)$
-  KUSTOMIZE_VERSION="5.0.1"
+  KUSTOMIZE_VERSION="5.0.2"
   curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | sudo bash -s "${KUSTOMIZE_VERSION}" /usr/local/bin/
 fi
 ```
