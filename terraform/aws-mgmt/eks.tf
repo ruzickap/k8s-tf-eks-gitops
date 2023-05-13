@@ -13,9 +13,8 @@ module "vpc" {
   private_subnets = var.aws_private_subnets
   public_subnets  = var.aws_public_subnets
 
-  enable_nat_gateway   = true
-  single_nat_gateway   = true
-  enable_dns_hostnames = true
+  enable_nat_gateway = true
+  single_nat_gateway = true
 
   # Manage so we can name
   manage_default_network_acl    = true

@@ -13,17 +13,19 @@ metrics:
   serviceMonitor:
     enabled: true
 configuration:
-  provider: aws
   backupStorageLocation:
-    bucket: ${CLUSTER_FQDN}
-    prefix: velero
-    config:
-      region: ${AWS_DEFAULT_REGION}
+    - name:
+      provider: aws
+      bucket: ${CLUSTER_FQDN}
+      prefix: velero
+      config:
+        region: ${AWS_DEFAULT_REGION}
       # kmsKeyId: TODO !!!! xxxxx
   volumeSnapshotLocation:
-    name: aws
-    config:
-      region: ${AWS_DEFAULT_REGION}
+    - name:
+      provider: aws
+      config:
+        region: ${AWS_DEFAULT_REGION}
   # features: EnableCSI
   defaultResticPruneFrequency: 71h
 serviceAccount:
