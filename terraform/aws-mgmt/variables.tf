@@ -3,6 +3,11 @@ variable "argocd_core_version" {
   description = "ArgoCD Helm Chart version"
 }
 
+variable "aws_assume_role" {
+  description = "IAM Role to assume when working with AWS"
+  type        = string
+}
+
 variable "aws_auth_roles" {
   description = "Additional IAM roles to add to the aws-auth ConfigMap"
   type = list(object({
@@ -23,12 +28,6 @@ variable "aws_auth_users" {
   default = []
 }
 
-variable "aws_assume_role" {
-  description = "IAM Role to assume when working with AWS"
-  type        = string
-}
-
-# Variable used only in the cluster-aws pipeline
 variable "aws_default_region" {
   description = "AWS region"
   type        = string
@@ -64,6 +63,11 @@ variable "base_domain" {
   description = "Domain name used for delegation"
 }
 
+variable "cloudwatch_log_group_retention_in_days" {
+  description = "Number of days to retain log events. Default retention - 90 days."
+  type        = number
+}
+
 variable "cluster_enabled_log_types" {
   type        = list(string)
   description = "A list of the desired control plane logging to enable"
@@ -92,11 +96,6 @@ variable "cluster_path" {
 variable "cluster_version" {
   type        = string
   description = "Desired kubernetes version. If you do not specify a value, the latest available version is used"
-}
-
-variable "cloudwatch_log_group_retention_in_days" {
-  description = "Number of days to retain log events. Default retention - 90 days."
-  type        = number
 }
 
 variable "eks_managed_node_group_defaults" {
@@ -141,15 +140,15 @@ variable "gitops" {
   default     = ""
 }
 
-variable "kms_key_owners" {
-  type        = list(string)
-  description = "A list of IAM ARNs for those who will have full key permissions (`kms:*`)"
-}
-
 variable "kms_key_deletion_window_in_days" {
   type        = number
   default     = 30
   description = "The waiting period, specified in number of days (7 - 30). After the waiting period ends, AWS KMS deletes the KMS key"
+}
+
+variable "kms_key_owners" {
+  type        = list(string)
+  description = "A list of IAM ARNs for those who will have full key permissions (`kms:*`)"
 }
 
 variable "letsencrypt_environment" {

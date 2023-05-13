@@ -1,4 +1,4 @@
-# https://github.com/rancher/rancher/blob/release/v2.6/chart/values.yaml
+# https://github.com/rancher/rancher/blob/release/v2.7/chart/values.yaml
 hostname: rancher.${CLUSTER_FQDN}
 ingress:
   ingressClassName: nginx
@@ -15,3 +15,7 @@ letsEncrypt:
     class: nginx
 replicas: 1
 bootstrapPassword: ${RANCHER_BOOTSTRAP_PASSWORD}
+global:
+  cattle:
+    psp:
+      enabled: false
