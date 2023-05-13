@@ -9,6 +9,7 @@ resources:
   - ../../../../flux/sources/codecentric
   - ../../../../flux/sources/dex
   - ../../../../flux/sources/forecastle
+  - ../../../../flux/sources/komodorio
   - ../../../../flux/sources/ingress-nginx
   - ../../../../flux/sources/jetstack
   - ../../../../flux/sources/karpenter
@@ -37,6 +38,7 @@ resources:
   - ../../../../flux/cluster-apps/flux-podmonitor
   - ../../../../flux/cluster-apps/flux-receiver
   - ../../../../flux/cluster-apps/forecastle
+  - ../../../../flux/cluster-apps/helm-dashboard
   - ../../../../flux/cluster-apps/ingress-nginx
   - ../../../../flux/cluster-apps/karpenter
 #  - ../../../../flux/cluster-apps/keycloak
@@ -65,6 +67,7 @@ resources:
   - dex
   - external-dns
   - forecastle
+  - helm-dashboard
   - ingress-nginx
   - karpenter
 #  - keycloak
