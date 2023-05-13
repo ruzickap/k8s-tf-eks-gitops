@@ -11,7 +11,7 @@ spec:
         kind: HelmRepository
         name: runix
         namespace: flux-system
-      version: 1.14.7
+      version: 1.15.1
   interval: 1m
   valuesFrom:
     - kind: ConfigMap
