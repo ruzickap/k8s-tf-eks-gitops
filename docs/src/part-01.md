@@ -46,7 +46,7 @@ Install [kubectl](https://github.com/kubernetes/kubectl) binary:
 ```bash
 if ! command -v kubectl &> /dev/null; then
   # renovate: datasource=github-tags depName=kubernetes/kubectl extractVersion=^kubernetes-(?<version>.+)$
-  KUBECTL_VERSION="1.26.3"
+  KUBECTL_VERSION="1.27.1"
   sudo curl -s -Lo /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/v${KUBECTL_VERSION}/bin/$(uname | sed "s/./\L&/g")/amd64/kubectl"
   sudo chmod a+x /usr/local/bin/kubectl
 fi
@@ -57,7 +57,7 @@ Install [Helm](https://helm.sh/):
 ```bash
 if ! command -v helm &> /dev/null; then
   # renovate: datasource=github-tags depName=helm/helm
-  HELM_VERSION="3.11.3"
+  HELM_VERSION="3.12.0"
   curl -s https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash -s -- --version "v${HELM_VERSION}"
 fi
 ```
@@ -78,7 +78,7 @@ Install [flux](https://fluxcd.io/):
 if ! command -v flux &> /dev/null; then
   # shellcheck disable=SC2034
   # renovate: datasource=github-tags depName=fluxcd/flux2
-  FLUX_VERSION="0.40.2"
+  FLUX_VERSION="0.41.2"
   curl -s https://fluxcd.io/install.sh | sudo -E bash
 fi
 ```
