@@ -83,7 +83,7 @@ jobs:
           echo "SCHEDULED_CLUSTERS_MATRIX=$( echo -n "${SCHEDULED_CLUSTERS:1}" | jq -c -R -s 'split("|")' )" | tee -a "${GITHUB_OUTPUT}"
 
       - name: Send Slack message
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: slackapi/slack-github-action@v1.24.0
         if: ${{ steps.scheduled_run.outputs.SCHEDULED_CLUSTERS_MATRIX != '[]' }}
         with:
           payload-file-path: payload-slack-content.json
