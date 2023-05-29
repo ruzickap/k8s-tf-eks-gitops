@@ -1,29 +1,8 @@
 skip-check:
-  # Skip ArgoCD checks
-  - CKV_ARGO_1
-  - CKV_ARGO_2
-  # Ensure the S3 bucket has access logging enabled | Ensure AWS access logging is enabled on S3 buckets
-  - CKV_AWS_18
-  # Ensure Dynamodb point in time recovery (backup) is enabled | Ensure DynamoDB PITR is enabled
-  - CKV_AWS_28
-  # Ensure Domain Name System Security Extensions (DNSSEC) signing is enabled for Amazon Route 53 public hosted zones
-  - CKV2_AWS_38
-  # Ensure Domain Name System (DNS) query logging is enabled for Amazon Route 53 hosted zones
-  - CKV2_AWS_39
-  # Ensure IAM policies does not allow credentials exposure
-  - CKV_AWS_287
-  # IAM policies does not allow write access without constraints
-  - CKV_AWS_290
   # The build output cannot be affected by user parameters other than the build entry point and the top-level source location. GitHub Actions workflow_dispatch inputs MUST be empty
   - CKV_GHA_7
-  # Ensure that the seccomp profile is set to docker/default or runtime/default
-  - CKV_K8S_31
   # Image should use digest
   - CKV_K8S_43
-  # Prevent All NGINX Ingress annotation snippets. See CVE-2021-25742
-  - CKV_K8S_153
-  # Ensure GitHub repository webhooks are using HTTPS
-  - CKV_GITHUB_7
 
 skip-path:
   # Skip all flux manifests

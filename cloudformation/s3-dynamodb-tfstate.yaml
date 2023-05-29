@@ -28,8 +28,39 @@ Resources:
       Tags:
         - Key: Name
           Value: terrraform-remote-state-s3-bucket
+  TerraformRemoteStateS3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket:
+        Ref: TerraformRemoteStateS3Bucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          # S3 Bucket policy does not deny HTTP requests
+          - Sid: ForceSSLOnlyAccess
+            Effect: Deny
+            Principal: "*"
+            Action: "s3:*"
+            Resource:
+              - !Sub "arn:${AWS::Partition}:s3:::${TerraformRemoteStateS3Bucket}"
+              - !Sub "arn:${AWS::Partition}:s3:::${TerraformRemoteStateS3Bucket}/*"
+            Condition:
+              Bool:
+                aws:SecureTransport: "false"
+          # S3 Bucket policy does not deny TLS version lower than 1.2
+          - Sid: EnforceTLSv12orHigher
+            Effect: Deny
+            Principal: "*"
+            Action: "s3:*"
+            Resource:
+              - !Sub "arn:${AWS::Partition}:s3:::${TerraformRemoteStateS3Bucket}"
+              - !Sub "arn:${AWS::Partition}:s3:::${TerraformRemoteStateS3Bucket}/*"
+            Condition:
+              NumericLessThan:
+                s3:TlsVersion: 1.2
 
   TerraformRemoteStateLockDynamoDBTable:
+    # checkov:skip=CKV_AWS_28:Ensure Dynamodb point in time recovery (backup) is enabled
     Type: AWS::DynamoDB::Table
     DeletionPolicy: Delete
     UpdateReplacePolicy: Retain

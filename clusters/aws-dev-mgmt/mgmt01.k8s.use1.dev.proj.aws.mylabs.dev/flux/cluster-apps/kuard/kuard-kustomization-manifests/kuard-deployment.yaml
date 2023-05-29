@@ -22,6 +22,8 @@ spec:
       automountServiceAccountToken: false
       securityContext:
         runAsUser: 10000
+        seccompProfile:
+          type: RuntimeDefault
       affinity:
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -39,6 +41,7 @@ spec:
               secretProviderClass: aws-kuard-secretproviderclass
       containers:
         - name: kuard-deployment
+          # checkov:skip=CKV_K8S_43 "Image should use digest"
           image: gcr.io/kuar-demo/kuard-amd64:v0.10.0-green
           imagePullPolicy: Always
           env:
