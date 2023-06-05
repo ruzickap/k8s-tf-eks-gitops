@@ -32,7 +32,8 @@ aws_private_subnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
 aws_public_subnets  = ["10.0.4.0/24", "10.0.5.0/24", "10.0.6.0/24"]
 
 aws_tags_cluster_level = {
-  owner = "petr.ruzicka@gmail.com"
+  owner        = "petr.ruzicka@gmail.com"
+  cluster_fqdn = "mgmt01.k8s.use1.dev.proj.aws.mylabs.dev"
 }
 
 kms_key_owners = [

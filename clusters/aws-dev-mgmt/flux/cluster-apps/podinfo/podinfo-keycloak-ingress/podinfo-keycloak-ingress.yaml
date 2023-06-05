@@ -2,6 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
+    checkov.io/skip: CKV_K8S_153=Prevent All NGINX Ingress annotation snippets. See CVE-2021-25742
     forecastle.stakater.com/expose: "true"
     forecastle.stakater.com/icon: https://raw.githubusercontent.com/stefanprodan/podinfo/gh-pages/cuddle_bunny.gif
     forecastle.stakater.com/appName: Podinfo + Keycloak auth

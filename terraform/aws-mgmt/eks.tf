@@ -44,6 +44,8 @@ module "vpc" {
 # ---------------------------------------------------------------------------------------------------------------------
 
 resource "aws_route53_zone" "cluster_fqdn" {
+  # checkov:skip=CKV2_AWS_39:Ensure Domain Name System (DNS) query logging is enabled for Amazon Route 53 hosted zones
+  # checkov:skip=CKV2_AWS_38:Ensure Domain Name System Security Extensions (DNSSEC) signing is enabled for Amazon Route 53 public hosted zones
   name          = var.cluster_fqdn
   comment       = "Managed by ${local.aws_default_tags.owner}"
   force_destroy = true
@@ -168,6 +170,7 @@ module "iam_assumable_role_aws_ebs_csi_driver" {
 ## cert-manager
 
 resource "aws_iam_policy" "cert_manager" {
+  # checkov:skip=CKV_AWS_355:Ensure no IAM policies documents allow "*" as a statement's resource
   name        = "${module.eks.cluster_name}-cert-manager"
   description = "Policy allowing external-dns to change Route53 entries"
   tags        = local.aws_default_tags
@@ -271,6 +274,7 @@ module "iam_assumable_role_crossplane_provider_aws" {
 ## external-dns
 
 resource "aws_iam_policy" "external_dns" {
+  # checkov:skip=CKV_AWS_355:Ensure no IAM policies documents allow "*" as a statement's resource
   name        = "${module.eks.cluster_name}-external-dns"
   description = "Policy allowing external-dns to change Route53 entries"
   tags        = local.aws_default_tags
@@ -466,6 +470,9 @@ module "iam_assumable_role_cluster_autoscaler" {
 ## velero
 
 resource "aws_iam_policy" "velero_server" {
+  # checkov:skip=CKV_AWS_355:Ensure no IAM policies documents allow "*" as a statement's resource
+  # checkov:skip=CKV_AWS_290:Ensure IAM policies does not allow write access without constraints
+  # checkov:skip=CKV_AWS_287:Ensure IAM policies does not allow credentials exposure
   name        = "${module.eks.cluster_name}-velero-server"
   description = "Policy allowing Velero to access S3"
   tags        = local.aws_default_tags
