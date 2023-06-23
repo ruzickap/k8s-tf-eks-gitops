@@ -11,7 +11,7 @@ spec:
         kind: HelmRepository
         name: komodorio
         namespace: flux-system
-      version: 0.1.9
+      version: 0.1.10
   interval: 1m
   valuesFrom:
     - kind: ConfigMap
