@@ -31,7 +31,7 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.MATRIX }}
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 💡🔪 Get clusters
         id: set-matrix
@@ -79,7 +79,7 @@ jobs:
 
     steps:
       - name: 💡🔪 Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 💡🔪 Get and display environment variables
         run: |
