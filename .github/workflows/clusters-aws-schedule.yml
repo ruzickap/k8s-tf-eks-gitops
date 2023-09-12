@@ -150,7 +150,7 @@ jobs:
           echo "CLUSTER_NAME=${CLUSTER_FQDN%%.*}" | tee -a "${GITHUB_ENV}"
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v3
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ env.AWS_ASSUME_ROLE }}
           role-session-name: GitHubOidcFederatedRole
