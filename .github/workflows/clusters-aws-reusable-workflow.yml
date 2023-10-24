@@ -161,7 +161,7 @@ jobs:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
 
       # Terraform needs node command: https://github.com/hashicorp/setup-terraform/issues/84
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           # renovate: datasource=github-tags depName=nodejs/node versioning=node
           node-version: 18
