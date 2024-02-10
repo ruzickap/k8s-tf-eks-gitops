@@ -4,7 +4,7 @@
 
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
-  version = "4.0.2"
+  version = "5.5.2"
 
   name = local.vpc_name
   cidr = var.aws_vpc_cidr
@@ -65,7 +65,7 @@ resource "aws_route53_record" "base_domain" {
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "19.13.1"
+  version = "20.2.1"
 
   cluster_name    = local.cluster_name
   cluster_version = var.cluster_version
@@ -128,7 +128,7 @@ module "eks" {
 # Creates Karpenter native node termination handler resources and IAM instance profile
 module "karpenter" {
   source  = "terraform-aws-modules/eks/aws//modules/karpenter"
-  version = "19.13.1"
+  version = "20.2.1"
 
   cluster_name                 = module.eks.cluster_name
   irsa_name                    = "${module.eks.cluster_name}-irsa-karpenter"
@@ -156,7 +156,7 @@ resource "kubernetes_annotations" "delete_default_storageclass" {
 
 module "iam_assumable_role_aws_ebs_csi_driver" {
   source                         = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                        = "5.18.0"
+  version                        = "5.34.0"
   create_role                    = true
   provider_url                   = module.eks.cluster_oidc_issuer_url
   role_name                      = "${module.eks.cluster_name}-irsa-aws-ebs-csi-driver"
@@ -203,7 +203,7 @@ resource "aws_iam_policy" "cert_manager" {
 
 module "iam_assumable_role_cert_manager" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "5.18.0"
+  version                       = "5.34.0"
   create_role                   = true
   provider_url                  = module.eks.cluster_oidc_issuer_url
   role_name                     = "${module.eks.cluster_name}-irsa-cert-manager"
@@ -245,7 +245,7 @@ resource "aws_iam_policy" "cnpg_db01" {
 
 module "iam_assumable_role_cnpg_db01" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "5.18.0"
+  version                       = "5.34.0"
   create_role                   = true
   provider_url                  = module.eks.cluster_oidc_issuer_url
   role_name                     = "${module.eks.cluster_name}-irsa-cnpg-db01"
@@ -259,7 +259,7 @@ module "iam_assumable_role_cnpg_db01" {
 
 module "iam_assumable_role_crossplane_provider_aws" {
   source           = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version          = "5.18.0"
+  version          = "5.34.0"
   create_role      = true
   provider_url     = module.eks.cluster_oidc_issuer_url
   role_name        = "${module.eks.cluster_name}-irsa-crossplane-provider-aws"
@@ -308,7 +308,7 @@ resource "aws_iam_policy" "external_dns" {
 
 module "iam_assumable_role_external_dns" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "5.18.0"
+  version                       = "5.34.0"
   create_role                   = true
   provider_url                  = module.eks.cluster_oidc_issuer_url
   role_name                     = "${module.eks.cluster_name}-irsa-external-dns"
@@ -365,7 +365,7 @@ resource "aws_iam_policy" "kuard" {
 
 module "iam_assumable_role_kuard" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "5.18.0"
+  version                       = "5.34.0"
   create_role                   = true
   provider_url                  = module.eks.cluster_oidc_issuer_url
   role_name                     = "${module.eks.cluster_name}-irsa-kuard"
@@ -403,7 +403,7 @@ resource "aws_iam_policy" "kustomize_controller" {
 # Role created by this module must be in stored in git in clusters/aws-dev-mgmt/<cluster_name>/flux/flux-system/kustomization.yaml
 module "iam_assumable_role_kustomize_controller" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "5.18.0"
+  version                       = "5.34.0"
   create_role                   = true
   provider_url                  = module.eks.cluster_oidc_issuer_url
   role_name                     = "${module.eks.cluster_name}-irsa-kustomize-controller"
@@ -457,7 +457,7 @@ resource "aws_iam_policy" "cluster_autoscaler" {
 # Role created by this module must be in stored in git in clusters/aws-dev-mgmt/<cluster_name>/flux/flux-system/kustomization.yaml
 module "iam_assumable_role_cluster_autoscaler" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "5.18.0"
+  version                       = "5.34.0"
   create_role                   = true
   provider_url                  = module.eks.cluster_oidc_issuer_url
   role_name                     = "${module.eks.cluster_name}-irsa-cluster-autoscaler"
@@ -522,7 +522,7 @@ resource "aws_iam_policy" "velero_server" {
 
 module "iam_assumable_role_velero_server" {
   source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
-  version                       = "5.18.0"
+  version                       = "5.34.0"
   create_role                   = true
   provider_url                  = module.eks.cluster_oidc_issuer_url
   role_name                     = "${module.eks.cluster_name}-irsa-velero-server"
