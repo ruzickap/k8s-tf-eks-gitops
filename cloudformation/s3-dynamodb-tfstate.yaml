@@ -1,18 +1,28 @@
 AWSTemplateFormatVersion: 2010-09-09
 
+# https://github.com/cloudposse/terraform-aws-tfstate-backend
+# https://www.marksayson.com/blog/secure-s3-config-with-cloudformation/
+
+# Issues:
+# S3 Bucket Replication is disabled
+# S3 Bucket logging is disabled
+# S3 Bucket MFA Delete is disabled
+
+Description: >
+  This CloudFormation stack is designed to create an S3 bucket that is used as a backend for Terraform state files.
+
 Parameters:
-  ClusterFQDN:
-    Description: Name of the S3 bucket (Usually Cluster FQDN)
+  Name:
+    Description: Name of the S3 bucket
     Type: String
-    Default: mycluster.mylabs.com
 
 Resources:
+  # S3 bucket used as a backend for Terraform state files
   TerraformRemoteStateS3Bucket:
     # checkov:skip=CKV_AWS_18:Access logging is not needed for S3 bucket used by Terraform
     Type: AWS::S3::Bucket
     Properties:
-      AccessControl: Private
-      BucketName: !Sub "${ClusterFQDN}"
+      BucketName: !Ref Name
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
@@ -20,14 +30,37 @@ Resources:
         RestrictPublicBuckets: true
       VersioningConfiguration:
         Status: Enabled
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerEnforced
+      LifecycleConfiguration:
+        Rules:
+          # https://github.com/at0S/dev-tools/blob/a5e27ec4aa98cb1d985b4d2acf30d5d124ba6b99/terraform/terraform-state-management.yaml#L21
+          - Id: Transition30days
+            Status: Enabled
+            Transitions:
+              - TransitionInDays: 30
+                StorageClass: STANDARD_IA
+          - Id: MoveOldVersionsToIA
+            Status: Enabled
+            NoncurrentVersionTransitions:
+              - TransitionInDays: 30
+                StorageClass: STANDARD_IA
+          - Id: DeleteOldVersions
+            Status: Enabled
+            NoncurrentVersionExpirationInDays: 60
+          - Id: MultipartUploadLifecycleRule
+            Status: Enabled
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 1
+          - Id: ExpiredObjectDeleteMarkerLifecycleRule
+            Status: Enabled
+            ExpiredObjectDeleteMarker: true
       BucketEncryption:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: aws:kms
               KMSMasterKeyID: alias/aws/s3
-      Tags:
-        - Key: Name
-          Value: terrraform-remote-state-s3-bucket
   TerraformRemoteStateS3BucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
@@ -36,36 +69,55 @@ Resources:
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
-          # S3 Bucket policy does not deny HTTP requests
+          # S3 Bucket policy force HTTPs requests
           - Sid: ForceSSLOnlyAccess
             Effect: Deny
             Principal: "*"
             Action: "s3:*"
             Resource:
-              - !Sub "arn:${AWS::Partition}:s3:::${TerraformRemoteStateS3Bucket}"
-              - !Sub "arn:${AWS::Partition}:s3:::${TerraformRemoteStateS3Bucket}/*"
+              - !GetAtt TerraformRemoteStateS3Bucket.Arn
+              - !Sub "${TerraformRemoteStateS3Bucket.Arn}/*"
             Condition:
               Bool:
                 aws:SecureTransport: "false"
-          # S3 Bucket policy does not deny TLS version lower than 1.2
-          - Sid: EnforceTLSv12orHigher
+          # S3 Bucket policy prevent old cryptographic protocol
+          - Sid: PreventOldTLS
             Effect: Deny
             Principal: "*"
             Action: "s3:*"
             Resource:
-              - !Sub "arn:${AWS::Partition}:s3:::${TerraformRemoteStateS3Bucket}"
-              - !Sub "arn:${AWS::Partition}:s3:::${TerraformRemoteStateS3Bucket}/*"
+              - !GetAtt TerraformRemoteStateS3Bucket.Arn
+              - !Sub "${TerraformRemoteStateS3Bucket.Arn}/*"
             Condition:
               NumericLessThan:
                 s3:TlsVersion: 1.2
-
+          # Prevent uploads of unencrypted objects to S3 / Requiring a specific encryption mechanism to be used
+          - Sid: DenyIncorrectEncryptionHeader
+            Effect: Deny
+            Principal: "*"
+            Action: "s3:PutObject"
+            Resource: !Sub "arn:${AWS::Partition}:s3:::${TerraformRemoteStateS3Bucket}/*"
+            Condition:
+              "ForAllValues:StringNotEquals":
+                "s3:x-amz-server-side-encryption":
+                  - AES256
+                  - "aws:kms"
+          # Requiring uploaded files to be encrypted
+          - Sid: DenyPublishingUnencryptedResources
+            Effect: Deny
+            Principal: "*"
+            Action: "s3:PutObject"
+            Resource: !Sub "arn:${AWS::Partition}:s3:::${TerraformRemoteStateS3Bucket}/*"
+            Condition:
+              "Null":
+                "s3:x-amz-server-side-encryption": true
   TerraformRemoteStateLockDynamoDBTable:
     # checkov:skip=CKV_AWS_28:Ensure Dynamodb point in time recovery (backup) is enabled
     Type: AWS::DynamoDB::Table
     DeletionPolicy: Delete
     UpdateReplacePolicy: Retain
     Properties:
-      TableName: !Sub "${ClusterFQDN}"
+      TableName: !Ref Name
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: false
       AttributeDefinitions:
@@ -76,13 +128,9 @@ Resources:
           KeyType: HASH
       BillingMode: PAY_PER_REQUEST
       SSESpecification:
+        KMSMasterKeyId: alias/aws/dynamodb
         SSEEnabled: true
         SSEType: KMS
-        KMSMasterKeyId: alias/aws/dynamodb
-      Tags:
-        - Key: Name
-          Value: terrraform-remote-state-lock-table
-
 Outputs:
   TerraformRemoteStateS3Bucket:
     Value: !Ref TerraformRemoteStateS3Bucket

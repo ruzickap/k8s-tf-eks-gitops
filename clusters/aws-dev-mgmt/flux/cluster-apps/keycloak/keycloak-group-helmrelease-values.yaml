@@ -34,7 +34,7 @@ keycloakConfigCli:
     myrealm.yaml: |
       bruteForceProtected: true
       clients:
-        # https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider/#keycloak-auth-provider
+        # https://oauth2-proxy.github.io/oauth2-proxy/7.4.x/configuration/oauth_provider/#keycloak-auth-provider
         - clientId: oauth2-proxy-keycloak.${CLUSTER_FQDN}
           name: oauth2-proxy-keycloak.${CLUSTER_FQDN}
           description: "OAuth2 Proxy for Keycloak"

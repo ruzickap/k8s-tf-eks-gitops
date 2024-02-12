@@ -1,9 +1,6 @@
 # pre-commit configuration file
 .pre-commit-config.yaml
 
-# release-it
-.release-it.yml
-
 # mdbook generated files
 docs/book
 

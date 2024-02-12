@@ -35,8 +35,8 @@ on:
         required: false
   push:
     paths:
-      - 'clusters/dev-sandbox/**'
-      - 'terraform/dev/**'
+      - "clusters/dev-sandbox/**"
+      - "terraform/dev/**"
 
 permissions: read-all
 

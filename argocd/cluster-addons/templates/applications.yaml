@@ -1,4 +1,5 @@
-# https://github.com/argoproj/argo-helm/blob/master/charts/argo-cd/templates/argocd-configs/applications.yaml
+# yamllint disable
+# https://github.com/argoproj/argo-helm/blob/0453552b320712d20be65d9ba3f56644842dd84c/charts/argocd-apps/templates/applications.yaml
 {{- range .Values.applications }}
 apiVersion: argoproj.io/v1alpha1
 kind: Application
