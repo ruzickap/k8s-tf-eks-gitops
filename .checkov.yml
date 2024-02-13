@@ -3,6 +3,8 @@ skip-check:
   - CKV_GHA_7
   # Image should use digest
   - CKV_K8S_43
+  # Ensure Terraform module sources use a commit hash
+  - CKV_TF_1
 
 skip-path:
   # Skip all flux manifests

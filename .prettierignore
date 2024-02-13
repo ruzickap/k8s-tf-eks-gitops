@@ -1,0 +1,4 @@
+argocd/cluster-addons/templates/applications.yaml
+clusters/aws-dev-mgmt/flux/cluster-apps/aws-ebs-csi-driver/aws-ebs-csi-driver-group-helmrelease-values.yaml
+clusters/aws-dev-mgmt/flux/cluster-apps/karpenter/karpenter-group-helmrelease-values.yaml
+clusters/aws-dev-mgmt/flux/flux-system/gotk-components.yaml

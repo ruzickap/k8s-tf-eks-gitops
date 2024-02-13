@@ -1,5 +1,5 @@
 # https://github.com/oauth2-proxy/manifests/blob/main/helm/oauth2-proxy/values.yaml
-# https://oauth2-proxy.github.io/oauth2-proxy/docs/configuration/oauth_provider/#keycloak-oidc-auth-provider
+# https://oauth2-proxy.github.io/oauth2-proxy/7.4.x/configuration/oauth_provider/#keycloak-oidc-auth-provider
 config:
   clientID: oauth2-proxy-keycloak.${CLUSTER_FQDN}
   clientSecret: oauth2-proxy-keycloak-${OAUTH2_PROXY_SECRET}

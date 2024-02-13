@@ -9,6 +9,8 @@ Parameters:
 Resources:
   KMSKey:
     Type: AWS::KMS::Key
+    UpdateReplacePolicy: Retain
+    DeletionPolicy: Delete
     Properties:
       Description: "KMS Key used by SOPS to encrypt secrets"
       PendingWindowInDays: 7
@@ -20,8 +22,8 @@ Resources:
             Effect: Allow
             Principal:
               AWS: !Sub "arn:${AWS::Partition}:iam::${AWS::AccountId}:root"
-            Action: 'kms:*'
-            Resource: '*'
+            Action: "kms:*"
+            Resource: "*"
           - Sid: Enable User Permissions
             Effect: Allow
             Principal:
@@ -34,7 +36,7 @@ Resources:
               - "kms:ReEncrypt*"
               - "kms:GenerateDataKey*"
               - "kms:DescribeKe"
-            Resource: '*'
+            Resource: "*"
 
   KMSKeyAlias:
     Type: AWS::KMS::Alias

@@ -36,13 +36,13 @@ alertmanager:
             footer: "https://${CLUSTER_FQDN}"
             actions:
               - type: button
-                text: 'Runbook :blue_book:'
-                url: '{{ (index .Alerts 0).Annotations.runbook_url }}'
+                text: "Runbook :blue_book:"
+                url: "{{ (index .Alerts 0).Annotations.runbook_url }}"
               - type: button
-                text: 'Query :mag:'
-                url: '{{ (index .Alerts 0).GeneratorURL }}'
+                text: "Query :mag:"
+                url: "{{ (index .Alerts 0).GeneratorURL }}"
               - type: button
-                text: 'Silence :no_bell:'
+                text: "Silence :no_bell:"
                 url: '{{ template "__alert_silence_link" . }}'
     templates:
       - "/etc/alertmanager/config/cp-slack-templates.tmpl"
@@ -201,7 +201,7 @@ grafana:
         gnetId: 10001
         revision: 2
         datasource: Prometheus
-      # https://github.com/fluxcd/flux2/blob/main/manifests/monitoring/grafana/dashboards/cluster.json
+      # https://github.com/fluxcd/flux2/tree/main/manifests/monitoring
       gitops-toolkit-control-plane:
         url: https://raw.githubusercontent.com/fluxcd/flux2/4acef9d508bb50cc5647237f39e1a25b69cad451/manifests/monitoring/monitoring-config/dashboards/control-plane.json
         datasource: Prometheus

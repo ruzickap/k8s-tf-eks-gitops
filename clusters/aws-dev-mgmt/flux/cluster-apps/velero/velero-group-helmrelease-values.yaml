@@ -20,7 +20,7 @@ configuration:
       prefix: velero
       config:
         region: ${AWS_DEFAULT_REGION}
-      # kmsKeyId: TODO !!!! xxxxx
+      # kmsKeyId: Not working
   volumeSnapshotLocation:
     - name:
       provider: aws

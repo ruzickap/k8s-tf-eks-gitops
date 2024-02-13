@@ -1,6 +1,6 @@
 apiVersion: v2
 name: app-of-apps
-description: This chart installs the [app-of-apps](https://argoproj.github.io/argo-cd/operator-manual/cluster-bootstrapping/#app-of-apps-pattern) declared in `argocd/apps` directory for ArgoCD
+description: This chart installs the [app-of-apps](https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#app-of-apps-pattern) declared in `argocd/apps` directory for ArgoCD
 type: application
 version: 0.0.1
 appVersion: 0.0.1

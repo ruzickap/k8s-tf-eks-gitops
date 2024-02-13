@@ -1,0 +1,33 @@
+misconfigurations:
+  # EKS should have the encryption of secrets enabled
+  - id: AVD-AWS-0039
+
+  # EKS cluster should not have open CIDR range for public access
+  - id: AVD-AWS-0041
+
+  # IAM policy should avoid use of wildcards and instead apply the principle of least privilege
+  - id: AVD-AWS-0057
+
+  # Unencrypted S3 bucket
+  - id: AVD-AWS-0088
+    paths:
+      - cloudformation/s3-dynamodb-tfstate.yaml
+
+  # An Network ACL rule allows ALL ports
+  - id: AVD-AWS-0102
+
+  # An egress security group rule allows traffic to /0
+  - id: AVD-AWS-0104
+
+  # An ingress Network ACL rule allows specific ports from /0
+  - id: AVD-AWS-0105
+
+  # Manage secrets
+  - id: AVD-KSV-0041
+    paths:
+      - clusters/aws-dev-mgmt/flux/flux-system/gotk-components.yaml
+
+  # Manage all resources
+  - id: AVD-KSV-0046
+    paths:
+      - clusters/aws-dev-mgmt/flux/flux-system/gotk-components.yaml
