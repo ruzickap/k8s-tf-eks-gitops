@@ -16,7 +16,7 @@ jobs:
       scheduled_clusters_matrix: ${{ steps.scheduled_run.outputs.scheduled_clusters_matrix }}
     steps:
       - name: Check out repository code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0
 
@@ -120,7 +120,7 @@ jobs:
         stage: ${{ fromJSON(needs.scheduled-run-time-check.outputs.SCHEDULED_CLUSTERS_MATRIX) }}
     steps:
       - name: Check out repository code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Setup Flux
         uses: fluxcd/flux2/action@main
