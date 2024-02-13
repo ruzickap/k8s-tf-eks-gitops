@@ -11,7 +11,7 @@ _... managed by Flux/ArgoCD and serviced with Renovate ..._
 [![Grafana](https://img.shields.io/badge/Grafana-grey?style=for-the-badge&logo=grafana)](https://github.com/grafana/grafana)
 [![Renovate](https://img.shields.io/badge/Renovate-grey?style=for-the-badge&logo=renovatebot)](https://github.com/renovatebot/renovate)
 
-[![Build Status](https://github.com/ruzickap/k8s-tf-eks-gitops/actions/workflows/mdbook-build-check-deploy.yml/badge.svg)](https://github.com/ruzickap/k8s-tf-eks-gitops/actions/workflows/mdbook-build-check-deploy.yml)
+[![Build Status](https://github.com/ruzickap/k8s-tf-eks-gitops/actions/workflows/mdbook-build.yml/badge.svg)](https://github.com/ruzickap/k8s-tf-eks-gitops/actions/workflows/mdbook-build-check-deploy.yml)
 
 <br/>
 
