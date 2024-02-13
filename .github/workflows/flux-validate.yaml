@@ -1,4 +1,5 @@
-name: Flux validate
+---
+name: flux-validate
 
 on:
   workflow_dispatch:
@@ -7,8 +8,8 @@ on:
       - main
     paths:
       - .github/workflows/flux-validate.yaml
-      - "clusters/**.yml"
-      - "flux/**.yaml"
+      - clusters/**.yml
+      - flux/**.yaml
       - kustomization.yaml
 
 env:
