@@ -16,7 +16,7 @@ jobs:
       scheduled_clusters_matrix: ${{ steps.scheduled_run.outputs.scheduled_clusters_matrix }}
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
         with:
           fetch-depth: 0
 
@@ -28,7 +28,7 @@ jobs:
 
       - name: Get changed files
         id: changed-files
-        uses: tj-actions/changed-files@v41.0.1
+        uses: tj-actions/changed-files@716b1e13042866565e00e85fd4ec490e186c4a2f # v41.0.1
         with:
           since: ${{ steps.date.outputs.DATE }}
 
@@ -83,7 +83,7 @@ jobs:
           echo "SCHEDULED_CLUSTERS_MATRIX=$( echo -n "${SCHEDULED_CLUSTERS:1}" | jq -c -R -s 'split("|")' )" | tee -a "${GITHUB_OUTPUT}"
 
       - name: Send Slack message
-        uses: slackapi/slack-github-action@v1.24.0
+        uses: slackapi/slack-github-action@e28cf165c92ffef168d23c5c9000cffc8a25e117 # v1.24.0
         if: ${{ steps.scheduled_run.outputs.SCHEDULED_CLUSTERS_MATRIX != '[]' }}
         with:
           payload-file-path: payload-slack-content.json
@@ -120,7 +120,7 @@ jobs:
         stage: ${{ fromJSON(needs.scheduled-run-time-check.outputs.SCHEDULED_CLUSTERS_MATRIX) }}
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
 
       - name: Setup Flux
         uses: fluxcd/flux2/action@main
@@ -150,7 +150,7 @@ jobs:
           echo "CLUSTER_NAME=${CLUSTER_FQDN%%.*}" | tee -a "${GITHUB_ENV}"
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4
         with:
           role-to-assume: ${{ env.AWS_ASSUME_ROLE }}
           role-session-name: GitHubOidcFederatedRole
