@@ -1,33 +1,28 @@
-name: mdbook-build-check-deploy
+name: mdbook-build
 
 on:
   workflow_dispatch:
-  pull_request:
-    types: [opened, synchronize]
-    paths:
-      - .github/workflows/mdbook-build-check-deploy.yml
-      - .markdownlint.yml
-      - .spelling
-      - docs/**
   push:
-    branches:
-      - main
     paths:
-      - .github/workflows/mdbook-build-check-deploy.yml
-      - .markdownlint.yml
-      - .spelling
+      - .github/workflows/mdbook-build.yml
       - docs/**
+      - package.json
+      - package-lock.json
+      - .spelling
+      - .markdownlint.yml
 
 permissions: read-all
 
 jobs:
-  mdbook-build-check-deploy:
+  mdbook-build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
 
       - name: Install Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4.0.2
         with:
           # renovate: datasource=github-tags depName=nodejs/node versioning=node
           node-version: 18
@@ -54,15 +49,19 @@ jobs:
           cp docs/src/README.md docs/book/README.md
           ln -s docs/book ${{ github.event.repository.name }}
 
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@1f0c5cde4bc74cd7e1254d0cb4de8d49e9068c7d # v4.0.0
+
       - name: Check broken links
-        uses: ruzickap/action-my-broken-link-checker@v2
+        uses: ruzickap/action-my-broken-link-checker@a0895a4cda23b5c90999cb9d3c8a8f44d8a8980d # v2.5.0
         with:
-          url: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
+          url: ${{ steps.pages.outputs.base_url }}
           pages_path: .
-          cmd_params: '--exclude=(https://github.com/${{ github.repository_owner }}/${{ github.event.repository.name }}/edit/main/docs/) --max-connections-per-host=5 --color=always --rate-limit=5 --header="User-Agent:curl/7.54.0" --skip-tls-verification'
+          cmd_params: '--exclude=(${{ steps.pages.outputs.base_url }}/edit/main/docs/) --buffer-size=8192 --max-connections-per-host=5 --color=always --rate-limit=5 --header="User-Agent:Mozilla" --skip-tls-verification'
 
       - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@373f7f263a76c20808c831209c920827a82a2847 # v3.9.3
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
