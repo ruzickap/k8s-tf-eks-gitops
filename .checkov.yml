@@ -8,6 +8,8 @@ skip-check:
 
 skip-path:
   - clusters/aws-dev-mgmt/flux/cluster-apps-secrets/cluster-apps-secrets.yaml
+  - clusters/aws-dev-mgmt/mgmt01.k8s.use1.dev.proj.aws.mylabs.dev/flux/cluster-apps-secrets/cluster-apps-secrets.yaml
+  - clusters/aws-dev-mgmt/mgmt02.k8s.use1.dev.proj.aws.mylabs.dev/flux/cluster-apps-secrets/cluster-apps-secrets.yaml
   # Skip all flux manifests
   - flux-system/gotk-components.yaml
   - flux-system/gotk-sync.yaml
