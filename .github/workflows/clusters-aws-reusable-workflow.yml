@@ -31,7 +31,7 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.MATRIX }}
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
 
       - name: 💡🔪 Get clusters
         id: set-matrix
@@ -79,7 +79,7 @@ jobs:
 
     steps:
       - name: 💡🔪 Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4
 
       - name: 💡🔪 Get and display environment variables
         run: |
@@ -134,7 +134,7 @@ jobs:
           EOF
 
       - name: 💡🔪 Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4
         with:
           role-to-assume: ${{ env.AWS_ASSUME_ROLE }}
           role-session-name: GitHubOidcFederatedRole
@@ -156,12 +156,12 @@ jobs:
           fi
 
       - name: 💡🔪 Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@a1502cd9e758c50496cc9ac5308c4843bcd56d36 # v3
         with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
 
       # Terraform needs node command: https://github.com/hashicorp/setup-terraform/issues/84
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8 # v4
         with:
           # renovate: datasource=github-tags depName=nodejs/node versioning=node
           node-version: 18
