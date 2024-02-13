@@ -7,6 +7,7 @@ skip-check:
   - CKV_TF_1
 
 skip-path:
+  - clusters/aws-dev-mgmt/flux/cluster-apps-secrets/cluster-apps-secrets.yaml
   # Skip all flux manifests
   - flux-system/gotk-components.yaml
   - flux-system/gotk-sync.yaml
@@ -14,4 +15,3 @@ skip-path:
   - flux/kustomization.yaml
   # Skip https://raw.githubusercontent.com/aws/secrets-store-csi-driver-provider-aws/main/deployment/aws-provider-installer.yaml
   - flux/cluster-apps/secrets-store-csi-driver-provider-aws/secrets-store-csi-driver-provider-aws-kustomization/kustomization.yaml
-  - clusters/aws-dev-mgmt/flux/cluster-apps-secrets/cluster-apps-secrets.yaml
