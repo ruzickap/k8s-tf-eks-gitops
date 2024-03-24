@@ -42,7 +42,7 @@ spec:
       containers:
         - name: kuard-deployment
           # checkov:skip=CKV_K8S_43 "Image should use digest"
-          image: gcr.io/kuar-demo/kuard-amd64:v0.10.0-green
+          image: gcr.io/kuar-demo/kuard-amd64:v0.10.0-green@sha256:b45e6382fef12c72da3abbf226cb339438810aae18928bd2a811134b50398141
           imagePullPolicy: Always
           env:
             - name: USERNAME
