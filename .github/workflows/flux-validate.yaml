@@ -14,7 +14,7 @@ on:
 
 env:
   # renovate: datasource=github-tags depName=yannh/kubeconform
-  KUBECONFORM_VERSION: 0.6.4
+  KUBECONFORM_VERSION: 0.6.6
 
 permissions: read-all
 
