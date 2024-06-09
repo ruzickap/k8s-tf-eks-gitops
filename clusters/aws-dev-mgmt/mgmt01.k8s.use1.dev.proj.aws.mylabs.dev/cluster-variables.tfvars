@@ -18,10 +18,10 @@ gitops = "flux"
 
 # The ArgoCD Version is only used for initial ArgoCD installation (https://github.com/argoproj/argo-cd/tags)
 # renovate: datasource=github-tags depName=argoproj/argo-cd
-argocd_core_version = "2.7.10"
+argocd_core_version = "2.11.3"
 
 # renovate: datasource=github-tags depName=fluxcd/flux2
-flux_version = "0.41.2"
+flux_version = "2.3.0"
 
 cluster_version                 = "1.25"
 cluster_endpoint_private_access = false

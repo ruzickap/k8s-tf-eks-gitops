@@ -11,5 +11,5 @@ spec:
         kind: HelmRepository
         name: crossplane
         namespace: flux-system
-      version: 1.12.2
+      version: 1.16.0
   interval: 1m
